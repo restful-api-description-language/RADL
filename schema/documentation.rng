@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+  <define name="documentation">
+    <element name="documentation">
+      <optional>
+        <ref name="inline"/>
+      </optional>
+      <optional>
+        <ref name="doc-title"/>
+      </optional>
+      <ref name="html"/>
+    </element>
+  </define>
+  <define name="inline">
+    <attribute name="inline">
+      <choice>
+        <value>true</value>
+        <value>false</value>
+      </choice>
+    </attribute>
+  </define>
+  <define name="doc-title">
+    <element name="title">
+      <text/>
+    </element>
+  </define>
+  <define name="html">
+    <zeroOrMore>
+      <ref name="html-content"/>
+    </zeroOrMore>
+  </define>
+  <define name="html-content">
+    <choice>
+      <ref name="html-element"/>
+      <text/>
+      <ref name="ref"/>
+    </choice>
+  </define>
+  <define name="html-element">
+    <element>
+      <nsName ns="http://www.w3.org/1999/xhtml/"/>
+      <zeroOrMore>
+        <ref name="html-attribute"/>
+      </zeroOrMore>
+      <zeroOrMore>
+        <ref name="html-content"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="html-attribute">
+    <attribute>
+      <anyName/>
+      <optional>
+        <text/>
+      </optional>
+    </attribute>
+  </define>
+</grammar>

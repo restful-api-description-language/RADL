@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <!-- ref elements are used in the documentation modules -->
+  <define name="ref">
+    <element name="ref">
+      <group>
+        <choice>
+          <attribute name="idref">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="uri">
+            <data type="anyURI"/>
+          </attribute>
+          <attribute name="media-type">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="header">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="mechanism">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="identity-provider">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="scheme">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="scheme-parameter">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="status-code">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="uri-parameter">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="resources">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="resource">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="var">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="property">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="header">
+            <data type="IDREF"/>
+          </attribute>
+          <attribute name="method">
+            <data type="IDREF"/>
+          </attribute>
+        </choice>
+        <optional>
+          <text/>
+        </optional>
+      </group>
+      <!-- Uses the name of the referred item if not provided -->
+    </element>
+  </define>
+</grammar>

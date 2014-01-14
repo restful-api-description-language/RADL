@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://identifiers.emc.com/radl" xmlns:radl="http://identifiers.emc.com/radl">
+  <xs:element name="documentation">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:title"/>
+        <xs:group ref="radl:html"/>
+      </xs:sequence>
+      <xs:attribute name="inline">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="inline">
+    <xs:attribute name="inline" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="true"/>
+          <xs:enumeration value="false"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:group name="html">
+    <xs:sequence>
+      <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:html-content"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="html-content">
+    <xs:sequence>
+      <xs:choice minOccurs="0">
+        <xs:group ref="radl:html-element"/>
+        <xs:element ref="radl:ref"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="html-element">
+    <xs:sequence>
+      <xs:any namespace="http://www.w3.org/1999/xhtml/" processContents="skip"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="html-attribute">
+    <xs:anyAttribute processContents="skip"/>
+  </xs:attributeGroup>
+</xs:schema>

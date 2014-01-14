@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://identifiers.emc.com/radl" xmlns:radl="http://identifiers.emc.com/radl">
+  <!-- ref elements are used in the documentation modules -->
+  <xs:element name="ref">
+    <xs:complexType mixed="true">
+      <xs:attribute name="idref" type="xs:IDREF"/>
+      <xs:attribute name="uri" type="xs:anyURI"/>
+      <xs:attribute name="media-type" type="xs:IDREF"/>
+      <xs:attribute name="header" type="xs:IDREF"/>
+      <xs:attribute name="mechanism" type="xs:IDREF"/>
+      <xs:attribute name="identity-provider" type="xs:IDREF"/>
+      <xs:attribute name="scheme" type="xs:IDREF"/>
+      <xs:attribute name="scheme-parameter" type="xs:IDREF"/>
+      <xs:attribute name="status-code" type="xs:IDREF"/>
+      <xs:attribute name="uri-parameter" type="xs:IDREF"/>
+      <xs:attribute name="resources" type="xs:IDREF"/>
+      <xs:attribute name="resource" type="xs:IDREF"/>
+      <xs:attribute name="var" type="xs:IDREF"/>
+      <xs:attribute name="property" type="xs:IDREF"/>
+      <xs:attribute name="method" type="xs:IDREF"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

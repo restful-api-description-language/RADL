@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://identifiers.emc.com/radl" xmlns:radl="http://identifiers.emc.com/radl">
+  <xs:include schemaLocation="ref.xsd"/>
+  <xs:include schemaLocation="documentation.xsd"/>
+  <xs:element name="service">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" ref="radl:start"/>
+        <xs:element minOccurs="0" ref="radl:link-relations"/>
+        <xs:element minOccurs="0" ref="radl:link-types"/>
+        <xs:group minOccurs="0" ref="radl:service-conventions"/>
+        <xs:element minOccurs="0" ref="radl:media-types"/>
+        <xs:element minOccurs="0" ref="radl:resources"/>
+        <xs:element minOccurs="0" ref="radl:authentication"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attributeGroup ref="radl:name"/>
+    </xs:complexType>
+  </xs:element>
+  <!-- Generic definitions -->
+  <xs:attributeGroup name="id">
+    <xs:attribute name="id" use="required" type="xs:ID"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="idref">
+    <xs:attribute name="ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:element name="title" type="xs:string"/>
+  <xs:attributeGroup name="name">
+    <xs:attribute name="name" use="required"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="href">
+    <xs:attribute name="href" use="required" type="xs:anyURI"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="ref-attribute">
+    <xs:attribute name="ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:group name="foreign-element">
+    <xs:choice>
+      <xs:any namespace="##other" processContents="skip"/>
+      <xs:any namespace="##local" processContents="skip"/>
+    </xs:choice>
+  </xs:group>
+  <xs:attributeGroup name="any-attribute">
+    <xs:anyAttribute processContents="skip"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="public">
+    <xs:attribute name="public" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="true"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="status">
+    <xs:attribute name="implementation-status">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="future"/>
+          <xs:enumeration value="assigned"/>
+          <xs:enumeration value="poc"/>
+          <xs:enumeration value="partial"/>
+          <xs:enumeration value="complete"/>
+          <xs:enumeration value="passed"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="design-status">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="future"/>
+          <xs:enumeration value="assigned"/>
+          <xs:enumeration value="poc"/>
+          <xs:enumeration value="partial"/>
+          <xs:enumeration value="complete"/>
+          <xs:enumeration value="approved"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="implementation-status">
+    <xs:attribute name="implementation-status" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="future"/>
+          <xs:enumeration value="assigned"/>
+          <xs:enumeration value="poc"/>
+          <xs:enumeration value="partial"/>
+          <xs:enumeration value="complete"/>
+          <xs:enumeration value="passed"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="design-status">
+    <xs:attribute name="design-status" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="future"/>
+          <xs:enumeration value="assigned"/>
+          <xs:enumeration value="poc"/>
+          <xs:enumeration value="partial"/>
+          <xs:enumeration value="complete"/>
+          <xs:enumeration value="approved"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:element name="start">
+    <xs:complexType>
+      <xs:attribute name="href" type="xs:anyURI"/>
+      <xs:attributeGroup ref="radl:interface-ref"/>
+      <xs:attribute name="identity-provider-ref" type="xs:IDREF"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="identity-provider-ref">
+    <xs:attribute name="identity-provider-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:element name="link-relations">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:link-relation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="link-relation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="radl:id"/>
+      <xs:attributeGroup ref="radl:status"/>
+      <xs:attributeGroup ref="radl:link-relation-name"/>
+      <xs:attribute name="href" type="xs:anyURI"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="link-relation-name">
+    <xs:attribute name="name" use="required" type="xs:anyURI"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="link-relation-ref">
+    <xs:attribute name="link-relation-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:element name="link-types">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:link-type"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="link-type">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="radl:id"/>
+      <xs:attributeGroup ref="radl:status"/>
+      <xs:attribute name="name"/>
+      <xs:attribute name="href" type="xs:anyURI"/>
+      <xs:attribute name="path" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="path">
+    <xs:attribute name="path" use="required" type="xs:string"/>
+  </xs:attributeGroup>
+  <xs:group name="service-conventions">
+    <xs:sequence>
+      <xs:element name="conventions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+            <xs:element minOccurs="0" ref="radl:headers"/>
+            <xs:group minOccurs="0" ref="radl:uri-parameters"/>
+            <xs:group minOccurs="0" ref="radl:status-codes"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="media-types">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:media-type"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="media-type">
+    <xs:complexType>
+      <xs:sequence minOccurs="0">
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:description"/>
+        <xs:element minOccurs="0" ref="radl:documents"/>
+        <xs:group minOccurs="0" ref="radl:media-type-conventions"/>
+        <xs:element minOccurs="0" ref="radl:interfaces"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attribute name="href" type="xs:anyURI"/>
+      <xs:attribute name="extends" type="xs:anyURI"/>
+      <xs:attribute name="name"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="media-type-ref">
+    <xs:attribute name="media-type-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="media-type-extends">
+    <xs:attribute name="extends" use="required" type="xs:anyURI"/>
+  </xs:attributeGroup>
+  <xs:element name="description">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="radl:type"/>
+      <xs:attributeGroup ref="radl:href"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="type">
+    <xs:attribute name="type" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="rnc"/>
+          <xs:enumeration value="rng"/>
+          <xs:enumeration value="xsd"/>
+          <xs:enumeration value="JSONSchema"/>
+          <xs:enumeration value="sedola"/>
+          <xs:enumeration value="text"/>
+          <xs:enumeration value="html"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:element name="documents">
+    <xs:complexType>
+      <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:document"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="document">
+    <xs:sequence>
+      <xs:element name="document">
+        <xs:complexType>
+          <xs:sequence minOccurs="0">
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+            <xs:element minOccurs="0" ref="radl:properties"/>
+            <xs:element minOccurs="0" ref="radl:links"/>
+            <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:document"/>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:ID"/>
+          <xs:attribute name="extends" type="xs:QName"/>
+          <xs:attribute name="name"/>
+          <xs:attribute name="ref" type="xs:IDREF"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="document-ref">
+    <xs:sequence>
+      <xs:element name="document">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+          </xs:sequence>
+          <xs:attribute name="ref" use="required" type="xs:IDREF"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="media-type-conventions">
+    <xs:sequence>
+      <xs:element name="conventions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+            <xs:element minOccurs="0" ref="radl:headers"/>
+            <xs:group minOccurs="0" ref="radl:uri-parameters"/>
+            <xs:group minOccurs="0" ref="radl:status-codes"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="properties">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:property"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="property">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attributeGroup ref="radl:name"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="links">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:link"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="link">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attribute name="link-relation-ref" type="xs:IDREF"/>
+      <xs:attribute name="link-type-ref" type="xs:IDREF"/>
+      <xs:attributeGroup ref="radl:interface-ref"/>
+      <xs:attributeGroup ref="radl:status"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="link-type-ref">
+    <xs:attribute name="link-type-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:element name="interfaces">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:group minOccurs="0" ref="radl:interface-conventions"/>
+        <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:interface"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="uri-parameters">
+    <xs:sequence>
+      <xs:element name="uri-parameters">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+            <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:uri-parameter"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="uri-parameter">
+    <xs:sequence>
+      <xs:element name="uri-parameter">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="radl:documentation"/>
+            <xs:element minOccurs="0" ref="radl:value-range"/>
+            <xs:element minOccurs="0" ref="radl:default"/>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:ID"/>
+          <xs:attributeGroup ref="radl:name"/>
+          <xs:attributeGroup ref="radl:datatype"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="uri-parameter-ref">
+    <xs:attribute name="uri-parameter-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:group name="interface-conventions">
+    <xs:sequence>
+      <xs:element name="conventions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+            <xs:element minOccurs="0" ref="radl:headers"/>
+            <xs:group minOccurs="0" ref="radl:uri-parameters"/>
+            <xs:group minOccurs="0" ref="radl:status-codes"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="interface">
+    <xs:sequence>
+      <xs:element name="interface">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:headers"/>
+            <xs:element ref="radl:methods"/>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:ID"/>
+          <xs:attributeGroup ref="radl:name"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="interface-ref">
+    <xs:attribute name="interface-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:element name="headers">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:header"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="header">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attributeGroup ref="radl:name"/>
+      <xs:attributeGroup ref="radl:header-type"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="header-type">
+    <xs:attribute name="type" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="request"/>
+          <xs:enumeration value="response"/>
+          <xs:enumeration value="general"/>
+          <xs:enumeration value="entity"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:element name="methods">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:method"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="method">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:request"/>
+        <xs:element minOccurs="0" ref="radl:response"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attributeGroup ref="radl:method-name"/>
+      <xs:attributeGroup ref="radl:status"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="method-name">
+    <xs:attribute name="name" use="required" type="radl:http-method"/>
+  </xs:attributeGroup>
+  <xs:simpleType name="http-method">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="GET"/>
+      <xs:enumeration value="PUT"/>
+      <xs:enumeration value="HEAD"/>
+      <xs:enumeration value="POST"/>
+      <xs:enumeration value="DELETE"/>
+      <xs:enumeration value="TRACE"/>
+      <xs:enumeration value="OPTIONS"/>
+      <xs:enumeration value="CONNECT"/>
+      <xs:enumeration value="PATCH"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="request">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:group minOccurs="0" ref="radl:request-uri-parameters"/>
+        <xs:element minOccurs="0" ref="radl:header-refs"/>
+        <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:document-ref"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="request-uri-parameters">
+    <xs:sequence>
+      <xs:element name="uri-parameters">
+        <xs:complexType>
+          <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:request-uri-parameter"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="request-uri-parameter">
+    <xs:sequence>
+      <xs:element name="uri-parameter">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:ID"/>
+          <xs:attribute name="name"/>
+          <xs:attributeGroup ref="radl:request-uri-parameter-ref"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="request-uri-parameter-ref">
+    <xs:attribute name="ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:element name="header-refs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:header-ref"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="header-ref">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="radl:ref"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="response">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:group minOccurs="0" ref="radl:response-status-codes"/>
+        <xs:element minOccurs="0" ref="radl:header-refs"/>
+        <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:document-ref"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="response-status-codes">
+    <xs:sequence>
+      <xs:element name="status-codes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:status-code"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="status-code">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="radl:ref"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="status-codes">
+    <xs:sequence>
+      <xs:element name="status-codes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+            <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:status"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="status">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" ref="radl:problem"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="radl:code"/>
+      <xs:attributeGroup ref="radl:id"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="status-code-ref">
+    <xs:attribute name="ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="code">
+    <xs:attribute name="code" use="required" type="radl:HTTP-status-enum"/>
+  </xs:attributeGroup>
+  <xs:simpleType name="HTTP-status-enum">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="100"/>
+      <xs:enumeration value="101"/>
+      <xs:enumeration value="102"/>
+      <xs:enumeration value="200"/>
+      <xs:enumeration value="201"/>
+      <xs:enumeration value="203"/>
+      <xs:enumeration value="204"/>
+      <xs:enumeration value="205"/>
+      <xs:enumeration value="206"/>
+      <xs:enumeration value="207"/>
+      <xs:enumeration value="208"/>
+      <xs:enumeration value="301"/>
+      <xs:enumeration value="302"/>
+      <xs:enumeration value="303"/>
+      <xs:enumeration value="304"/>
+      <xs:enumeration value="305"/>
+      <xs:enumeration value="306"/>
+      <xs:enumeration value="307"/>
+      <xs:enumeration value="308"/>
+      <xs:enumeration value="400"/>
+      <xs:enumeration value="401"/>
+      <xs:enumeration value="402"/>
+      <xs:enumeration value="403"/>
+      <xs:enumeration value="404"/>
+      <xs:enumeration value="405"/>
+      <xs:enumeration value="406"/>
+      <xs:enumeration value="407"/>
+      <xs:enumeration value="408"/>
+      <xs:enumeration value="409"/>
+      <xs:enumeration value="410"/>
+      <xs:enumeration value="411"/>
+      <xs:enumeration value="412"/>
+      <xs:enumeration value="413"/>
+      <xs:enumeration value="414"/>
+      <xs:enumeration value="415"/>
+      <xs:enumeration value="416"/>
+      <xs:enumeration value="417"/>
+      <xs:enumeration value="418"/>
+      <xs:enumeration value="420"/>
+      <xs:enumeration value="422"/>
+      <xs:enumeration value="423"/>
+      <xs:enumeration value="424"/>
+      <xs:enumeration value="425"/>
+      <xs:enumeration value="426"/>
+      <xs:enumeration value="428"/>
+      <xs:enumeration value="429"/>
+      <xs:enumeration value="431"/>
+      <xs:enumeration value="444"/>
+      <xs:enumeration value="449"/>
+      <xs:enumeration value="450"/>
+      <xs:enumeration value="451"/>
+      <xs:enumeration value="494"/>
+      <xs:enumeration value="495"/>
+      <xs:enumeration value="496"/>
+      <xs:enumeration value="497"/>
+      <xs:enumeration value="499"/>
+      <xs:enumeration value="500"/>
+      <xs:enumeration value="501"/>
+      <xs:enumeration value="502"/>
+      <xs:enumeration value="503"/>
+      <xs:enumeration value="504"/>
+      <xs:enumeration value="505"/>
+      <xs:enumeration value="506"/>
+      <xs:enumeration value="507"/>
+      <xs:enumeration value="508"/>
+      <xs:enumeration value="509"/>
+      <xs:enumeration value="510"/>
+      <xs:enumeration value="511"/>
+      <xs:enumeration value="598"/>
+      <xs:enumeration value="599"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="problem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="radl:problemType"/>
+        <xs:element ref="radl:title"/>
+        <xs:element ref="radl:detail"/>
+        <xs:element ref="radl:supportId"/>
+        <xs:element ref="radl:more"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="problemType" type="xs:anyURI"/>
+  <xs:element name="detail" type="xs:string"/>
+  <xs:element name="supportId" type="xs:anyURI"/>
+  <xs:element name="more">
+    <xs:complexType>
+      <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:foreign-element"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="resources">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:resource"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="resource">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" ref="radl:location"/>
+        <xs:group minOccurs="0" maxOccurs="unbounded" ref="radl:resource-interface"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="radl:id"/>
+      <xs:attributeGroup ref="radl:name"/>
+      <xs:attribute name="identity-provider-ref" type="xs:IDREF"/>
+      <xs:attribute name="public">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attributeGroup ref="radl:status"/>
+      <xs:attribute name="extends" type="xs:QName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="resource-ref">
+    <xs:attribute name="resource-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="extends">
+    <xs:attribute name="extends" use="required" type="xs:QName"/>
+  </xs:attributeGroup>
+  <xs:element name="location">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attribute name="uri" type="xs:anyURI"/>
+      <xs:attribute name="uri-template"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="uri-template">
+    <xs:attribute name="uri-template" use="required"/>
+  </xs:attributeGroup>
+  <xs:group name="resource-interface">
+    <xs:sequence>
+      <xs:element name="interface">
+        <xs:complexType>
+          <xs:attributeGroup ref="radl:ref-attribute"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="authentication">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:group minOccurs="0" ref="radl:authentication-conventions"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:mechanism"/>
+        <xs:element minOccurs="0" ref="radl:identity-provider"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="authentication-conventions">
+    <xs:sequence>
+      <xs:element name="conventions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="radl:documentation"/>
+            <xs:element minOccurs="0" ref="radl:headers"/>
+            <xs:group minOccurs="0" ref="radl:status-codes"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="mechanism">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:scheme"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attributeGroup ref="radl:name"/>
+      <xs:attributeGroup ref="radl:authentication-type"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="mechanism-ref">
+    <xs:attribute name="mechanism-ref" use="required" type="xs:IDREF"/>
+  </xs:attributeGroup>
+  <xs:element name="identity-provider">
+    <xs:complexType>
+      <xs:attributeGroup ref="radl:id"/>
+      <xs:attributeGroup ref="radl:mechanism-ref"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="authentication-type">
+    <xs:attribute name="authentication-type" use="required"/>
+  </xs:attributeGroup>
+  <xs:element name="scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="radl:parameter"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attributeGroup ref="radl:name"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="parameter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="radl:documentation"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attributeGroup ref="radl:name"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="datatype">
+    <xs:attribute name="datatype" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="string"/>
+          <xs:enumeration value="boolean"/>
+          <xs:enumeration value="decimal"/>
+          <xs:enumeration value="float"/>
+          <xs:enumeration value="double"/>
+          <xs:enumeration value="duration"/>
+          <xs:enumeration value="dateTime"/>
+          <xs:enumeration value="time"/>
+          <xs:enumeration value="date"/>
+          <xs:enumeration value="hexBinary"/>
+          <xs:enumeration value="base64Binary"/>
+          <xs:enumeration value="anyURI"/>
+          <xs:enumeration value="integer"/>
+          <xs:enumeration value="language"/>
+          <xs:enumeration value="ID"/>
+          <xs:enumeration value="IDREF"/>
+          <xs:enumeration value="integer"/>
+          <xs:enumeration value="long"/>
+          <xs:enumeration value="short"/>
+          <xs:enumeration value="byte"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:element name="value-range" type="xs:string"/>
+  <xs:element name="default" type="xs:string"/>
+  <xs:attributeGroup name="uri">
+    <xs:attribute name="uri" use="required" type="xs:anyURI"/>
+  </xs:attributeGroup>
+</xs:schema>

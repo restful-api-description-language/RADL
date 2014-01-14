@@ -1,0 +1,9 @@
+namespace ns1 = "http://www.w3.org/1999/xhtml/"
+
+documentation = element documentation { inline?, doc-title?, html }
+inline = attribute inline { "true" | "false" }
+doc-title = element title { text }
+html = html-content*
+html-content = html-element | text | ref
+html-element = element ns1:* { html-attribute*, html-content* }
+html-attribute = attribute * { text? }

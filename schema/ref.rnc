@@ -1,0 +1,25 @@
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+# ref elements are used in the documentation modules
+ref =
+  element ref {
+    ((attribute idref { xsd:IDREF }
+      | attribute uri { xsd:anyURI }
+      | attribute media-type { xsd:IDREF }
+      | attribute header { xsd:IDREF }
+      | attribute mechanism { xsd:IDREF }
+      | attribute identity-provider { xsd:IDREF }
+      | attribute scheme { xsd:IDREF }
+      | attribute scheme-parameter { xsd:IDREF }
+      | attribute status-code { xsd:IDREF }
+      | attribute uri-parameter { xsd:IDREF }
+      | attribute resources { xsd:IDREF }
+      | attribute resource { xsd:IDREF }
+      | attribute var { xsd:IDREF }
+      | attribute property { xsd:IDREF }
+      | attribute header { xsd:IDREF }
+      | attribute method { xsd:IDREF }),
+     text?)
+    # Uses the name of the referred item if not provided
+    
+  }
