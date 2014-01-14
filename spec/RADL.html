@@ -1,6 +1,12 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>RESTful API Description Language (RADL)</title><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"><meta name="description" content="RESTful API Description Language (RADL) is an XML vocabulary for describing Hypermedia-driven RESTful APIs. The APIs it describes may use any media type, in XML, JSON, HTML, or any other format. The structure of a RADL description is based on media types, including the documents associated with a media type, links found in these documents, and the interfaces associated with these links. RADL can be used as a specification language or as run-time metadata to describe a service. This is a preliminary version of an article that will be presented at XML Prague 2014. The most recent version of this specification is always available at https://github.com/restful-api-description-language."><meta name="keywords" content="REST, XML, authoring, metadata"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="article"><div class="titlepage"><div><div><h1 class="title"><a name="d5e1"></a>RESTful API Description Language (RADL)</h1></div><div><h3 class="subtitle"><i>Hypermedia-driven API design</i></h3></div><div><div class="author"><h3 class="author">Jonathan Robie</h3><code class="email">&lt;<a class="email" href="mailto:jonathan.robie@emc.com">jonathan.robie@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">R&eacute;mon Sinnema</h3><code class="email">&lt;<a class="email" href="mailto:remon.sinnema@emc.com">remon.sinnema@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">Erik Wilde</h3><code class="email">&lt;<a class="email" href="mailto:erik.wilde@emc.com">erik.wilde@emc.com</a>&gt;</code></div></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>RESTful API Description Language (RADL) is an XML vocabulary for
+   <title>RESTful API Description Language (RADL)</title><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"><meta name="description" content="RESTful API Description Language (RADL) is an XML vocabulary for describing Hypermedia-driven RESTful APIs. The APIs it describes may use any media type, in XML, JSON, HTML, or any other format. The structure of a RADL description is based on media types, including the documents associated with a media type, links found in these documents, and the interfaces associated with these links. RADL can be used as a specification language or as run-time metadata to describe a service. This is a preliminary version of an article that will be presented at XML Prague 2014. The most recent version of this specification is always available at http://github.com/restful-api-description-language."><meta name="keywords" content="REST, XML, authoring, metadata"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="article"><div class="titlepage"><div><div><h1 class="title"><a name="d5e1"></a>RESTful API Description Language (RADL)</h1></div><div><h3 class="subtitle"><i>Hypermedia-driven API design</i></h3></div><div><div class="author"><h3 class="author">Jonathan Robie</h3><code class="email">&lt;<a class="email" href="mailto:jonathan.robie@emc.com">jonathan.robie@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">R&eacute;mon Sinnema</h3><code class="email">&lt;<a class="email" href="mailto:remon.sinnema@emc.com">remon.sinnema@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">Erik Wilde</h3><code class="email">&lt;<a class="email" href="mailto:erik.wilde@emc.com">erik.wilde@emc.com</a>&gt;</code></div></div><div><div class="legalnotice"><a name="d5e24"></a><p class="copyright">Copyright &copy; 2014 EMC Corporation</p><p>Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at</p><a class="ulink" href="" target="_top">http://www.apache.org/licenses/LICENSE-2.0</a><p>Unless required by applicable law or agreed to in writing,
+      software distributed under the License is distributed on an "AS
+      IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+      express or implied.  See the License for the specific language
+      governing permissions and limitations under the License.</p></div></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>RESTful API Description Language (RADL) is an XML vocabulary for
       describing Hypermedia-driven RESTful APIs. The APIs it describes may
       use any media type, in XML, JSON, HTML, or any other format. The
       structure of a RADL description is based on media types, including the
@@ -8,7 +14,7 @@
       documents, and the interfaces associated with these links.</p><p>RADL can be used as a specification language or as run-time
       metadata to describe a service.</p><p>This is a preliminary version of an article that
       will be presented at XML Prague 2014. The most recent version of this specification is always
-      available at https://github.com/restful-api-description-language.</p></div></div></div><hr></div><div class="toc"><dl class="toc"><dt><span class="section"><a href="#d5e24">Introduction</a></span></dt><dt><span class="section"><a href="#d5e40">REST</a></span></dt><dt><span class="section"><a href="#d5e62">How we designed RADL</a></span></dt><dt><span class="section"><a href="#d5e92">The RADL document</a></span></dt><dt><span class="section"><a href="#d5e120">Using RADL Descriptions</a></span></dt><dt><span class="section"><a href="#appendix-a">Appendix A: RADL Schema</a></span></dt><dt><span class="section"><a href="#d5e142">Schema for embedded XHTML</a></span></dt><dt><span class="section"><a href="#d5e145">Schema for embedded DocBook</a></span></dt><dt><span class="section"><a href="#d5e148">RADL schema</a></span></dt><dt><span class="section"><a href="#d5e151">Appendix B: Generating HTML client documentation</a></span></dt><dt><span class="section"><a href="#d5e155">Appendix C: Generating JSON+HTML metadata</a></span></dt><dt><span class="bibliography"><a href="#d5e159">Bibliography</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e24"></a>Introduction</h2></div></div></div><p>Web APIs are critical to the business strategy of many
+      available at <a class="ulink" href="https://github.com/restful-api-description-language" target="_top">http://github.com/restful-api-description-language</a>.</p></div></div></div><hr></div><div class="toc"><dl class="toc"><dt><span class="section"><a href="#d5e31">Introduction</a></span></dt><dt><span class="section"><a href="#d5e47">REST</a></span></dt><dt><span class="section"><a href="#d5e69">How we designed RADL</a></span></dt><dt><span class="section"><a href="#d5e99">The RADL document</a></span></dt><dt><span class="section"><a href="#d5e127">Using RADL Descriptions</a></span></dt><dt><span class="section"><a href="#appendix-a">Appendix A: RADL Schema</a></span></dt><dt><span class="section"><a href="#d5e149">Schema for embedded XHTML</a></span></dt><dt><span class="section"><a href="#d5e152">Schema for embedded DocBook</a></span></dt><dt><span class="section"><a href="#d5e155">RADL schema</a></span></dt><dt><span class="section"><a href="#d5e158">Appendix B: Generating HTML client documentation</a></span></dt><dt><span class="section"><a href="#d5e162">Appendix C: Generating JSON+HTML metadata</a></span></dt><dt><span class="bibliography"><a href="#d5e166">Bibliography</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e31"></a>Introduction</h2></div></div></div><p>Web APIs are critical to the business strategy of many
     companies, and vital to the way users use information on the
     Web. Companies like eBay, Amazon, Salesforce, and Google provide
     valuable services via Web APIs, and developers are using these APIs
@@ -39,14 +45,14 @@
     scope of the processing rules for a media type.</p></blockquote></div><p>RADL provides much the same information as Web Application
     Description Language (WADL)
 
-    <a href="#ftn.d5e35" class="footnote" name="d5e35"><sup class="footnote">[1]</sup></a>,
+    <a href="#ftn.d5e42" class="footnote" name="d5e42"><sup class="footnote">[1]</sup></a>,
 
     but the structure of WADL is driven
     by URI patterns and server-side implementation concerns rather than
     hypermedia-driven design. RADL provides much the same information as
     RESTful Service Description Language (<a class="xref" href="#RSDL2">RESTful Service Description     Language (EMC)</a>), but the structure of
     RSDL is driven by resources, describing an implementation rather than
-    focusing on the media-types.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e40"></a>REST</h2></div></div></div><p>REST Is an Architectural Style, which is formally defined by the
+    focusing on the media-types.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e47"></a>REST</h2></div></div></div><p>REST Is an Architectural Style, which is formally defined by the
     following constraints:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Client/Server</p></li><li class="listitem"><p>Stateless</p></li><li class="listitem"><p>Cache</p></li><li class="listitem"><p>Uniform interface</p></li><li class="listitem"><p>Layered system</p></li><li class="listitem"><p>Code-on-demand (optional)</p></li></ol></div><p>The client/server constraint demands that we divide our system
     in multiple components, since monolithic applications cannot be made
     to scale. Each component can be further divided as needed. For
@@ -76,7 +82,7 @@
     work.</p><p>The uniform interface constraint is the one that really distinguishes
     REST from other approaches. Anybody who has played with Legos knows
     the power of a universal interface. In REST over HTTP, we capture all
-    actions with the standard HTTP methods.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e62"></a>How we designed RADL</h2></div></div></div><p>We designed RADL by refactoring RSDL to define almost everything in
+    actions with the standard HTTP methods.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e69"></a>How we designed RADL</h2></div></div></div><p>We designed RADL by refactoring RSDL to define almost everything in
     terms of media types. In RSDL, we focused on describing services. In
     RADL, we focus on describing media types. This shift was motivated by
     the Roy Fielding quote cited in the introduction  <a class="xref" href="#hypertext-driven">REST APIs must be hypertext-driven</a>:</p><div class="blockquote"><blockquote class="blockquote"><p>Any effort spent describing what methods to use
@@ -109,7 +115,7 @@
     we needed to model, identifying their relationships in the
     documents that define them, and faithfully preserving these
     relationships in our schema.  A RADL description is a description
-    of a service, using the following definition <a href="#ftn.d5e73" class="footnote" name="d5e73"><sup class="footnote">[2]</sup></a>:</p><div class="blockquote"><blockquote class="blockquote"><p>A service is a set of interlinked resources that
+    of a service, using the following definition <a href="#ftn.d5e80" class="footnote" name="d5e80"><sup class="footnote">[2]</sup></a>:</p><div class="blockquote"><blockquote class="blockquote"><p>A service is a set of interlinked resources that
     allows clients to reach goals by following links with explicit
     interaction semantics.</p></blockquote></div><p>Once a complete media type description is done, the resource
     description for a service is simple and small, associating URI formats
@@ -159,7 +165,7 @@
     type. RADL allows the entire service description to be specified in
     one document. The information needed for client documentation, server
     stub generation, runtime metadata, and testing can then be extracted
-    from the complete description as needed.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e92"></a>The RADL document</h2></div></div></div><p>Now that we have defined the concepts behind RADL, let us show how
+    from the complete description as needed.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e99"></a>The RADL document</h2></div></div></div><p>Now that we have defined the concepts behind RADL, let us show how
     they are modeled in a RADL document. The following template
     illustrates the overall structure of RADL (a RELAX-NG schema can be
     found in <a class="xref" href="#appendix-a" title="Appendix A: RADL Schema">the section called &#8220;Appendix A: RADL Schema&#8221;</a>):</p><pre class="programlisting">
@@ -448,7 +454,7 @@ interface.</p><pre class="programlisting">
 
 &lt;/service&gt;
 </pre><p>This short example does not show how to handle things like URI
-parameters, HTTP headers and status codes, or authentication. All of these are possible in RADL.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: provide examples to illustrate more RADL functionality.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e120"></a>Using RADL Descriptions</h2></div></div></div><p>The following are some of the major uses we envision for RADL
+parameters, HTTP headers and status codes, or authentication. All of these are possible in RADL.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: provide examples to illustrate more RADL functionality.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e127"></a>Using RADL Descriptions</h2></div></div></div><p>The following are some of the major uses we envision for RADL
 descriptions.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Generating client documentation using HTML or DocBook. An example of
 generated documentation is shown in Appendix B, along with the
 stylesheet that generated it. We are currently doing this for our
@@ -468,7 +474,7 @@ link relation from <a class="xref" href="#json-home">JSON Home Documents</a> or 
 documentation to be embedded using a separate documentation
 schema. This appendix shows sample documentation schemas for XHTML and
 DocBook, then shows the schema for RADL per se.</p><p>This schema is current as of the time of writing. For the latest
-version, see the RADL github repository at https://github.com/restful-api-description-language.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e142"></a>Schema for embedded XHTML</h2></div></div></div><pre class="programlisting">
+version, see the RADL github repository at <a class="ulink" href="" target="_top">https://github.com/restful-api-description-language</a>.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e149"></a>Schema for embedded XHTML</h2></div></div></div><pre class="programlisting">
 namespace ns1 = "http://www.w3.org/1999/xhtml/"
 
 documentation = element documentation { inline?, doc-title?, html }
@@ -478,7 +484,7 @@ html = html-content*
 html-content = html-element | text | ref
 html-element = element ns1:* { html-attribute*, html-content* }
 html-attribute = attribute * { text? }
-</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e145"></a>Schema for embedded DocBook</h2></div></div></div><pre class="programlisting">
+</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e152"></a>Schema for embedded DocBook</h2></div></div></div><pre class="programlisting">
 namespace docbook = "http://docbook.org/ns/docbook"
 
 documentation = element documentation { inline?, doc-title?, docbook }
@@ -490,7 +496,7 @@ docbook =  docbook-content*
 docbook-content = (docbook-element | text | ref)
 docbook-element = element docbook:* { docbook-attribute*, docbook-content* }
 docbook-attribute = attribute * { text? }
-</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e148"></a>RADL schema</h2></div></div></div><pre class="programlisting">
+</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e155"></a>RADL schema</h2></div></div></div><pre class="programlisting">
 default namespace radl = "http://identifiers.emc.com/radl"
 
 start = service
@@ -784,72 +790,73 @@ datatype =
 value-range = element value-range { text }
 default-value = element default { text }
 uri = attribute uri { xsd:anyURI }
-</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e151"></a>Appendix B: Generating HTML client documentation</h2></div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: stylesheet to generate HTML overview of a RADL service for client documentation.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e155"></a>Appendix C: Generating JSON+HTML metadata</h2></div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: stylesheet to convert RADL to the standard RADL JSON+HTML
-representation</p></td></tr></table></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a name="d5e159"></a>Bibliography</h2></div></div></div><div class="bibliomixed"><a name="WADL"></a><p class="bibliomixed">[WADL] Marc Hadley, Sun Microsystems. <span class="ital">Web Application Description Language</span>, W3C Member Submission 31 August 2009.
-        http://www.w3.org/Submission/wadl/.</p></div><div class="bibliomixed"><a name="rfc6570"></a><p class="bibliomixed">[URI Templates] Joe Gregorio, Google; Roy Fielding,
+</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e158"></a>Appendix B: Generating HTML client documentation</h2></div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: stylesheet to generate HTML overview of a RADL service for client documentation.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e162"></a>Appendix C: Generating JSON+HTML metadata</h2></div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: stylesheet to convert RADL to the standard RADL JSON+HTML
+representation</p></td></tr></table></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a name="d5e166"></a>Bibliography</h2></div></div></div><div class="bibliomixed"><a name="WADL"></a><p class="bibliomixed">[WADL] Marc Hadley, Sun Microsystems. <span class="ital">Web Application Description Language</span>, W3C Member Submission 31 August 2009.
+        <a class="ulink" href="" target="_top">http://www.w3.org/Submission/wadl/</a>.
+    </p></div><div class="bibliomixed"><a name="rfc6570"></a><p class="bibliomixed">[URI Templates] Joe Gregorio, Google; Roy Fielding,
       Adobe; Marc Hadley, MITRE; Mark Nottingham, Rackspace; David Orchard, Salesforce.com.
         <span class="ital">URI Template</span>, IETF RFC 6570, March 2012.
-        http://tools.ietf.org/html/rfc6570</p></div><div class="bibliomixed"><a name="json-home"></a><p class="bibliomixed">[JSON Home Documents] Mark Nottingham, Rackspace.
+        <a class="ulink" href="" target="_top">http://tools.ietf.org/html/rfc6570</a></p></div><div class="bibliomixed"><a name="json-home"></a><p class="bibliomixed">[JSON Home Documents] Mark Nottingham, Rackspace.
         <span class="ital">Home Documents for HTTP APIs</span>, May 8, 2013.
-        http://www.ietf.org/id/draft-nottingham-json-home-03.txt</p></div><div class="bibliomixed"><a name="xml-home"></a><p class="bibliomixed">[XML Home Documents] Erik Wilde, EMC. <span class="ital">Home Documents for HTTP Services: XML Syntax</span>, June 11, 2013.
-        http://www.ietf.org/id/draft-wilde-home-xml-01.txt</p></div><div class="bibliomixed"><a name="rfc6838"></a><p class="bibliomixed">[Media Type       Specifications and Registration Procedures] N. Freed, Oracle; J.
+        <a class="ulink" href="" target="_top">http://www.ietf.org/id/draft-nottingham-json-home-03.txt</a></p></div><div class="bibliomixed"><a name="xml-home"></a><p class="bibliomixed">[XML Home Documents] Erik Wilde, EMC. <span class="ital">Home Documents for HTTP Services: XML Syntax</span>, June 11, 2013.
+        <a class="ulink" href="" target="_top">http://www.ietf.org/id/draft-wilde-home-xml-01.txt</a></p></div><div class="bibliomixed"><a name="rfc6838"></a><p class="bibliomixed">[Media Type       Specifications and Registration Procedures] N. Freed, Oracle; J.
       Klensin; T. Hansen, AT&amp;T Laboratories. <span class="ital">Media Type Specifications and
         Registration Procedures</span>, IETF RFC 6838, January 2013.
-        http://tools.ietf.org/html/rfc6838</p></div><div class="bibliomixed"><a name="rfc2048"></a><p class="bibliomixed">[RFC 2048] 
+        <a class="ulink" href="" target="_top">http://tools.ietf.org/html/rfc6838</a></p></div><div class="bibliomixed"><a name="rfc2048"></a><p class="bibliomixed">[RFC 2048] 
       N. Freed, J. Klensin, J. Postel.
       <span class="ital">Multipurpose Internet Mail Extensions
       (MIME) Part Four: Registration Procedures</span>, IETF RFC 2048, November 1996.
-      http://tools.ietf.org/html/rfc2048
+      <a class="ulink" href="" target="_top">http://tools.ietf.org/html/rfc2048</a>
     </p></div><div class="bibliomixed"><a name="Burke"></a><p class="bibliomixed">[To WADL or not to WADL]  Bill Burke. <span class="ital">To WADL or not to WADL</span>, blog post, May 21, 2009.
-        http://bill.burkecentral.com/2009/05/21/to-wadl-or-not-to-wadl/.</p></div><div class="bibliomixed"><a name="hypertext-driven"></a><p class="bibliomixed">[REST APIs must be hypertext-driven]  Roy
+        <a class="ulink" href="" target="_top">http://bill.burkecentral.com/2009/05/21/to-wadl-or-not-to-wadl/</a>.</p></div><div class="bibliomixed"><a name="hypertext-driven"></a><p class="bibliomixed">[REST APIs must be hypertext-driven]  Roy
       Fielding. <span class="ital">REST APIs must be hypertext-driven</span>, blog post, Mon
       20 Oct 2008.
-        http://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven/.</p></div><div class="bibliomixed"><a name="draft-nottingham-json-home-02"></a><p class="bibliomixed">[Home Documents for HTTP APIs] 
+        <a class="ulink" href="" target="_top">http://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven/</a>.</p></div><div class="bibliomixed"><a name="draft-nottingham-json-home-02"></a><p class="bibliomixed">[Home Documents for HTTP APIs] 
       <span class="ital">Home Documents for HTTP APIs</span>,
       http://tools.ietf.org/html/draft-nottingham-json-home-02.
-        http://tools.ietf.org/html/draft-nottingham-json-home-02</p></div><div class="bibliomixed"><a name="draft-nottingham-http-problem-04"></a><p class="bibliomixed">[Problem Details for HTTP APIs] 
+        <a class="ulink" href="" target="_top">http://tools.ietf.org/html/draft-nottingham-json-home-02</a></p></div><div class="bibliomixed"><a name="draft-nottingham-http-problem-04"></a><p class="bibliomixed">[Problem Details for HTTP APIs] 
       <span class="ital">Problem Details for HTTP APIs</span>,
       http://datatracker.ietf.org/doc/draft-nottingham-http-problem/.
-        http://datatracker.ietf.org/doc/draft-nottingham-http-problem/</p></div><div class="bibliomixed"><a name="rfc3023"></a><p class="bibliomixed">[XML Media Types] 
+        <a class="ulink" href="" target="_top">http://datatracker.ietf.org/doc/draft-nottingham-http-problem/</a></p></div><div class="bibliomixed"><a name="rfc3023"></a><p class="bibliomixed">[XML Media Types] 
       <span class="ital">XML Media Types</span>, IETF RFC 3023, MURATA Makoto (FAMILY Given),
-      Simon St.Laurent, Daniel Kohn. http://tools.ietf.org/html/rfc3023</p></div><div class="bibliomixed"><a name="rfc4288"></a><p class="bibliomixed">[Media Type Specifications and Registration Procedures] 
+      Simon St.Laurent, Daniel Kohn. <a class="ulink" href="" target="_top">http://tools.ietf.org/html/rfc3023</a></p></div><div class="bibliomixed"><a name="rfc4288"></a><p class="bibliomixed">[Media Type Specifications and Registration Procedures] 
       <span class="ital">Media Type Specifications and Registration Procedures</span>, IETF
       RFC 4288, Ned Freed, John C. Klensin.
-      http://tools.ietf.org/html/rfc4288</p></div><div class="bibliomixed"><a name="rfc5839"></a><p class="bibliomixed">[Additional Media Type Structured Syntax Suffixes] 
+      <a class="ulink" href="" target="_top">http://tools.ietf.org/html/rfc4288</a></p></div><div class="bibliomixed"><a name="rfc5839"></a><p class="bibliomixed">[Additional Media Type Structured Syntax Suffixes] 
       <span class="ital">Additional Media Type Structured Syntax Suffixes</span>, IETF RFC
       5830, Tony Hansen, Alexey Melnikov.
-      http://tools.ietf.org/html/rfc4288</p></div><div class="bibliomixed"><a name="Aristotle"></a><p class="bibliomixed">[Does REST need a service description language] 
+      <a class="ulink" href="" target="_top">http://tools.ietf.org/html/rfc4288</a></p></div><div class="bibliomixed"><a name="Aristotle"></a><p class="bibliomixed">[Does REST need a service description language] 
       Aristotle Pagaltzis. <span class="ital">Does REST need a service description
         language?</span>, blog post, May 27, 2007.
-      http://plasmasturm.org/log/460/.</p></div><div class="bibliomixed"><a name="Corey"></a><p class="bibliomixed">[How RESTful is Your API?]  Cory House. <span class="ital">How RESTful is your API?</span>, blog post, August 26, 2012.
-        http://www.bitnative.com/2012/08/26/how-restful-is-your-api/.</p></div><div class="bibliomixed"><a name="Fowler"></a><p class="bibliomixed">[Richardson Maturity Model]  Martin Fowler. <span class="ital">Richardson Maturity Model: steps toward the glory of REST</span>, blog post,
+      <a class="ulink" href="" target="_top">http://plasmasturm.org/log/460/</a>.</p></div><div class="bibliomixed"><a name="Corey"></a><p class="bibliomixed">[How RESTful is Your API?]  Cory House. <span class="ital">How RESTful is your API?</span>, blog post, August 26, 2012.
+        <a class="ulink" href="" target="_top">http://www.bitnative.com/2012/08/26/how-restful-is-your-api/</a>.</p></div><div class="bibliomixed"><a name="Fowler"></a><p class="bibliomixed">[Richardson Maturity Model]  Martin Fowler. <span class="ital">Richardson Maturity Model: steps toward the glory of REST</span>, blog post,
       18 March 2010.
-      http://martinfowler.com/articles/richardsonMaturityModel.html.</p></div><div class="bibliomixed"><a name="Dare"></a><p class="bibliomixed">[What's Wrong with WADL?]  Dare Obasanjo. <span class="ital">What's Wrong with WADL?</span>, blog post, June 4, 2007.
-        http://www.25hoursaday.com/weblog/2007/06/04/WhatsWrongWithWADL.aspx</p></div><div class="bibliomixed"><a name="RiP"></a><p class="bibliomixed">[REST in Practice]  Jim Webber, Savas Parastatidis and Ian
+      <a class="ulink" href="" target="_top">http://martinfowler.com/articles/richardsonMaturityModel.html</a>.</p></div><div class="bibliomixed"><a name="Dare"></a><p class="bibliomixed">[What's Wrong with WADL?]  Dare Obasanjo. <span class="ital">What's Wrong with WADL?</span>, blog post, June 4, 2007.
+        <a class="ulink" href="" target="_top">http://www.25hoursaday.com/weblog/2007/06/04/WhatsWrongWithWADL.aspx</a></p></div><div class="bibliomixed"><a name="RiP"></a><p class="bibliomixed">[REST in Practice]  Jim Webber, Savas Parastatidis and Ian
       Robinson. <span class="ital">REST in Practice: Hypermedia and Systems
         Architecture</span>. O'Reilly Media; 1 edition (September 24, 2010). ISBN-13:
       978-0596805821. </p></div><div class="bibliomixed"><a name="RWS"></a><p class="bibliomixed">[RESTful Web Services]  Leonard Richardson, Sam Ruby
         <span class="ital">RESTful Web Services</span>. O'Reilly Media; Dec 17, 2008f.
       ISBN-13: 978-0596554606.</p></div><div class="bibliomixed"><a name="sedola"></a><p class="bibliomixed">[Sedola] Erik Wilde. <span class="ital">Service
         Documentation Language</span>
-      https://github.com/dret/sedola/
+      <a class="ulink" href="" target="_top">https://github.com/dret/sedola/</a>
     </p></div><div class="bibliomixed"><a name="Fielding2000"></a><p class="bibliomixed">[Architectural Styles and the Design of Network-based Software Architectures, PhD Dissertation Thesis.]  Roy Thomas Fielding, <span class="ital">Architectural Styles and the Design of
         Network-based Software Architectures, PhD Dissertation Thesis</span>, University of
       California, Irvine &copy; 2000.
-        http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm.</p></div><div class="bibliomixed"><a name="RSDL1"></a><p class="bibliomixed">[RESTful Service Description     Language (Ovirt)] RESTful Service Description Language
+        <a class="ulink" href="" target="_top">http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm.</a></p></div><div class="bibliomixed"><a name="RSDL1"></a><p class="bibliomixed">[RESTful Service Description     Language (Ovirt)] RESTful Service Description Language
     (RSDL). Michael Pasternak, Red Hat. Available at
-    http://www.ovirt.org/RSDL.</p></div><div class="bibliomixed"><a name="RSDL2"></a><p class="bibliomixed">[RESTful Service Description     Language (EMC)] Jonathan Robie, Rob Cavicchio, R&eacute;mon Sinnema and
+    <a class="ulink" href="" target="_top">http://www.ovirt.org/RSDL</a>.</p></div><div class="bibliomixed"><a name="RSDL2"></a><p class="bibliomixed">[RESTful Service Description     Language (EMC)] Jonathan Robie, Rob Cavicchio, R&eacute;mon Sinnema and
     Erik Wilde. <span class="ital">RESTful Service Description
     Language (RSDL): Describing RESTful Services Without Tight
     Coupling.</span> Presented at Balisage: The Markup Conference
     2013, Montr&eacute;al, Canada, August 6 - 9, 2013. In Proceedings of
     Balisage: The Markup Conference 2013. Balisage Series on Markup
     Technologies, vol. 10
-    (2013). doi:10.4242/BalisageVol10.Robie01.</p></div></div><div class="footnotes"><br><hr style="width:100; text-align:left;margin-left: 0"><div id="ftn.d5e35" class="footnote"><p><a href="#d5e35" class="para"><sup class="para">[1] </sup></a>Here, RSDL refers to <a class="xref" href="#RSDL2">RESTful Service Description     Language (EMC)</a>, the
+    (2013). doi:10.4242/BalisageVol10.Robie01.</p></div></div><div class="footnotes"><br><hr style="width:100; text-align:left;margin-left: 0"><div id="ftn.d5e42" class="footnote"><p><a href="#d5e42" class="para"><sup class="para">[1] </sup></a>Here, RSDL refers to <a class="xref" href="#RSDL2">RESTful Service Description     Language (EMC)</a>, the
     language we presented at Balisage 2013.  Unfortunately, we found
     that the name and the acronym were previously used by Red Hat for
     a different language, <a class="xref" href="#RSDL1">RESTful Service Description     Language (Ovirt)</a>, which concentrates
     on describing URIs as standalone entry points for an
-    application.</p></div><div id="ftn.d5e73" class="footnote"><p><a href="#d5e73" class="para"><sup class="para">[2] </sup></a>This
+    application.</p></div><div id="ftn.d5e80" class="footnote"><p><a href="#d5e80" class="para"><sup class="para">[2] </sup></a>This
     definition is taken from a Twitter tweet by Erik Wilde, 21 August
     2013.</p></div></div></div></body></html>
