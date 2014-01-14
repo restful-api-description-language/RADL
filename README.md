@@ -2,11 +2,13 @@ RADL
 ====
 
 RESTful API Description Language (RADL) is an XML vocabulary for
-describing Hypermedia-driven RESTful APIs. The APIs it describes may
-use any media type, in XML, JSON, HTML, or any other format. The
+describing Hypermedia-driven RESTful APIs. Unlike most REST
+description languages, RADL takes a purist approach to REST. The
 structure of a RADL description is based on media types, including the
 documents associated with a media type, links found in these
-documents, and the interfaces associated with these links.
+documents, and the interfaces associated with these links. The APIs it
+describes may use any media type, in XML, JSON, HTML, or any other
+format.
 
 RADL can be used as a specification language or as run-time metadata
 to describe a service.  A JSON representation of RADL is under
