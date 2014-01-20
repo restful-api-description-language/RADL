@@ -75,12 +75,13 @@
     now writing about the API Economy, and even people who have never
     programmed may know why Web APIs are important.</para>
 
-    <para>Web service providers may have little knowledge of the clients that
-    use them, but they need to ensure that these clients can continue to
-    run as they evolve their services. Web services may need to support
-    large numbers of users, so they must be scalable. These means that Web
-    API providers must design their APIs to support evolution and
-    scalablility in distributed systems. This is not easy.</para>
+    <para>Web service providers may have little knowledge of the
+    clients that use them, but they need to ensure that these clients
+    can continue to run as they evolve their services. Web services
+    may need to support large numbers of users, so they must be
+    scalable. This means that Web API providers must design their APIs
+    to support evolution and scalablility in distributed systems. This
+    is not easy.</para>x
 
     <para>Fortunately, this is precisely the problem that REST
     (Representational State Transfer) was designed to
@@ -108,20 +109,18 @@
 
     <para>RADL provides much the same information as Web Application
     Description Language (WADL)
-
+    but the structure of WADL is driven
+    by URI patterns and server-side implementation concerns rather than
+    hypermedia-driven design. RADL provides much the same information as
+    RESTful Service Description Language (<xref linkend="RSDL2"/>), 
     <footnote><para>Here, RSDL refers to <xref linkend="RSDL2"/>, the
     language we presented at Balisage 2013.  Unfortunately, we found
     that the name and the acronym were previously used by Red Hat for
     a different language, <xref linkend="RSDL1"/>, which concentrates
     on describing URIs as standalone entry points for an
     application.</para></footnote>,
-
-    but the structure of WADL is driven
-    by URI patterns and server-side implementation concerns rather than
-    hypermedia-driven design. RADL provides much the same information as
-    RESTful Service Description Language (<xref linkend="RSDL2"/>), but the structure of
-    RSDL is driven by resources, describing an implementation rather than
-    focusing on the media-types.</para>
+    but the structure of RSDL is driven by resources, describing an
+    implementation rather than focusing on the media-types.</para>
 
 
   </section>
@@ -316,9 +315,9 @@
     found in <xref linkend="appendix-a"/>):</para>
 
     <programlisting><![CDATA[
-    <service name="Outline" xmlns="http://identifiers.emc.com/vocab/radl"
+<service name="Outline" xmlns="http://identifiers.emc.com/vocab/radl"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://identifiers.emc.com/vocab/radl
+    xsi:schemaLocation="https://github.com/restful-api-description-language/RADL/tree/master/schema"
     radl.xsd">
 
   <link-relations>
@@ -369,14 +368,15 @@ short.</para>
   </documentation>
 ]]></programlisting>
 
-<para>This starting fragment shows how we can add documentation to RADL. We
-support different documentation modules. Our TechPubs department uses
-DocBook, for instance, but in this paper we will only use HTML. To keep
-the RADL document well-formed XML, we will use XHTML and we declare its
-namespace. We can use all of HTML's elements and additionally we can
-use the ref element to refer to things. We added ref so that we could
-refer to RADL concepts, like link relations, and more easily process
-those references. Working with only generic a elements would be
+<para>This starting fragment shows how we can add documentation to
+RADL. We support different documentation modules. Our TechPubs
+department uses DocBook, for instance, but in this paper we will only
+use HTML. To keep the RADL document well-formed XML, we will use XHTML
+and we declare its namespace. We can use all of HTML's elements and
+additionally we can use the <code>ref</code> element to refer to
+things. We added <code>ref</code>so that we could refer to RADL
+concepts, like link relations, and more easily process those
+references. Working with only generic <code>a</code> elements would be
 awkward.</para>
 
 
@@ -409,7 +409,7 @@ awkward.</para>
 service, but you could add more generic ones, like <code>self</code> as well.</para>
 
 <para>There is no defined model for naming link relations. All the generic
-ones like self use simple names, and they are registered by IANA in a
+ones like <code>self</code> use simple names, and they are registered by IANA in a
 flat namespace. However, to avoid name collisions, you may want to use
 URIs for your own specialized link relations. EMC is moving towards
 using URIs of the form <code>http://identifiers.emc.com/linkrel/&lt;name&gt;</code>.</para>
