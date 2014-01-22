@@ -80,7 +80,7 @@
     run as they evolve their services. Web services may need to support
     large numbers of users, so they must be scalable. These means that Web
     API providers must design their APIs to support evolution and
-    scalablility in distributed systems. This is not easy.</para>
+    scalability in distributed systems. This is not easy.</para>
 
     <para>Fortunately, this is precisely the problem that REST
     (Representational State Transfer) was designed to
