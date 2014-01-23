@@ -621,14 +621,13 @@ and build special purpose clients instead.</para>
 implementation details: the resources. These are not part of the
 client API, but they are important for servers that implement the
 API. A resource associates one or more interfaces with a URI or URI
-Template <xref linkend="rfc6570"/>.</para>
-###########
-<para> URI Templates define variables that sometimes are part of the
-interface, but to keep things simple we do not show that in this
-paper. Resources implement interfaces. In this example the
-correspondence is 1:1, so that's not very interesting, but there are
-cases where it makes sense to let a resource implement more than one
-interface.</para>
+Template. <xref linkend="rfc6570"/>.  <footnote><para>URI Templates
+allow URIs to be created using variables, which can be supplied by the
+client in the REST API. They are not used in this
+example.</para></footnote> Resources implement interfaces. In this
+example the correspondence is 1:1, so that's not very interesting, but
+there are cases where it makes sense to let a resource implement more
+than one interface.</para>
 
 <programlisting><![CDATA[
   <resources>
