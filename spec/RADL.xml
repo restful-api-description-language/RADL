@@ -80,7 +80,7 @@
     can continue to run as they evolve their services. Web services
     may need to support large numbers of users, so they must be
     scalable. This means that Web API providers must design their APIs
-    to support evolution and scalablility in distributed systems. This
+    to support evolution and scalability in distributed systems. This
     is not easy.</para>
 
     <para>Fortunately, this is precisely the problem that REST
@@ -114,16 +114,18 @@
     RADL serves the same needs as WADL, but the structure of WADL is
     driven by URI patterns and server-side implementation concerns
     rather than hypermedia-driven design, and it does not describe
-    media types and the links found in the associated documents. RADL
-    provides the same information as RESTful Service Description
-    Language (<xref linkend="RSDL2"/>), <footnote><para>Here, RSDL
-    refers to <xref linkend="RSDL2"/>, the language we presented at
-    Balisage 2013.  Unfortunately, we found that the name and the
-    acronym were previously used by Red Hat for a different language,
-    <xref linkend="RSDL1"/>, which concentrates on describing URIs as
-    standalone entry points for an application.</para></footnote>, but
-    the structure of RSDL is driven by resources, describing an
-    implementation. 
+    media types and the links found in the associated documents.
+    <footnote>
+      <para>
+	RADL provides the same information as RESTful Service
+	Description Language (<xref linkend="RSDL2"/>), an earlier
+	language that we presented at Balisage 2013, but the structure
+	of RSDL is driven by resources, describing an implementation.
+	(The name RESTful Service Description Language and the acronym
+	RSDL were previously used by Red Hat for a different language,
+	<xref linkend="RSDL1"/>, which concentrates on describing URIs
+	as standalone entry points for an application.)</para>
+    </footnote>
     </para>
 
     <para>
