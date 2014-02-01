@@ -29,6 +29,15 @@
     </keywordset>
 
     <abstract>
+      <para>In a REST API, the server provides options to a client in
+      the form of hypermedia links in documents, and the main thing a
+      client needs to know is how to locate and use these links in
+      order to use the API. The main job of a REST API description is
+      to provide this information to the client in the context of
+      media type descriptions. Unfortunately, most REST service
+      description languages and design methodologies focus on other
+      concerns instead.</para>
+
       <para>RESTful API Description Language (RADL) is an XML vocabulary for
       describing Hypermedia-driven RESTful APIs. The APIs it describes may
       use any media type, in XML, JSON, HTML, or any other format. The
@@ -36,8 +45,8 @@
       documents associated with a media type, links found in these
       documents, and the interfaces associated with these links.</para>
 
-      <para>RADL can be used as a specification language or as run-time
-      metadata to describe a service.</para>
+      <para>RADL can be used as a specification language or as
+      run-time metadata to describe a service.</para>
 
       <para>This is a preliminary version of an article that
       will be presented at XML Prague 2014. The most recent version of this specification is always
@@ -90,6 +99,15 @@
     developer. An XML vocabulary that supports the design process is
     extremely helpful for designing a RESTful API and for teaching RESTful
     API design, and is well suited to writing documentation.</para>
+
+    <para>In a REST API, the server provides options to a client in
+    the form of hypermedia links in documents, and the main thing a
+    client needs to know is how to locate and use these links in order
+    to use the API. The main job of a REST API description is to
+    provide this information to the client in the context of media
+    type descriptions. This is the main focus of RADL. Unfortunately,
+    most REST service description languages and design methodologies
+    focus on other concerns instead.</para>
 
     <para>Developers who write clients need documentation to know how to use Web
     APIs. Their programs may need a machine-readable representation of the
@@ -200,10 +218,32 @@
     <title>REST APIs must be hypertext-driven</title>
 
     <para>The previous section describes the REST architectural style,
-    this section describes REST APIs.  In <xref
-    linkend="hypertext-driven"/>, Fielding explains that REST APIs
-    must be hypertext-driven, and describes how a client uses this
-    kind of API:</para>
+    this section describes REST APIs.  
+
+    A REST client uses a service much as a human
+    user uses a set of web pages. The client starts out by retrieving
+    an initial document from a known URI. 
+
+    Each document represents a client application state, and the links
+    in the document represent the choices available to the client in
+    that state.
+
+    The server provides options to a REST client in the form of
+    hypermedia links that it places in these documents, just as it
+    provides options to a human user using links.
+
+    The client can use these links to proceed to another state, just
+    as a human user might click on a link.</para>
+
+    <para>But a REST client can only do this if it knows how to
+    interpret the documents it receives, and how to locate and use the
+    links that it encounters.  The main job of a REST API description
+    is to provide this information to the client.</para>
+
+    <para>Roy Fielding described this in <xref
+    linkend="hypertext-driven"/>, where he says that REST APIs must be
+    hypertext-driven and describes how a client uses this kind of
+    API:</para>
 
     <blockquote><para>A REST API should be entered with no prior
     knowledge beyond the initial URI (bookmark) and set of
@@ -220,25 +260,9 @@
     information is driving interaction instead of
     hypertext.]</para></blockquote>
 
-    <para>In other words, a REST client uses a service much as a human
-    user uses a set of web pages. The client starts out by retrieving
-    a document from a known URI.
-
-    Each document represents a client application state, and the links
-    in the document represent the choices available in that state.
-
-    The server provides options to a REST client in the form of
-    hypermedia links that it places in these documents, just as it
-    provides options to a human user using links.
-
-    The client can use these links to proceed to another state, just
-    as a human user might click on a link.</para>
-
-    <para>But a REST client can only do this if it knows how to
-    interpret the documents it receives, and how to locate and use the
-    links that it encounters.  In the previously mentioned post,
-    Fielding says that a REST API description must explain these
-    things in the context of the media type for the document.</para>
+    <para>In the same post, Fielding says that a REST API description
+    must explain these things in the context of the media type for the
+    document.</para>
 
     <blockquote><para>Any effort spent describing what methods to use
     on what URIs of interest should be entirely defined within the
@@ -296,26 +320,36 @@
     <title>RADL - a hypertext-driven API description</title>
 
     <para>RADL is a description for hypertext-driven REST APIs, as
-    described in the previous section.</para>
+    described in the previous section. Most of the information in a
+    RADL description tells a client how to interpret the documents it
+    receives, and how to locate and use the links that it encounters.
+    This information is provided in media type descriptions. To
+    support well-known media types that are described by
+    specifications, RADL also allows a reference to human-readable
+    documentation instead<footnote><para>If you need run-time metadata
+    for well known media types, you need a RADL description that
+    provides this information, which cannot be automatically extracted
+    from a HTMl document.</para></footnote>. A media type can be
+    defined as an extension to an existing media type.</para>
 
-    <para>A RADL document describes the API for a service, which it
-    defines as a set of related resources. RADL describes a REST API
-    primarily in terms of the media types that the service uses.
+    <para>In addition to media types, RADL describes resources, which
+    are needed for implementation but are not part of the client
+    API. Once complete media type descriptions have been done, the
+    resource description for a service is simple and small,
+    associating URI formats with interfaces that are defined in the
+    media type descriptions.</para>
 
-    In addition, it describes resources, which are needed for
-    implementation but are not part of the client API. Once complete
-    media type descriptions have been done, the resource description
-    for a service is simple and small, associating URI formats with
-    interfaces that are defined in the media type descriptions.
-
-    RADL also supports authentication, which is needed by both the
+    <para>RADL also supports authentication, which is needed by both the
     client and the server implementation, but is orthogonal to the API
-    per se. 
+    per se.</para>
 
-    RADL allows the entire service description to be specified in
-    one document. The information needed for client documentation, server
-    stub generation, runtime metadata, and testing can then be extracted
-    from the complete description as needed.</para>
+    <para>RADL allows the entire service description to be specified
+    in one document <footnote><para>We do not yet support descriptions
+    built from multiple modules, this is likely in a future version of
+    RADL.</para></footnote>. The information needed for client
+    documentation, server stub generation, runtime metadata, and
+    testing can then be extracted from the complete description as
+    needed.</para>
 
 
     <para>The following template illustrates the overall structure of

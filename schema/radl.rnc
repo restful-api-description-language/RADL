@@ -14,6 +14,12 @@ default namespace radl = "http://identifiers.emc.com/radl"
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
+
+## TODO: 
+## * Starting document instead of interface
+## * Enclose radl:document in radl:documents
+## * Validate examples again!
+
 start = service
 include "ref.rnc"
 include "documentation.rnc"
@@ -50,7 +56,7 @@ design-status =
   attribute design-status {
     "future" | "assigned" | "poc" | "partial" | "complete" | "approved"
   }
-service-start = element start { href?, interface-ref, identity-provider-ref? }
+service-start = element start { href?, document-ref, identity-provider-ref? }
 identity-provider-ref = attribute identity-provider-ref { xsd:IDREF }
 link-relations =
   element link-relations { documentation?, link-relation* }
@@ -102,6 +108,10 @@ document-ref =
     attribute ref { xsd:IDREF },
     documentation?
   }
+document-refs =
+  element documents {
+     document-ref*
+  }
 media-type-conventions = element conventions { documentation?, headers?, uri-parameters?, status-codes? }
 properties = element properties { documentation?, property* }
 property = element property { id?, name, documentation? }
@@ -149,7 +159,7 @@ http-method =
   | "PATCH"
 request =
   element request {
-    documentation?, request-uri-parameters?, header-refs?, document-ref*
+    documentation?, request-uri-parameters?, header-refs?, document-refs?
   }
 request-uri-parameters =
   element uri-parameters { request-uri-parameter* }
@@ -162,7 +172,7 @@ header-refs = element header-refs { documentation?, header-ref* }
 header-ref = element header-ref { ref }
 response =
   element response {
-    documentation?, response-status-codes?, header-refs?, document-ref*
+    documentation?, response-status-codes?, header-refs?, document-refs?
   }
 response-status-codes =
   element status-codes {

@@ -1,228 +1,245 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet type="text/xsl" href="radl2html.xsl"?>
 <service xmlns:html="http://www.w3.org/1999/xhtml/" xmlns="http://identifiers.emc.com/radl"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Maps">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Maps">
 
-  <documentation> This is an example from the book RESTful Web Services, chapter 5. </documentation>
+	<documentation> This is an example from the book RESTful Web Services, chapter 5. </documentation>
 
-  <start interface-ref="int-planets" />
+	<!-- ### CHANGEME - use a starting document instead ### -->
+	<start document-ref="doc-planets"/>
 
-  <link-relations>
-    <link-relation id="rel-place" name="place">
-      <documentation> The target resource is a related place. Links of this type are found by
-        looking for <html:code>a</html:code> elements with <html:code>class="place"</html:code>.
-        Additionally, you can find search links to places via the <html:code>form</html:code>
-        element with <html:code>id="searchPlace"</html:code>. </documentation>
-    </link-relation>
-    <link-relation id="rel-point" name="point">
-      <documentation> The target resource is a related point on a planet. Links of this type are
-        found by looking for <html:code>a</html:code> elements with different values for the
-          <html:code>class</html:code> attribute, like <html:code>coordinates</html:code>,
-          <html:code>map_nav</html:code>, <html:code>zoom_in</html:code>, and
-          <html:code>zoom_out</html:code>. </documentation>
-    </link-relation>
-    <link-relation id="rel-map" name="map">
-      <documentation> The target resource is a map related to the current resource. Links of this
-        type are found by looking for <html:code>a</html:code> elements with
-          <html:code>class="map"</html:code>. </documentation>
-    </link-relation>
-    <link-relation id="rel-image" name="image">
-      <documentation> The target resource is an image related to the current resource. Links of this
-        type are found by looking for <html:code>img</html:code> elements with
-          <html:code>class="map"</html:code>. </documentation>
-    </link-relation>
-  </link-relations>
+	<link-relations>
+		<link-relation id="rel-place" name="place">
+			<documentation> The target resource is a related place. Links of this type are found by
+				looking for <html:code>a</html:code> elements with
+					<html:code>class="place"</html:code>. Additionally, you can find search links to
+				places via the <html:code>form</html:code> element with
+					<html:code>id="searchPlace"</html:code>. </documentation>
+		</link-relation>
+		<link-relation id="rel-point" name="point">
+			<documentation> The target resource is a related point on a planet. Links of this type
+				are found by looking for <html:code>a</html:code> elements with different values for
+				the <html:code>class</html:code> attribute, like <html:code>coordinates</html:code>,
+					<html:code>map_nav</html:code>, <html:code>zoom_in</html:code>, and
+					<html:code>zoom_out</html:code>. </documentation>
+		</link-relation>
+		<link-relation id="rel-map" name="map">
+			<documentation> The target resource is a map related to the current resource. Links of
+				this type are found by looking for <html:code>a</html:code> elements with
+					<html:code>class="map"</html:code>. </documentation>
+		</link-relation>
+		<link-relation id="rel-image" name="image">
+			<documentation> The target resource is an image related to the current resource. Links
+				of this type are found by looking for <html:code>img</html:code> elements with
+					<html:code>class="map"</html:code>. </documentation>
+		</link-relation>
+	</link-relations>
 
-  <media-types>
-    <media-type id="med-planets" name="planets" extends="application/xhtml+xml">
-      <documentation> We are defining an XHTML <html:em>microformat</html:em> by adding meaning
-      using the <html:code>class</html:code> attribute to elements. For example, adding
-      <html:code>class="planets"</html:code> to the <html:code>ul</html:code> element, we can
-      turn a list into a list of planets. </documentation>
-      <description type="html" href="http://tools.ietf.org/html/rfc3236"/>
-      <documents>
-	<document id="doc-planets" name="planets">
-	  <links>
-	    <link link-relation-ref="rel-place" interface-ref="int-place"/>
-	  </links>
-	</document>
-	<document id="doc-place" name="place">
-	  <links>
-	    <link link-relation-ref="rel-map" interface-ref="int-map"/>
-	    <link link-relation-ref="rel-point" interface-ref="int-point"/>
-	    <link link-relation-ref="rel-place" interface-ref="int-place"/>
-	  </links>
-	</document>
-	<document id="doc-point" name="point">
-	  <links>
-	    <link link-relation-ref="rel-place" interface-ref="int-place"/>
-	    <link link-relation-ref="rel-point" interface-ref="int-point"/>
-	  </links>
-	</document>
-	<document id="doc-map" name="map">
-	  <links>
-	    <link link-relation-ref="rel-image" interface-ref="int-image"/>
-	    <link link-relation-ref="rel-map" interface-ref="int-map"/>
-	  </links>
-	</document>
-      </documents>
-      <interfaces>
-	<conventions>
-	  <uri-parameters>
-	    <uri-parameter id="par-planet" name="planet" datatype="string">
-	      <documentation> Human friendly name of a planet, like <html:code>Earth</html:code>.
-	      </documentation>
-	    </uri-parameter>
-	    <uri-parameter id="par-place-name" name="place-name" datatype="string">
-	      <documentation> Human friendly name of a place, like <html:code>Mount%20Rushmore</html:code>.
-	      </documentation>
-	    </uri-parameter>
-	    <uri-parameter id="par-scoping-information" name="scoping-information" datatype="string">
-	      <documentation> A hierarchy of <ref uri-parameter="par-place-name">place names</ref> like
-	      <html:code>/USA/New%20England/Maine/</html:code>. </documentation>
-	    </uri-parameter>
-	    <uri-parameter id="par-map-type" name="map-type" datatype="string">
-	      <documentation> The type of map, like <html:code>satellite</html:code>. </documentation>
-	    </uri-parameter>
-	    <uri-parameter id="par-scale" name="scale" datatype="string">
-	      <documentation> Dot followed by an integer, like <html:code>.1</html:code>. A bigger number
-	      indicates more details. </documentation>
-	    </uri-parameter>
-	    <uri-parameter id="par-show" name="show" datatype="string">
-	      <documentation> Things to search for near a given place, like <html:code>diners</html:code>.
-	      </documentation>
-	    </uri-parameter>
-	    <uri-parameter id="par-latitude" name="latitude" datatype="float">
-	      <documentation> Latitude on a planet, like <html:code>24.9195</html:code>. </documentation>
-	    </uri-parameter>
-	    <uri-parameter id="par-longitude" name="longitude" datatype="float">
-	      <documentation> Longitude on a planet, like <html:code>17.821</html:code>. </documentation>
-	    </uri-parameter>
-	  </uri-parameters>
-	</conventions>
+	<media-types>
+		<media-type id="med-planets" name="planets" extends="application/xhtml+xml">
+			<documentation> We are defining an XHTML <html:em>microformat</html:em> by adding
+				meaning using the <html:code>class</html:code> attribute to elements. For example,
+				adding <html:code>class="planets"</html:code> to the <html:code>ul</html:code>
+				element, we can turn a list into a list of planets. </documentation>
+			<description type="html" href="http://tools.ietf.org/html/rfc3236"/>
+			<documents>
+				<document id="doc-planets" name="planets">
+					<links>
+						<link link-relation-ref="rel-place" interface-ref="int-place"/>
+					</links>
+				</document>
+				<document id="doc-place" name="place">
+					<links>
+						<link link-relation-ref="rel-map" interface-ref="int-map"/>
+						<link link-relation-ref="rel-point" interface-ref="int-point"/>
+						<link link-relation-ref="rel-place" interface-ref="int-place"/>
+					</links>
+				</document>
+				<document id="doc-point" name="point">
+					<links>
+						<link link-relation-ref="rel-place" interface-ref="int-place"/>
+						<link link-relation-ref="rel-point" interface-ref="int-point"/>
+					</links>
+				</document>
+				<document id="doc-map" name="map">
+					<links>
+						<link link-relation-ref="rel-image" interface-ref="int-image"/>
+						<link link-relation-ref="rel-map" interface-ref="int-map"/>
+					</links>
+				</document>
+			</documents>
+			<interfaces>
+				<conventions>
+					<uri-parameters>
+						<uri-parameter id="par-planet" name="planet" datatype="string">
+							<documentation> Human friendly name of a planet, like
+									<html:code>Earth</html:code>. </documentation>
+						</uri-parameter>
+						<uri-parameter id="par-place-name" name="place-name" datatype="string">
+							<documentation> Human friendly name of a place, like
+									<html:code>Mount%20Rushmore</html:code>. </documentation>
+						</uri-parameter>
+						<uri-parameter id="par-scoping-information" name="scoping-information"
+							datatype="string">
+							<documentation> A hierarchy of <ref uri-parameter="par-place-name">place
+									names</ref> like
+									<html:code>/USA/New%20England/Maine/</html:code>.
+							</documentation>
+						</uri-parameter>
+						<uri-parameter id="par-map-type" name="map-type" datatype="string">
+							<documentation> The type of map, like <html:code>satellite</html:code>.
+							</documentation>
+						</uri-parameter>
+						<uri-parameter id="par-scale" name="scale" datatype="string">
+							<documentation> Dot followed by an integer, like
+									<html:code>.1</html:code>. A bigger number indicates more
+								details. </documentation>
+						</uri-parameter>
+						<uri-parameter id="par-show" name="show" datatype="string">
+							<documentation> Things to search for near a given place, like
+									<html:code>diners</html:code>. </documentation>
+						</uri-parameter>
+						<uri-parameter id="par-latitude" name="latitude" datatype="float">
+							<documentation> Latitude on a planet, like
+									<html:code>24.9195</html:code>. </documentation>
+						</uri-parameter>
+						<uri-parameter id="par-longitude" name="longitude" datatype="float">
+							<documentation> Longitude on a planet, like
+									<html:code>17.821</html:code>. </documentation>
+						</uri-parameter>
+					</uri-parameters>
+				</conventions>
 
-	<interface id="int-planets" name="planets">
-	  <methods>
-	    <method name="GET">
-	      <response>
-		<document ref="doc-planets"/>
-	      </response>
-	    </method>
-	  </methods>
-	</interface>
+				<interface id="int-planets" name="planets">
+					<methods>
+						<method name="GET">
+							<response>
+								<document ref="doc-planets"/>
+							</response>
+						</method>
+					</methods>
+				</interface>
 
-	<interface id="int-place" name="place">
-	  <methods>
-	    <method name="GET">
-	      <request>
-		<uri-parameters>
-		  <uri-parameter name="planet" ref="par-planet"/>
-		  <uri-parameter name="scoping-information" ref="par-scoping-information"/>
-		  <uri-parameter name="place-name" ref="par-place-name"/>
-		  <uri-parameter name="show" ref="par-show"/>
-		</uri-parameters>
-	      </request>
-	      <response>
-		<document ref="doc-place"/>
-	      </response>
-	    </method>
-	  </methods>
-	</interface>
+				<interface id="int-place" name="place">
+					<methods>
+						<method name="GET">
+							<request>
+								<uri-parameters>
+									<uri-parameter name="planet" ref="par-planet"/>
+									<uri-parameter name="scoping-information"
+										ref="par-scoping-information"/>
+									<uri-parameter name="place-name" ref="par-place-name"/>
+									<uri-parameter name="show" ref="par-show"/>
+								</uri-parameters>
+							</request>
+							<response>
+								<documents>
+									<document ref="doc-place"/>
+								</documents>
+							</response>
+						</method>
+					</methods>
+				</interface>
 
-	<interface id="int-point" name="point">
-	  <methods>
-	    <method name="GET">
-	      <request>
-		<uri-parameters>
-		  <uri-parameter name="planet" ref="par-planet"/>
-		  <uri-parameter name="latitude" ref="par-latitude"/>
-		  <uri-parameter name="longitude" ref="par-longitude"/>
-		</uri-parameters>
-	      </request>
-	      <response>
-		<document ref="doc-point"/>
-	      </response>
-	    </method>
-	  </methods>
-	</interface>
+				<interface id="int-point" name="point">
+					<methods>
+						<method name="GET">
+							<request>
+								<uri-parameters>
+									<uri-parameter name="planet" ref="par-planet"/>
+									<uri-parameter name="latitude" ref="par-latitude"/>
+									<uri-parameter name="longitude" ref="par-longitude"/>
+								</uri-parameters>
+							</request>
+							<response>
+								<documents>
+									<document ref="doc-point"/>
+								</documents>
+							</response>
+						</method>
+					</methods>
+				</interface>
 
-	<interface id="int-map" name="map">
-	  <methods>
-	    <method name="GET">
-	      <request>
-		<uri-parameters>
-		  <uri-parameter name="map-type" ref="par-map-type"/>
-		  <uri-parameter name="scale" ref="par-scale"/>
-		  <uri-parameter name="planet" ref="par-planet"/>
-		  <uri-parameter name="latitude" ref="par-latitude"/>
-		  <uri-parameter name="longitude" ref="par-longitude"/>
-		</uri-parameters>
-	      </request>
-	      <response>
-		<document ref="doc-map"/>
-	      </response>
-	    </method>
-	  </methods>
-	</interface>
-      </interfaces>
-    </media-type>
+				<interface id="int-map" name="map">
+					<methods>
+						<method name="GET">
+							<request>
+								<uri-parameters>
+									<uri-parameter name="map-type" ref="par-map-type"/>
+									<uri-parameter name="scale" ref="par-scale"/>
+									<uri-parameter name="planet" ref="par-planet"/>
+									<uri-parameter name="latitude" ref="par-latitude"/>
+									<uri-parameter name="longitude" ref="par-longitude"/>
+								</uri-parameters>
+							</request>
+							<response>
+								<documents>
+									<document ref="doc-map"/>
+								</documents>
+							</response>
+						</method>
+					</methods>
+				</interface>
+			</interfaces>
+		</media-type>
 
-    <media-type id="med-png" name="image/png">
-      <description type="html" href="http://www.iana.org/assignments/media-types/image/png"/>
-      <documents>
-	<document id="doc-png" name="png"/>
-      </documents>
-      <interfaces>
-	<interface id="int-image" name="image">
-	  <methods>
-	    <method name="GET">
-	      <request>
-		<uri-parameters>
-		  <uri-parameter name="map-type" ref="par-map-type"/>
-		  <uri-parameter name="scale" ref="par-scale"/>
-		  <uri-parameter name="planet" ref="par-planet"/>
-		  <uri-parameter name="latitude" ref="par-latitude"/>
-		  <uri-parameter name="longitude" ref="par-longitude"/>
-		</uri-parameters>
-	      </request>
-	      <response>
-		<document ref="doc-png"/>
-	      </response>
-	    </method>
-	  </methods>
-	</interface>
-      </interfaces>
+		<media-type id="med-png" name="image/png">
+			<description type="html" href="http://www.iana.org/assignments/media-types/image/png"/>
+			<documents>
+				<document id="doc-png" name="png"/>
+			</documents>
+			<interfaces>
+				<interface id="int-image" name="image">
+					<methods>
+						<method name="GET">
+							<request>
+								<uri-parameters>
+									<uri-parameter name="map-type" ref="par-map-type"/>
+									<uri-parameter name="scale" ref="par-scale"/>
+									<uri-parameter name="planet" ref="par-planet"/>
+									<uri-parameter name="latitude" ref="par-latitude"/>
+									<uri-parameter name="longitude" ref="par-longitude"/>
+								</uri-parameters>
+							</request>
+							<response>
+								<documents>
+									<document ref="doc-png"/>
+								</documents>
+							</response>
+						</method>
+					</methods>
+				</interface>
+			</interfaces>
+		</media-type>
 
-    </media-type>
+	</media-types>
 
-  </media-types>
+	<resources>
 
-  <resources>
+		<resource id="res-planets" name="planets">
+			<location uri="/"/>
+			<interface ref="int-planets"/>
+		</resource>
 
-    <resource id="res-planets" name="planets">
-      <location uri="/"/>
-      <interface ref="int-planets"/>
-    </resource>
+		<resource id="res-place" name="place">
+			<location uri-template="/{planet}/[{scoping-information}/][{place-name}]{?show}"/>
+			<interface ref="int-place"/>
+		</resource>
 
-    <resource id="res-place" name="place">
-      <location uri-template="/{planet}/[{scoping-information}/][{place-name}]{?show}"/>
-      <interface ref="int-place"/>
-    </resource>
+		<resource id="res-point" name="point">
+			<location uri-template="/{planet}/{latitude},{longitude}"/>
+			<interface ref="int-point"/>
+		</resource>
 
-    <resource id="res-point" name="point">
-      <location uri-template="/{planet}/{latitude},{longitude}"/>
-      <interface ref="int-point"/>
-    </resource>
+		<resource id="res-map" name="map">
+			<location uri-template="/{map-type}{scale}/{planet}/{latitude},{longitude}"/>
+			<interface ref="int-map"/>
+		</resource>
 
-    <resource id="res-map" name="map">
-      <location uri-template="/{map-type}{scale}/{planet}/{latitude},{longitude}"/>
-      <interface ref="int-map"/>
-    </resource>
-
-    <resource id="res-image" name="image">
-      <location uri-template="/{map-type}{scale}/{planet}/images/{latitude},{longitude}.png"/>
-      <interface ref="int-image"/>
-    </resource>
-  </resources>
+		<resource id="res-image" name="image">
+			<location uri-template="/{map-type}{scale}/{planet}/images/{latitude},{longitude}.png"/>
+			<interface ref="int-image"/>
+		</resource>
+	</resources>
 
 </service>
