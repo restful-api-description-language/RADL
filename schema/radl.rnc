@@ -15,11 +15,6 @@ default namespace radl = "http://identifiers.emc.com/radl"
 ## limitations under the License.
 
 
-## TODO: 
-## * Starting document instead of interface
-## * Enclose radl:document in radl:documents
-## * Validate examples again!
-
 start = service
 include "ref.rnc"
 include "documentation.rnc"

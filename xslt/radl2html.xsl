@@ -537,8 +537,6 @@
           <xsl:variable name="interface-ref" select="@interface-ref"/>
           <xsl:variable name="link-relation-ref" select="@link-relation-ref"/>
           <!-- TODO: Need also to handle the inline interface description case -->
-          
-          <!-- #### NOW ### -->
           <xsl:for-each select="//radl:interface[@id=$interface-ref]/radl:methods/radl:method">
             <tr>
               <xsl:if test="$showStatus">
@@ -571,11 +569,6 @@
   </xsl:template>
   
   <xsl:template match="radl:request">
-<!--
-    element request {
-      documentation?, request-uri-parameters?, header-refs?, document-ref*
-    }
--->
     <xsl:apply-templates select="radl:documentation"/>
     <xsl:apply-templates select="radl:uri-parameters"/>
     <xsl:apply-templates select="radl:header-refs"/>
@@ -584,10 +577,6 @@
   </xsl:template>
   
   <xsl:template match="radl:response">
-<!-- 
-  element response {
-    documentation?, response-status-codes?, header-refs?, document-ref*
-  }-->
     <xsl:apply-templates select="radl:documentation"/>    
     <xsl:apply-templates select="radl:header-refs"/>
     <xsl:apply-templates select="radl:documents"/>  <!-- match="radl:document[@ref]" -->       
