@@ -1,178 +1,145 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>RESTful API Description Language (RADL)</title><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"><meta name="description" content="RESTful API Description Language (RADL) is an XML vocabulary for describing Hypermedia-driven RESTful APIs. The APIs it describes may use any media type, in XML, JSON, HTML, or any other format. The structure of a RADL description is based on media types, including the documents associated with a media type, links found in these documents, and the interfaces associated with these links. RADL can be used as a specification language or as run-time metadata to describe a service. This is a preliminary version of an article that will be presented at XML Prague 2014. The most recent version of this specification is always available at http://github.com/restful-api-description-language."><meta name="keywords" content="REST, XML, authoring, metadata"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="article"><div class="titlepage"><div><div><h1 class="title"><a name="d5e1"></a>RESTful API Description Language (RADL)</h1></div><div><h3 class="subtitle"><i>Hypermedia-driven API design</i></h3></div><div><div class="author"><h3 class="author">Jonathan Robie</h3><code class="email">&lt;<a class="email" href="mailto:jonathan.robie@emc.com">jonathan.robie@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">R&eacute;mon Sinnema</h3><code class="email">&lt;<a class="email" href="mailto:remon.sinnema@emc.com">remon.sinnema@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">Erik Wilde</h3><code class="email">&lt;<a class="email" href="mailto:erik.wilde@emc.com">erik.wilde@emc.com</a>&gt;</code></div></div><div><div class="legalnotice"><a name="d5e24"></a><p class="copyright">Copyright &copy; 2014 EMC Corporation</p><p>Licensed under the Apache License, Version 2.0 (the "License");
-      you may not use this file except in compliance with the License.
-      You may obtain a copy of the License at</p><a class="ulink" href="" target="_top">http://www.apache.org/licenses/LICENSE-2.0</a><p>Unless required by applicable law or agreed to in writing,
-      software distributed under the License is distributed on an "AS
-      IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-      express or implied.  See the License for the specific language
-      governing permissions and limitations under the License.</p></div></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>RESTful API Description Language (RADL) is an XML vocabulary for
-      describing Hypermedia-driven RESTful APIs. The APIs it describes may
-      use any media type, in XML, JSON, HTML, or any other format. The
-      structure of a RADL description is based on media types, including the
-      documents associated with a media type, links found in these
-      documents, and the interfaces associated with these links.</p><p>RADL can be used as a specification language or as run-time
-      metadata to describe a service.</p><p>This is a preliminary version of an article that
-      will be presented at XML Prague 2014. The most recent version of this specification is always
-      available at <a class="ulink" href="https://github.com/restful-api-description-language" target="_top">http://github.com/restful-api-description-language</a>.</p></div></div></div><hr></div><div class="toc"><dl class="toc"><dt><span class="section"><a href="#d5e31">Introduction</a></span></dt><dt><span class="section"><a href="#d5e47">REST</a></span></dt><dt><span class="section"><a href="#d5e69">How we designed RADL</a></span></dt><dt><span class="section"><a href="#d5e99">The RADL document</a></span></dt><dt><span class="section"><a href="#d5e127">Using RADL Descriptions</a></span></dt><dt><span class="section"><a href="#appendix-a">Appendix A: RADL Schema</a></span></dt><dt><span class="section"><a href="#d5e149">Schema for embedded XHTML</a></span></dt><dt><span class="section"><a href="#d5e152">Schema for embedded DocBook</a></span></dt><dt><span class="section"><a href="#d5e155">RADL schema</a></span></dt><dt><span class="section"><a href="#d5e158">Appendix B: Generating HTML client documentation</a></span></dt><dt><span class="section"><a href="#d5e162">Appendix C: Generating JSON+HTML metadata</a></span></dt><dt><span class="bibliography"><a href="#d5e166">Bibliography</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e31"></a>Introduction</h2></div></div></div><p>Web APIs are critical to the business strategy of many
-    companies, and vital to the way users use information on the
-    Web. Companies like eBay, Amazon, Salesforce, and Google provide
-    valuable services via Web APIs, and developers are using these APIs
-    together with other data sources to create new kinds of applications
-    that run on a variety of devices and environments. Some analysts are
-    now writing about the API Economy, and even people who have never
-    programmed may know why Web APIs are important.</p><p>Web service providers may have little knowledge of the clients that
-    use them, but they need to ensure that these clients can continue to
-    run as they evolve their services. Web services may need to support
-    large numbers of users, so they must be scalable. These means that Web
-    API providers must design their APIs to support evolution and
-    scalablility in distributed systems. This is not easy.</p><p>Fortunately, this is precisely the problem that REST
-    (Representational State Transfer) was designed to
-    solve. Unfortunately, designing and documenting RESTful APIs is still
-    too much of a black art, causing many difficulties for the average
-    developer. An XML vocabulary that supports the design process is
-    extremely helpful for designing a RESTful API and for teaching RESTful
-    API design, and is well suited to writing documentation.</p><p>Developers who write clients need documentation to know how to use Web
-    APIs. Their programs may need a machine-readable representation of the
-    API as runtime metadata. An XML vocabulary works well for this, and
-    can easily be converted to JSON and HTML for developers who prefer
-    this representation.</p><p>RESTful API Description Language (RADL) is an XML vocabulary
-    created to support RESTful Web API design. It can be used to create
-    both documentation and runtime metadata. The design of RADL is focused
-    on the media type, in keeping with this famous quote by Roy
-    Fielding <a class="xref" href="#hypertext-driven">REST APIs must be hypertext-driven</a>:</p><div class="blockquote"><blockquote class="blockquote"><p>Any effort spent describing what methods to use
-    on what URIs of interest should be entirely defined within the
-    scope of the processing rules for a media type.</p></blockquote></div><p>RADL provides much the same information as Web Application
-    Description Language (WADL)
-
-    <a href="#ftn.d5e42" class="footnote" name="d5e42"><sup class="footnote">[1]</sup></a>,
-
-    but the structure of WADL is driven
-    by URI patterns and server-side implementation concerns rather than
-    hypermedia-driven design. RADL provides much the same information as
-    RESTful Service Description Language (<a class="xref" href="#RSDL2">RESTful Service Description     Language (EMC)</a>), but the structure of
-    RSDL is driven by resources, describing an implementation rather than
-    focusing on the media-types.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e47"></a>REST</h2></div></div></div><p>REST Is an Architectural Style, which is formally defined by the
-    following constraints:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Client/Server</p></li><li class="listitem"><p>Stateless</p></li><li class="listitem"><p>Cache</p></li><li class="listitem"><p>Uniform interface</p></li><li class="listitem"><p>Layered system</p></li><li class="listitem"><p>Code-on-demand (optional)</p></li></ol></div><p>The client/server constraint demands that we divide our system
-    in multiple components, since monolithic applications cannot be made
-    to scale. Each component can be further divided as needed. For
-    instance, the client can be a browser and the server a web
-    application. We can then further divide the web application into a web
-    server for the CPU-intensive processing and a database server for
-    I/O-intensive processing. Distributing capabilities over multiple
-    components gives us the opportunity to give each the resources it
-    needs.</p><p>The layered system constraint additionally requires that the
-    client cannot see beyond its immediate server. This allows us to
-    change our server landscape without breaking the client. We could, for
-    example, insert proxy servers to aid with scaling.</p><p>We can further improve scalability by moving some of the
-    processing from the server to the client. The stateless constraint
-    makes us move data to the client so that the server need not maintain
-    application state. Here, we must distinguish two different kinds of
-    state: the server will maintain resource state, so that interesting
-    data is available from multiple clients, but the client is responsible
-    for application state. The client knows what goal it wants to achieve
-    and can easily remember where along the path to that goal it is.
-    </p><p>The code-on-demand constraint additionally pushes processing to
-    the client. We see this when web servers send JavaScript to the
-    browser, which then executes it. This optional constraint is very
-    common on the Web, but less common in RESTful APIs.</p><p>The cache constraint also helps with scalability. The server
-    indicates how long data that it sends is valid, so that the client
-    does not have to keep asking for it. If clients do so anyway, we can
-    insert caching proxy servers to keep our servers available for useful
-    work.</p><p>The uniform interface constraint is the one that really distinguishes
-    REST from other approaches. Anybody who has played with Legos knows
-    the power of a universal interface. In REST over HTTP, we capture all
-    actions with the standard HTTP methods.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e69"></a>How we designed RADL</h2></div></div></div><p>We designed RADL by refactoring RSDL to define almost everything in
-    terms of media types. In RSDL, we focused on describing services. In
-    RADL, we focus on describing media types. This shift was motivated by
-    the Roy Fielding quote cited in the introduction  <a class="xref" href="#hypertext-driven">REST APIs must be hypertext-driven</a>:</p><div class="blockquote"><blockquote class="blockquote"><p>Any effort spent describing what methods to use
-    on what URIs of interest should be entirely defined within the
-    scope of the processing rules for a media
-    type.</p></blockquote></div><p>The structure of a REST API is based on media types,
-    including the documents associated with a media type, links found
-    in these documents, and the interfaces associated with these
-    links.  This is also the structure of a RADL description. A
-    client's current application state, including the choices
-    available to the client, is found in documents that are described
-    by a media type.  The client needs to understand the media type in
-    order to identify available choices and make use of them. In <a class="xref" href="#hypertext-driven">REST APIs must be hypertext-driven</a>, Fielding explains how a client uses
-    this kind of API:</p><div class="blockquote"><blockquote class="blockquote"><p>A REST API should be entered with no prior
-    knowledge beyond the initial URI (bookmark) and set of
-    standardized media types that are appropriate for the intended
-    audience (i.e., expected to be understood by any client that might
-    use the API). From that point on, all application state
-    transitions must be driven by client selection of server-provided
-    choices that are present in the received representations or
-    implied by the user&#8217;s manipulation of those representations. The
-    transitions may be determined (or limited by) the client&#8217;s
-    knowledge of media types and resource communication mechanisms,
-    both of which may be improved on-the-fly (e.g.,
-    code-on-demand). [Failure here implies that out-of-band
-    information is driving interaction instead of
-    hypertext.]</p></blockquote></div><p>These are the things that a client needs to know to use a
-    REST API, so these are the things that RADL must describe.  To
-    design RADL, we collecting the formal definitions of the entities
-    we needed to model, identifying their relationships in the
-    documents that define them, and faithfully preserving these
-    relationships in our schema.  A RADL description is a description
-    of a service, using the following definition <a href="#ftn.d5e80" class="footnote" name="d5e80"><sup class="footnote">[2]</sup></a>:</p><div class="blockquote"><blockquote class="blockquote"><p>A service is a set of interlinked resources that
-    allows clients to reach goals by following links with explicit
-    interaction semantics.</p></blockquote></div><p>Once a complete media type description is done, the resource
-    description for a service is simple and small, associating URI formats
-    with interfaces that are defined in the media type descriptions.</p><p>Fielding's thesis refers to (the now obsoleted) <a class="xref" href="#rfc2048">RFC 2048</a> for the definition of media type.</p><div class="blockquote"><blockquote class="blockquote"><p>A media type is a precise and openly available specification of
-    the data format of a representation.</p></blockquote></div><p>A media type defines how a sequence of bytes is to be interpreted as
-    data. For instance, the JPEG specification defines how images of
-    photographic quality are to be coded. A browser uses this knowledge to
-    draw images on screen.</p><div class="blockquote"><blockquote class="blockquote"><p>A media type is used to indicate the semantics
-    of the bytes that make up the data.</p></blockquote></div><p>Not only does a media type define the layout of the data, it
-    also defines the semantics, or how to process the data. For instance,
-    the XML specification defines when a document is well-formed and valid
-    and what whitespace is significant.</p><p>For services that we design, we usually want to present
-    structured information, so the layout of the data is generally defined
-    in terms of structured formats like XML or JSON. They can be generic,
-    like XML, or more tailored to a specific field, like XACML
-    (application/xacml+xml) for access control. They can even be specific
-    to a single service, such as Documentum
-    (<code class="code">application/vnd.emc.documentum+xml</code>). However, media
-    types can also be unstructured, like JPEG
-    (<code class="code">image/jpeg</code>). RADL needs to be able to support both
-    structured and unstructured media types. A media type may define more
-    than one kind of document. The Atom Syndication Format defines feed
-    and entry documents, for example. A complex custom RESTful service
-    might define many more kinds of documents.</p><p>The second job of a media type is to define semantics, or how to
-    process the data. In REST, the client maintains application state and
-    drives the interactions with the server, so the server can only guide
-    it by exposing where the client can go next, providing a set of
-    options in the form of hypermedia links. These links are typed via
-    link relations that identify the relationship between the source and
-    target resource. This is why the semantics of a service are defined
-    primarily by the semantics of the hypermedia.</p><p>Since any RESTful API must limit its operations to the uniform
-    interface, we need to do nothing more than decide which subset of the
-    uniform interface to expose. In practice, this means we must select
-    which of the standard HTTP methods to support, and define the
-    conventions for those methods in the context of a given media
-    type. These conventions include methods that can be applied to a URI
-    that implements each interface, together with any URI parameters,
-    headers, and request bodies used when making these requests.</p><p>A service description contains a few items that are needed to
-    implement the service but are not needed by the client. Resource
-    descriptions are the most common example. This kind of information
-    generally should not be provided to clients, because developers may be
-    tempted to write clients that depend on it, resulting in more tightly
-    coupled systems. A service description can also contain items that are
-    needed by both the client and the implementation, but are orthogonal
-    to the media types. Authentication is the most common example. This
-    information must be provided to the user, but not as part of the media
-    type. RADL allows the entire service description to be specified in
-    one document. The information needed for client documentation, server
-    stub generation, runtime metadata, and testing can then be extracted
-    from the complete description as needed.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e99"></a>The RADL document</h2></div></div></div><p>Now that we have defined the concepts behind RADL, let us show how
-    they are modeled in a RADL document. The following template
-    illustrates the overall structure of RADL (a RELAX-NG schema can be
-    found in <a class="xref" href="#appendix-a" title="Appendix A: RADL Schema">the section called &#8220;Appendix A: RADL Schema&#8221;</a>):</p><pre class="programlisting">
-    &lt;service name="Outline" xmlns="http://identifiers.emc.com/vocab/radl"
+   <title>RESTful API Description Language (RADL)</title><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"><meta name="description" content="In a REST API, the server provides options to a client in the form of hypermedia links in documents, and the main thing a client needs to know is how to locate and use these links in order to use the API. The main job of a REST API description is to provide this information to the client in the context of media type descriptions. Unfortunately, most REST service description languages and design methodologies focus on other concerns instead. RESTful API Description Language (RADL) is an XML vocabulary for describing Hypermedia-driven RESTful APIs. The APIs it describes may use any media type, in XML, JSON, HTML, or any other format. The structure of a RADL description is based on media types, including the documents associated with a media type, links found in these documents, and the interfaces associated with these links. RADL can be used as a specification language or as run-time metadata to describe a service. This is a preliminary version of an article that will be presented at XML Prague 2014. The most recent version of this specification is always available at http://github.com/restful-api-description-language."><meta name="keywords" content="REST, XML, authoring, metadata"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="article"><div class="titlepage"><div><div><h1 class="title"><a name="d5e1"></a>RESTful API Description Language (RADL)</h1></div><div><h3 class="subtitle"><i>Hypermedia-driven API design</i></h3></div><div><div class="author"><h3 class="author">Jonathan Robie</h3><code class="email">&lt;<a class="email" href="mailto:jonathan.robie@emc.com">jonathan.robie@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">R&eacute;mon Sinnema</h3><code class="email">&lt;<a class="email" href="mailto:remon.sinnema@emc.com">remon.sinnema@emc.com</a>&gt;</code></div></div><div><div class="author"><h3 class="author">Erik Wilde</h3><code class="email">&lt;<a class="email" href="mailto:erik.wilde@emc.com">erik.wilde@emc.com</a>&gt;</code></div></div><div><div class="legalnotice"><a name="d5e25"></a><p class="copyright">Copyright &copy; 2014 EMC Corporation</p><p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at</p><a class="ulink" href="" target="_top">http://www.apache.org/licenses/LICENSE-2.0</a><p>Unless required by applicable law or agreed to in writing, software distributed under
+        the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+        KIND, either express or implied. See the License for the specific language governing
+        permissions and limitations under the License.</p></div></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>In a REST API, the server provides options to a client in the form of hypermedia links
+        in documents, and the main thing a client needs to know is how to locate and use these links
+        in order to use the API. The main job of a REST API description is to provide this
+        information to the client in the context of media type descriptions. Unfortunately, most
+        REST service description languages and design methodologies focus on other concerns
+        instead.</p><p>RESTful API Description Language (RADL) is an XML vocabulary for describing
+        Hypermedia-driven RESTful APIs. The APIs it describes may use any media type, in XML, JSON,
+        HTML, or any other format. The structure of a RADL description is based on media types,
+        including the documents associated with a media type, links found in these documents, and
+        the interfaces associated with these links.</p><p>RADL can be used as a specification language or as run-time metadata to describe a
+        service.</p><p>This is a preliminary version of an article that will be presented at XML Prague 2014.
+        The most recent version of this specification is always available at <a class="ulink" href="https://github.com/restful-api-description-language" target="_top">http://github.com/restful-api-description-language</a>.</p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="section"><a href="#d5e32">Introduction</a></span></dt><dt><span class="section"><a href="#d5e43">The REST Architectural Style</a></span></dt><dt><span class="section"><a href="#d5e65">REST APIs must be hypertext-driven</a></span></dt><dt><span class="section"><a href="#d5e94">RADL - a hypertext-driven REST API description</a></span></dt><dt><span class="section"><a href="#d5e161">Using RADL Descriptions</a></span></dt><dt><span class="section"><a href="#appendix-a">Appendix A: RADL Schema</a></span></dt><dt><span class="section"><a href="#d5e183">Schema for embedded XHTML</a></span></dt><dt><span class="section"><a href="#d5e186">Schema for embedded DocBook</a></span></dt><dt><span class="section"><a href="#d5e189">RADL schema</a></span></dt><dt><span class="section"><a href="#d5e192">Appendix B: Complete Maps Example</a></span></dt><dt><span class="bibliography"><a href="#d5e196">Bibliography</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e32"></a>Introduction</h2></div></div></div><p>Web APIs are critical to the business strategy of many companies, and vital to the way
+      users use information on the Web. Companies like eBay, Amazon, Salesforce, and Google provide
+      valuable services via Web APIs, and developers are using these APIs together with other data
+      sources to create new kinds of applications that run on a variety of devices and environments.
+      Some analysts are now writing about the API Economy, and even people who have never programmed
+      may know why Web APIs are important.</p><p>Web service providers may have little knowledge of the clients that use them, but they
+      need to ensure that these clients can continue to run as they evolve their services. Web
+      services may need to support large numbers of users, so they must be scalable. This means that
+      Web API providers must design their APIs to support evolution and scalability in distributed
+      systems. This is not easy.</p><p>Fortunately, this is precisely the problem that REST (Representational State Transfer) was
+      designed to solve. Unfortunately, designing and documenting RESTful APIs is still too much of
+      a black art, causing many difficulties for the average developer. An XML vocabulary that
+      supports the design process is extremely helpful for designing a RESTful API and for teaching
+      RESTful API design, and is well suited to writing documentation. </p><p>In a REST API, the server provides options to a client in the form of hypermedia links in documents, and the main thing a
+    client needs to know is how to locate and use these links in order to use the API. The main job of a REST API description is to
+    provide this information to the client in the context of media  type descriptions. This is the main focus of RADL.  Unfortunately,
+    most REST service description languages and design methodologies focus on other concerns instead, and most APIs that claim to be
+    REST APIs ignore the principle that REST APIs must be hypertext-driven, publishing lists of URIs and conventions for
+    using those URIs instead. Roy Fielding, the inventor of REST, has frequently pointed out
+    that systems like these are not RESTful, and lead to tightly coupled systems.</p><p>RESTful API Description Language (RADL) is an XML vocabulary
+    created to support RESTful Web API design. RADL is
+    hypertext-driven, designed to support tooling and design
+    methdologies for purist REST, and to make it easier to teach REST
+    design.  RADL can be used to create both documentation and runtime
+    metadata, transforming to formats like HTML and JSON to suit
+    various environments. The design of RADL is focused on the media
+    type, in keeping with this famous quote by Roy Fielding <a class="xref" href="#hypertext-driven">REST APIs must be hypertext-driven</a>:</p><div class="blockquote"><blockquote class="blockquote"><p>Any effort spent describing what methods to use on what URIs of interest should be
+        entirely defined within the scope of the processing rules for a media type.</p></blockquote></div><p>Unlike most other description languages for REST APIs, RADL
+    is hypertext-driven. The structure of RADL is driven by media
+    types.  To support implementation, RADL also provides resources,
+    which associate interfaces with URI patterns. Resource
+    descriptions are for implementation only, and are not generally
+    provided to clients. RADL also provides support for
+    authentication, which is orthogonal to the REST service per
+    se. </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e43"></a>The REST Architectural Style</h2></div></div></div><p>REST Is an Architectural Style that is formally defined by the following
+      constraints:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Client/Server</p></li><li class="listitem"><p>Stateless</p></li><li class="listitem"><p>Cache</p></li><li class="listitem"><p>Uniform interface</p></li><li class="listitem"><p>Layered system</p></li><li class="listitem"><p>Code-on-demand (optional)</p></li></ol></div><p>The client/server constraint demands that we divide our system in multiple components,
+      since monolithic applications cannot be made to scale. Each component can be further divided
+      as needed. For instance, the client can be a browser and the server a web application. We can
+      then further divide the web application into a web server for the CPU-intensive processing and
+      a database server for I/O-intensive processing. Distributing capabilities over multiple
+      components gives us the opportunity to give each the resources it needs.</p><p>The layered system constraint additionally requires that the client cannot see beyond its
+      immediate server. This allows us to change our server landscape without breaking the client.
+      We could, for example, insert proxy servers to aid with scaling.</p><p>We can further improve scalability by moving some of the processing from the server to the
+      client. The stateless constraint makes us move data to the client so that the server need not
+      maintain application state. Here, we must distinguish two different kinds of state: the server
+      will maintain resource state, so that interesting data is available from multiple clients, but
+      the client is responsible for application state. The client knows what goal it wants to
+      achieve and can easily remember where along the path to that goal it is. </p><p>The code-on-demand constraint additionally pushes processing to the client. We see this
+      when web servers send JavaScript to the browser, which then executes it. This optional
+      constraint is very common on the Web, but less common in RESTful APIs.</p><p>The cache constraint also helps with scalability. The server indicates how long data that
+      it sends is valid, so that the client does not have to keep asking for it. If clients do so
+      anyway, we can insert caching proxy servers to keep our servers available for useful
+      work.</p><p>The uniform interface constraint is the one that really distinguishes REST from other
+      approaches. Anybody who has played with Legos knows the power of a universal interface. In
+      REST over HTTP, we capture all actions with the standard HTTP methods.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e65"></a>REST APIs must be hypertext-driven</h2></div></div></div><p>The previous section describes the REST architectural style, this section describes REST
+      APIs. A REST client uses a service much as a human user uses a set of web pages. The client
+      starts out by retrieving an initial document from a known URI. Each document represents a
+      client application state, and the links in the document represent the choices available to the
+      client in that state. The server provides options to a REST client in the form of hypermedia
+      links that it places in these documents, just as it provides options to a human user using
+      links. The client can use these links to proceed to another state, just as a human user might
+      click on a link.</p><p>But a REST client can only do this if it knows how to interpret the documents it receives,
+      and how to locate and use the links that it encounters. The main job of a REST API description
+      is to provide this information to the client.</p><p>Roy Fielding described this in <a class="xref" href="#hypertext-driven">REST APIs must be hypertext-driven</a>, where he says that REST
+      APIs must be hypertext-driven and describes how a client uses this kind of API:</p><div class="blockquote"><blockquote class="blockquote"><p>A REST API should be entered with no prior knowledge beyond the initial URI (bookmark)
+        and set of standardized media types that are appropriate for the intended audience (i.e.,
+        expected to be understood by any client that might use the API). From that point on, all
+        application state transitions must be driven by client selection of server-provided choices
+        that are present in the received representations or implied by the user&#8217;s manipulation of
+        those representations. The transitions may be determined (or limited by) the client&#8217;s
+        knowledge of media types and resource communication mechanisms, both of which may be
+        improved on-the-fly (e.g., code-on-demand). [Failure here implies that out-of-band
+        information is driving interaction instead of hypertext.]</p></blockquote></div><p>In the same post, Fielding says that a REST API description must explain these things in
+      the context of the media type for the document.</p><div class="blockquote"><blockquote class="blockquote"><p>Any effort spent describing what methods to use on what URIs of interest should be
+        entirely defined within the scope of the processing rules for a media type.</p></blockquote></div><p>Internet media types are used in many different ways on the Web. Email clients use media
+      types to identify the format of attached files, web browsers use them to determine how to
+      display or process HTML, images, video, audio, scripts, and other types of data appropriately.
+      Search engines and feed readers use media types to correctly index or distribute information.
+      Most Web programmers are familiar with media types like HTML (<code class="code">text/html</code>), JPEG
+        (<code class="code">image/jpeg</code>), Atom (<code class="code">application/atom+xml</code>, JavaScript
+        (<code class="code">application/javascript</code>), JSON (<code class="code">application/json</code>), XML
+        (<code class="code">application/xml</code>), MP4 (<code class="code">audio/mp4</code>), etc. Each of these media types
+      is associated with a specification that describes the media type's format and the semantics
+      associated with the format. The specification for a media type is called a media type
+      description.</p><p>For services that use structured information, the media type is generally described in
+      terms of structured formats like XML or JSON. They can be generic, like XML, or tailored to a
+      specific use, like XACML (<code class="code">application/xacml+xml</code>) for access control. They can
+      even be specific to a single service, such as Documentum
+        (<code class="code">application/vnd.emc.documentum+xml</code>). However, media types can also be
+      unstructured, like JPEG (<code class="code">image/jpeg</code>). A media type may define a single kind of
+      document or more than one kind of document. The Atom Syndication Format defines feed and entry
+      documents, for example. A media type used in a complex custom RESTful service might define
+      many more kinds of documents.</p><p>In a REST API, the media type description identifies the documents associated with a
+      media type, links found in these documents, and the interfaces associated with these links.
+      The interface for a link includes the HTTP methods that can be applied to that link, together
+      with any URI parameters, headers, and request bodies used when making these requests. These
+      are the things that a REST client must understand in order to use a REST API, and their
+      interpretation depends on the documents in which they are found, so most of the documentation
+      for a REST API belongs in these media type descriptions. </p><p>########### RADL service descriptions focuse on the client API, defined primarily using media types
+      rather than URI patterns, resources, or other implementation details. RADL serves the same
+      needs as WADL, but the structure of WADL is driven by URI patterns and server-side
+      implementation concerns rather than hypermedia-driven design, and it does not describe media
+      types and the links found in the associated documents. <a href="#ftn.d5e90" class="footnote" name="d5e90"><sup class="footnote">[1]</sup></a>
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e94"></a>RADL - a hypertext-driven REST API description</h2></div></div></div><p>RADL is a description for hypertext-driven REST APIs, as described in the previous
+      section. Most of the information in a RADL description tells a client how to interpret the
+      documents it receives, and how to locate and use the links that it encounters. This
+      information is provided in media type descriptions. To support well-known media types that are
+      described by specifications, RADL also allows a reference to human-readable documentation instead<a href="#ftn.d5e97" class="footnote" name="d5e97"><sup class="footnote">[2]</sup></a>. A media type can be defined as an extension to an existing media type.</p><p>In addition to media types, RADL describes resources, which are needed for implementation
+      but are not part of the client API. Once complete media type descriptions have been done, the
+      resource description for a service is simple and small, associating URI formats with
+      interfaces that are defined in the media type descriptions.</p><p>RADL also supports authentication, which is needed by both the client and the server
+      implementation, but is orthogonal to the API per se.</p><p>RADL allows the entire service description to be specified
+    in one description The information needed for client
+    documentation, server stub generation, runtime metadata, and
+    testing can then be extracted from the complete description as
+    needed.</p><p>The following template illustrates the overall structure of RADL (a RELAX-NG schema can be
+      found in <a class="xref" href="#appendix-a" title="Appendix A: RADL Schema">the section called &#8220;Appendix A: RADL Schema&#8221;</a>):</p><pre class="programlisting">
+&lt;service name="Outline" xmlns="http://identifiers.emc.com/vocab/radl"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://identifiers.emc.com/vocab/radl
+    xsi:schemaLocation="https://github.com/restful-api-description-language/RADL/tree/master/schema"
     radl.xsd"&gt;
+
+  &lt;start document-ref=""&gt;
+    &lt;!-- optional: describes the document associated with the initial URI --&gt;
+  &lt;/start&gt;
 
   &lt;link-relations&gt;
     &lt;!-- Link relations used by all media types --&gt;
@@ -185,7 +152,7 @@
         &lt;!-- The kinds of documents defined by this media type --&gt;
       &lt;/documents&gt;
       &lt;interfaces&gt;
-        &lt;!-- The behavior defined by this media type --&gt;
+        &lt;!-- The interfaces for links defined by this media type --&gt;
       &lt;/interfaces&gt;
     &lt;/media-type&gt;
   &lt;/media-types&gt;
@@ -196,16 +163,16 @@
   &lt;/resources&gt;
   
 &lt;/service&gt;
-</pre><p>The document element is service. It contains elements that model the
-main concepts we discussed in the previous section: link relations,
-media-types, and resources. Media types contain documents that
-describe the data format and interfaces that describe the semantics.</p><p>Now let us provide a concrete example, taken from chapter 5 of the
-book RESTful Web Services. This chapter deals with the read-only
-aspects of a service that provides information about places. The next
-chapter then goes on to add mutability. Since that does not change
-anything about the way we capture information in RADL, we will
-confine ourselves to chapter 5 here in order to keep the example
-short.</p><pre class="programlisting">
+</pre><p>The document element is service. It contains elements that model the main concepts we
+      discussed in the previous section: link relations, media-types, and resources. Media types
+      contain documents that describe the data format and interfaces that describe the
+      semantics.</p><p>Now let us provide a concrete example, taken from chapter 5
+    of the book RESTful Web Services. This chapter deals with the
+    read-only aspects of a service that provides information about
+    places. To get an overview of the service we are describing, let
+    us look at the client API documentation for this interface,
+    generated from the RADL description that we describe in the rest
+    of this section.</p><div class="mediaobject"><img src="../../images/maps-example.png" alt="HTML client documentation generated from a RADL description"></div><p>This example illustrates some important aspects of a RADL description:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>A service is defined primarily by its media types.</p></li><li class="listitem"><p>A media type is defined primarily by its documents.</p></li><li class="listitem"><p>A document is defined primarily by the links it contains.</p></li><li class="listitem"><p>A link is defined by its link relation<a href="#ftn.d5e122" class="footnote" name="d5e122"><sup class="footnote">[3]</sup></a> and the requests and responses supported by the link.</p></li><li class="listitem"><p>A request is defined by an HTTP method and any conventions associated with the method for the given link, such as URI parameters, HTTP headers, and documents used in the request body (for PUT, POST, and PATCH requests).</p></li><li class="listitem"><p>A response is defined by an HTTP method, the kinds of documents that can be returned in the response, and any headers or status codes that need to be documented for the response.</p></li></ul></div><p>Here are the first few lines of the RADL description:</p><pre class="programlisting">
 &lt;service name="Maps" xmlns="http://identifiers.emc.com/vocab/radl"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://identifiers.emc.com/vocab/radl radl.xsd"
     xmlns:html="http://www.w3.org/1999/xhtml/"&gt;
@@ -214,15 +181,18 @@ short.</p><pre class="programlisting">
     This is an example based on chapter 5 of the book 
     &lt;ref uri="http://shop.oreilly.com/product/9780596529260.do"&gt;RESTful Web Services&lt;/ref&gt;.
   &lt;/documentation&gt;
-</pre><p>This starting fragment shows how we can add documentation to RADL. We
-support different documentation modules. Our TechPubs department uses
-DocBook, for instance, but in this paper we will only use HTML. To keep
-the RADL document well-formed XML, we will use XHTML and we declare its
-namespace. We can use all of HTML's elements and additionally we can
-use the ref element to refer to things. We added ref so that we could
-refer to RADL concepts, like link relations, and more easily process
-those references. Working with only generic a elements would be
-awkward.</p><pre class="programlisting">
+
+  &lt;start interface-ref="int-planets" /&gt;
+</pre><p>This fragment shows how we can add documentation to RADL. We support different
+      documentation modules. Our TechPubs department uses DocBook, for instance, but in this paper
+      we will only use HTML. To keep the RADL document well-formed XML, we will use XHTML and we
+      declare its namespace. We can use all of HTML's elements and additionally we can use the
+        <code class="code">ref</code> element to refer to things. We added <code class="code">ref</code>so that we could refer
+      to RADL concepts, like link relations, and more easily process those references. Working with
+      only generic <code class="code">a</code> elements would be awkward.</p><p>The fragment also contains a <code class="code">start</code> element, an optional element that
+      identifies the interface associated with the initial URI for the service. Note that the
+      initial URI is not part of the RADL description - the same service can be deployed from many
+      different locations, and is not part of the API per se.</p><p>Here are the link relations we use in this service:</p><pre class="programlisting">
   &lt;link-relations&gt;
     &lt;link-relation id="rel-place" name="place"&gt;
       &lt;documentation&gt;
@@ -245,18 +215,16 @@ awkward.</p><pre class="programlisting">
       &lt;/documentation&gt;
     &lt;/link-relation&gt;
   &lt;/link-relations&gt;
-</pre><p>This example uses only link relations that were invented for this
-service, but you could add more generic ones, like <code class="code">self</code> as well.</p><p>There is no defined model for naming link relations. All the generic
-ones like self use simple names, and they are registered by IANA in a
-flat namespace. However, to avoid name collisions, you may want to use
-URIs for your own specialized link relations. EMC is moving towards
-using URIs of the form <code class="code">http://identifiers.emc.com/linkrel/&lt;name&gt;</code>.</p><p>The next section defines the media types. The first media type used in
-this service is PNG. It is used for displaying images of maps of
-places. This media type defines only one kind of document and one
-interface. Since this chapter of the book deals with a read-only
-service, all you can do with the images is retrieve them through the
-GET method.</p><pre class="programlisting">
-
+</pre><p>This example uses only link relations that were invented for this service, but you could
+      add more generic ones, like <code class="code">self</code> as well.</p><p>There is no defined model for naming link relations. All the generic ones like
+        <code class="code">self</code> use simple names, and they are registered by IANA in a flat namespace.
+      However, to avoid name collisions, you may want to use URIs for your own specialized link
+      relations. For instance, EMC is moving towards using URIs of the form
+        <code class="code">http://identifiers.emc.com/linkrel/&lt;name&gt;</code>.</p><p>The next section defines the media types. The first media type used in this service is PNG
+        (<code class="code">image/png</code>). It is used for displaying images of maps of places. This media
+      type defines only one kind of document and one interface. Since this chapter of the book deals
+      with a read-only service, all you can do with the images is retrieve them through the GET
+      method.</p><pre class="programlisting">
   &lt;media-types&gt;
     &lt;media-type id="med-png" name="image/png"&gt;
       &lt;description type="html" href="http://www.iana.org/assignments/media-types/image/png"/&gt;
@@ -278,23 +246,8 @@ GET method.</p><pre class="programlisting">
       &lt;/interfaces&gt;
     &lt;/media-type&gt;
     !!! SNIP !!!
-</pre><p>The next media type is the one that is defined specifically for
-this service. It is based on XHTML. The author could have defined its
-own media type, say <code class="code">application/vnd.oreilly.maps+xml</code>, but
-decided against that, and extends the
-<code class="code">application/xhtml+xml</code> media type instead. The HTML part
-of the media type makes it easy to consume the service with generic
-clients like web browsers. The X part of the media type also makes it
-possible to consume the service with a special-purpose client. For
-those types of clients, it would probably have been easier to use a
-new vocabulary, but then you would loose the browsers. Every service
-has to weigh the pros and cons. In the services that EMC provides,
-general purpose clients can provide very little value, so we create
-new media types like <code class="code">application/vnd.emc.documentum+xml</code>
-and build special purpose clients instead.</p><p>This media type defines several kinds of documents and
-interfaces. It defines how to get from one document to another via
-links that are typed using link relations. It also defines how these
-documents can be processed using interfaces.</p><pre class="programlisting">
+</pre><p>The next media type defines most of the documents used in this service, together wtih
+      their semantics. It is based on XHTML.</p><pre class="programlisting">
     &lt;media-type id="med-planets" name="application/xhtml+xml"&gt;
       &lt;documentation&gt;
         We define an &lt;ref uri="http://www.w3.org/TR/xhtml11/"&gt;XHTML&lt;/ref&gt; &lt;html:em&gt;microformat&lt;/html:em&gt; by adding 
@@ -417,14 +370,22 @@ documents can be processed using interfaces.</p><pre class="programlisting">
       &lt;/interfaces&gt;
     &lt;/media-type&gt;
   &lt;/media-types&gt;
-</pre><p>The final section of the RADL document contains the implementation
-details: the resources. A resource lives at a URI or URI
-Template <a class="xref" href="#rfc6570">URI Templates</a>. URI Templates define variables that sometimes are part of
-the interface, but to keep things simple we do not show that in this
-paper. Resources implement interfaces. In this example the
-correspondence is 1:1, so that's not very interesting, but there are
-cases where it makes sense to let a resource implement more than one
-interface.</p><pre class="programlisting">
+</pre><p>This media type defines several kinds of documents and interfaces. It defines how to get
+      from one document to another via links that are typed using link relations. It also defines
+      how these documents can be processed using interfaces.</p><p>In the above definitions, the author could have defined its own media type, say
+        <code class="code">application/vnd.oreilly.maps+xml</code>, but decided against that, and extends the
+        <code class="code">application/xhtml+xml</code> media type instead. The HTML part of the media type makes
+      it easy to consume the service with generic clients like web browsers. The X part of the media
+      type also makes it possible to consume the service with a special-purpose client. For those
+      types of clients, it would probably have been easier to use a new vocabulary, but then you
+      would loose the browsers. Every service has to weigh the pros and cons. In the services that
+      EMC provides, general purpose clients can provide very little value, so we create new media
+      types like <code class="code">application/vnd.emc.documentum+xml</code> and build special purpose clients
+      instead.</p><p>The final section of the RADL document contains the implementation details: the resources.
+      These are not part of the client API, but they are important for servers that implement the
+      API. A resource associates one or more interfaces with a URI or URI Template. <a class="xref" href="#rfc6570">URI Templates</a>. <a href="#ftn.d5e155" class="footnote" name="d5e155"><sup class="footnote">[4]</sup></a> Resources implement interfaces. In this example the correspondence is 1:1, so
+      that's not very interesting, but there are cases where it makes sense to let a resource
+      implement more than one interface.</p><pre class="programlisting">
   &lt;resources&gt;
     &lt;resource id="res-planets" name="planets"&gt;
       &lt;location uri="/"/&gt;
@@ -453,28 +414,27 @@ interface.</p><pre class="programlisting">
   &lt;/resources&gt;
 
 &lt;/service&gt;
-</pre><p>This short example does not show how to handle things like URI
-parameters, HTTP headers and status codes, or authentication. All of these are possible in RADL.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: provide examples to illustrate more RADL functionality.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e127"></a>Using RADL Descriptions</h2></div></div></div><p>The following are some of the major uses we envision for RADL
-descriptions.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Generating client documentation using HTML or DocBook. An example of
-generated documentation is shown in Appendix B, along with the
-stylesheet that generated it. We are currently doing this for our
-own interfaces.</p></li><li class="listitem"><p>Providing a standard representation of a service to
-make it easier to review and to mentor REST API design. We have
-successfully taught RESTful design to two teams with RSDL using this
-approach.</p></li><li class="listitem"><p>Generating server stubs for the REST interfaces to ensure that the
-deployed interface matches the specified interface.</p></li><li class="listitem"><p>Generating test clients to ensure that a running instance correctly
-implements the specified interfaces. We have limited experience with
-this using RSDL.</p></li><li class="listitem"><p>Providing run-time metadata, which may be generated
-dynamically to allow multiple services to be combined, modify the
-service based on available permissions or preferences, etc.  This
-metadata may be provided in either XML or JSON+HTML (see Appendix C
-for information on the JSON+HTML representation). For instance, a
-service might provide run time metadata via the <code class="code">about</code>
-link relation from <a class="xref" href="#json-home">JSON Home Documents</a> or <a class="xref" href="#xml-home">XML Home Documents</a>.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="appendix-a"></a>Appendix A: RADL Schema</h2></div></div></div><p>The RADL schema is a RELAX-NG compact notation schema that allows
-documentation to be embedded using a separate documentation
-schema. This appendix shows sample documentation schemas for XHTML and
-DocBook, then shows the schema for RADL per se.</p><p>This schema is current as of the time of writing. For the latest
-version, see the RADL github repository at <a class="ulink" href="" target="_top">https://github.com/restful-api-description-language</a>.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e149"></a>Schema for embedded XHTML</h2></div></div></div><pre class="programlisting">
+</pre><p>This short example does not show how to handle things like URI parameters, HTTP headers
+      and status codes, or authentication. All of these are possible in RADL.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: provide examples to illustrate more RADL functionality.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e161"></a>Using RADL Descriptions</h2></div></div></div>
+
+
+##### Future Directions #####
+
+    <p>The following are some of the major uses we envision for RADL descriptions.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Generating client documentation using HTML or DocBook. An example of generated
+          documentation is shown in Appendix B, along with the stylesheet that generated it. We are
+          currently doing this for our own interfaces.</p></li><li class="listitem"><p>Providing a standard representation of a service to make it easier to review and to
+          mentor REST API design. We have successfully taught RESTful design to two teams with RSDL
+          using this approach.</p></li><li class="listitem"><p>Generating server stubs for the REST interfaces to ensure that the deployed interface
+          matches the specified interface.</p></li><li class="listitem"><p>Generating test clients to ensure that a running instance correctly implements the
+          specified interfaces. We have limited experience with this using RSDL.</p></li><li class="listitem"><p>Providing run-time metadata, which may be generated dynamically to allow multiple
+          services to be combined, modify the service based on available permissions or preferences,
+          etc. This metadata may be provided in either XML or JSON+HTML (see Appendix C for
+          information on the JSON+HTML representation). For instance, a service might provide run
+          time metadata via the <code class="code">about</code> link relation from <a class="xref" href="#json-home">JSON Home Documents</a> or
+            <a class="xref" href="#xml-home">XML Home Documents</a>.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="appendix-a"></a>Appendix A: RADL Schema</h2></div></div></div><p>The RADL schema is a RELAX-NG compact notation schema that allows documentation to be
+      embedded using a separate documentation schema. This appendix shows sample documentation
+      schemas for XHTML and DocBook, then shows the schema for RADL per se.</p><p>This schema is current as of the time of writing. For the latest version, see the RADL
+      github repository at <a class="ulink" href="" target="_top">https://github.com/restful-api-description-language</a>.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e183"></a>Schema for embedded XHTML</h2></div></div></div><pre class="programlisting">
 namespace ns1 = "http://www.w3.org/1999/xhtml/"
 
 documentation = element documentation { inline?, doc-title?, html }
@@ -484,7 +444,7 @@ html = html-content*
 html-content = html-element | text | ref
 html-element = element ns1:* { html-attribute*, html-content* }
 html-attribute = attribute * { text? }
-</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e152"></a>Schema for embedded DocBook</h2></div></div></div><pre class="programlisting">
+</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e186"></a>Schema for embedded DocBook</h2></div></div></div><pre class="programlisting">
 namespace docbook = "http://docbook.org/ns/docbook"
 
 documentation = element documentation { inline?, doc-title?, docbook }
@@ -496,7 +456,7 @@ docbook =  docbook-content*
 docbook-content = (docbook-element | text | ref)
 docbook-element = element docbook:* { docbook-attribute*, docbook-content* }
 docbook-attribute = attribute * { text? }
-</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e155"></a>RADL schema</h2></div></div></div><pre class="programlisting">
+</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e189"></a>RADL schema</h2></div></div></div><pre class="programlisting">
 default namespace radl = "http://identifiers.emc.com/radl"
 
 start = service
@@ -790,10 +750,238 @@ datatype =
 value-range = element value-range { text }
 default-value = element default { text }
 uri = attribute uri { xsd:anyURI }
-</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e158"></a>Appendix B: Generating HTML client documentation</h2></div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: stylesheet to generate HTML overview of a RADL service for client documentation.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e162"></a>Appendix C: Generating JSON+HTML metadata</h2></div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="file:/home/jonathan/Oxygen%20XML%20Developer%2015/frameworks/docbook/css/img/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>TODO: stylesheet to convert RADL to the standard RADL JSON+HTML
-representation</p></td></tr></table></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a name="d5e166"></a>Bibliography</h2></div></div></div><div class="bibliomixed"><a name="WADL"></a><p class="bibliomixed">[WADL] Marc Hadley, Sun Microsystems. <span class="ital">Web Application Description Language</span>, W3C Member Submission 31 August 2009.
-        http://www.w3.org/Submission/wadl/.
-    </p></div><div class="bibliomixed"><a name="rfc6570"></a><p class="bibliomixed">[URI Templates] Joe Gregorio, Google; Roy Fielding,
+</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e192"></a>Appendix B: Complete Maps Example</h2></div></div></div><p>Here is the complete RADL description for the example used in the text of this
+      article.</p><pre class="programlisting">
+&lt;?xml version="1.0" ?&gt;
+&lt;?xml-stylesheet type="text/xsl" href="radl2html.xsl"?&gt;
+&lt;service xmlns:html="http://www.w3.org/1999/xhtml/" xmlns="http://identifiers.emc.com/radl"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Maps"&gt;
+
+  &lt;documentation&gt; This is an example from the book RESTful Web Services, chapter 5. &lt;/documentation&gt;
+
+  &lt;start interface-ref="int-planets" /&gt;
+
+  &lt;link-relations&gt;
+    &lt;link-relation id="rel-place" name="place"&gt;
+      &lt;documentation&gt; The target resource is a related place. Links of this type are found by
+        looking for &lt;html:code&gt;a&lt;/html:code&gt; elements with &lt;html:code&gt;class="place"&lt;/html:code&gt;.
+        Additionally, you can find search links to places via the &lt;html:code&gt;form&lt;/html:code&gt;
+        element with &lt;html:code&gt;id="searchPlace"&lt;/html:code&gt;. &lt;/documentation&gt;
+    &lt;/link-relation&gt;
+    &lt;link-relation id="rel-point" name="point"&gt;
+      &lt;documentation&gt; The target resource is a related point on a planet. Links of this type are
+        found by looking for &lt;html:code&gt;a&lt;/html:code&gt; elements with different values for the
+          &lt;html:code&gt;class&lt;/html:code&gt; attribute, like &lt;html:code&gt;coordinates&lt;/html:code&gt;,
+          &lt;html:code&gt;map_nav&lt;/html:code&gt;, &lt;html:code&gt;zoom_in&lt;/html:code&gt;, and
+          &lt;html:code&gt;zoom_out&lt;/html:code&gt;. &lt;/documentation&gt;
+    &lt;/link-relation&gt;
+    &lt;link-relation id="rel-map" name="map"&gt;
+      &lt;documentation&gt; The target resource is a map related to the current resource. Links of this
+        type are found by looking for &lt;html:code&gt;a&lt;/html:code&gt; elements with
+          &lt;html:code&gt;class="map"&lt;/html:code&gt;. &lt;/documentation&gt;
+    &lt;/link-relation&gt;
+    &lt;link-relation id="rel-image" name="image"&gt;
+      &lt;documentation&gt; The target resource is an image related to the current resource. Links of this
+        type are found by looking for &lt;html:code&gt;img&lt;/html:code&gt; elements with
+          &lt;html:code&gt;class="map"&lt;/html:code&gt;. &lt;/documentation&gt;
+    &lt;/link-relation&gt;
+  &lt;/link-relations&gt;
+
+  &lt;media-types&gt;
+    &lt;media-type id="med-planets" name="planets" extends="application/xhtml+xml"&gt;
+      &lt;documentation&gt; We are defining an XHTML &lt;html:em&gt;microformat&lt;/html:em&gt; by adding meaning
+      using the &lt;html:code&gt;class&lt;/html:code&gt; attribute to elements. For example, adding
+      &lt;html:code&gt;class="planets"&lt;/html:code&gt; to the &lt;html:code&gt;ul&lt;/html:code&gt; element, we can
+      turn a list into a list of planets. &lt;/documentation&gt;
+      &lt;description type="html" href="http://tools.ietf.org/html/rfc3236"/&gt;
+      &lt;documents&gt;
+	&lt;document id="doc-planets" name="planets"&gt;
+	  &lt;links&gt;
+	    &lt;link link-relation-ref="rel-place" interface-ref="int-place"/&gt;
+	  &lt;/links&gt;
+	&lt;/document&gt;
+	&lt;document id="doc-place" name="place"&gt;
+	  &lt;links&gt;
+	    &lt;link link-relation-ref="rel-map" interface-ref="int-map"/&gt;
+	    &lt;link link-relation-ref="rel-point" interface-ref="int-point"/&gt;
+	    &lt;link link-relation-ref="rel-place" interface-ref="int-place"/&gt;
+	  &lt;/links&gt;
+	&lt;/document&gt;
+	&lt;document id="doc-point" name="point"&gt;
+	  &lt;links&gt;
+	    &lt;link link-relation-ref="rel-place" interface-ref="int-place"/&gt;
+	    &lt;link link-relation-ref="rel-point" interface-ref="int-point"/&gt;
+	  &lt;/links&gt;
+	&lt;/document&gt;
+	&lt;document id="doc-map" name="map"&gt;
+	  &lt;links&gt;
+	    &lt;link link-relation-ref="rel-image" interface-ref="int-image"/&gt;
+	    &lt;link link-relation-ref="rel-map" interface-ref="int-map"/&gt;
+	  &lt;/links&gt;
+	&lt;/document&gt;
+      &lt;/documents&gt;
+      &lt;interfaces&gt;
+	&lt;conventions&gt;
+	  &lt;uri-parameters&gt;
+	    &lt;uri-parameter id="par-planet" name="planet" datatype="string"&gt;
+	      &lt;documentation&gt; Human friendly name of a planet, like &lt;html:code&gt;Earth&lt;/html:code&gt;.
+	      &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	    &lt;uri-parameter id="par-place-name" name="place-name" datatype="string"&gt;
+	      &lt;documentation&gt; Human friendly name of a place, like &lt;html:code&gt;Mount%20Rushmore&lt;/html:code&gt;.
+	      &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	    &lt;uri-parameter id="par-scoping-information" name="scoping-information" datatype="string"&gt;
+	      &lt;documentation&gt; A hierarchy of &lt;ref uri-parameter="par-place-name"&gt;place names&lt;/ref&gt; like
+	      &lt;html:code&gt;/USA/New%20England/Maine/&lt;/html:code&gt;. &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	    &lt;uri-parameter id="par-map-type" name="map-type" datatype="string"&gt;
+	      &lt;documentation&gt; The type of map, like &lt;html:code&gt;satellite&lt;/html:code&gt;. &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	    &lt;uri-parameter id="par-scale" name="scale" datatype="string"&gt;
+	      &lt;documentation&gt; Dot followed by an integer, like &lt;html:code&gt;.1&lt;/html:code&gt;. A bigger number
+	      indicates more details. &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	    &lt;uri-parameter id="par-show" name="show" datatype="string"&gt;
+	      &lt;documentation&gt; Things to search for near a given place, like &lt;html:code&gt;diners&lt;/html:code&gt;.
+	      &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	    &lt;uri-parameter id="par-latitude" name="latitude" datatype="float"&gt;
+	      &lt;documentation&gt; Latitude on a planet, like &lt;html:code&gt;24.9195&lt;/html:code&gt;. &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	    &lt;uri-parameter id="par-longitude" name="longitude" datatype="float"&gt;
+	      &lt;documentation&gt; Longitude on a planet, like &lt;html:code&gt;17.821&lt;/html:code&gt;. &lt;/documentation&gt;
+	    &lt;/uri-parameter&gt;
+	  &lt;/uri-parameters&gt;
+	&lt;/conventions&gt;
+
+	&lt;interface id="int-planets" name="planets"&gt;
+	  &lt;methods&gt;
+	    &lt;method name="GET"&gt;
+	      &lt;response&gt;
+		&lt;document ref="doc-planets"/&gt;
+	      &lt;/response&gt;
+	    &lt;/method&gt;
+	  &lt;/methods&gt;
+	&lt;/interface&gt;
+
+	&lt;interface id="int-place" name="place"&gt;
+	  &lt;methods&gt;
+	    &lt;method name="GET"&gt;
+	      &lt;request&gt;
+		&lt;uri-parameters&gt;
+		  &lt;uri-parameter name="planet" ref="par-planet"/&gt;
+		  &lt;uri-parameter name="scoping-information" ref="par-scoping-information"/&gt;
+		  &lt;uri-parameter name="place-name" ref="par-place-name"/&gt;
+		  &lt;uri-parameter name="show" ref="par-show"/&gt;
+		&lt;/uri-parameters&gt;
+	      &lt;/request&gt;
+	      &lt;response&gt;
+		&lt;document ref="doc-place"/&gt;
+	      &lt;/response&gt;
+	    &lt;/method&gt;
+	  &lt;/methods&gt;
+	&lt;/interface&gt;
+
+	&lt;interface id="int-point" name="point"&gt;
+	  &lt;methods&gt;
+	    &lt;method name="GET"&gt;
+	      &lt;request&gt;
+		&lt;uri-parameters&gt;
+		  &lt;uri-parameter name="planet" ref="par-planet"/&gt;
+		  &lt;uri-parameter name="latitude" ref="par-latitude"/&gt;
+		  &lt;uri-parameter name="longitude" ref="par-longitude"/&gt;
+		&lt;/uri-parameters&gt;
+	      &lt;/request&gt;
+	      &lt;response&gt;
+		&lt;document ref="doc-point"/&gt;
+	      &lt;/response&gt;
+	    &lt;/method&gt;
+	  &lt;/methods&gt;
+	&lt;/interface&gt;
+
+	&lt;interface id="int-map" name="map"&gt;
+	  &lt;methods&gt;
+	    &lt;method name="GET"&gt;
+	      &lt;request&gt;
+		&lt;uri-parameters&gt;
+		  &lt;uri-parameter name="map-type" ref="par-map-type"/&gt;
+		  &lt;uri-parameter name="scale" ref="par-scale"/&gt;
+		  &lt;uri-parameter name="planet" ref="par-planet"/&gt;
+		  &lt;uri-parameter name="latitude" ref="par-latitude"/&gt;
+		  &lt;uri-parameter name="longitude" ref="par-longitude"/&gt;
+		&lt;/uri-parameters&gt;
+	      &lt;/request&gt;
+	      &lt;response&gt;
+		&lt;document ref="doc-map"/&gt;
+	      &lt;/response&gt;
+	    &lt;/method&gt;
+	  &lt;/methods&gt;
+	&lt;/interface&gt;
+      &lt;/interfaces&gt;
+    &lt;/media-type&gt;
+
+    &lt;media-type id="med-png" name="image/png"&gt;
+      &lt;description type="html" href="http://www.iana.org/assignments/media-types/image/png"/&gt;
+      &lt;documents&gt;
+	&lt;document id="doc-png" name="png"/&gt;
+      &lt;/documents&gt;
+      &lt;interfaces&gt;
+	&lt;interface id="int-image" name="image"&gt;
+	  &lt;methods&gt;
+	    &lt;method name="GET"&gt;
+	      &lt;request&gt;
+		&lt;uri-parameters&gt;
+		  &lt;uri-parameter name="map-type" ref="par-map-type"/&gt;
+		  &lt;uri-parameter name="scale" ref="par-scale"/&gt;
+		  &lt;uri-parameter name="planet" ref="par-planet"/&gt;
+		  &lt;uri-parameter name="latitude" ref="par-latitude"/&gt;
+		  &lt;uri-parameter name="longitude" ref="par-longitude"/&gt;
+		&lt;/uri-parameters&gt;
+	      &lt;/request&gt;
+	      &lt;response&gt;
+		&lt;document ref="doc-png"/&gt;
+	      &lt;/response&gt;
+	    &lt;/method&gt;
+	  &lt;/methods&gt;
+	&lt;/interface&gt;
+      &lt;/interfaces&gt;
+
+    &lt;/media-type&gt;
+
+  &lt;/media-types&gt;
+
+  &lt;resources&gt;
+
+    &lt;resource id="res-planets" name="planets"&gt;
+      &lt;location uri="/"/&gt;
+      &lt;interface ref="int-planets"/&gt;
+    &lt;/resource&gt;
+
+    &lt;resource id="res-place" name="place"&gt;
+      &lt;location uri-template="/{planet}/[{scoping-information}/][{place-name}]{?show}"/&gt;
+      &lt;interface ref="int-place"/&gt;
+    &lt;/resource&gt;
+
+    &lt;resource id="res-point" name="point"&gt;
+      &lt;location uri-template="/{planet}/{latitude},{longitude}"/&gt;
+      &lt;interface ref="int-point"/&gt;
+    &lt;/resource&gt;
+
+    &lt;resource id="res-map" name="map"&gt;
+      &lt;location uri-template="/{map-type}{scale}/{planet}/{latitude},{longitude}"/&gt;
+      &lt;interface ref="int-map"/&gt;
+    &lt;/resource&gt;
+
+    &lt;resource id="res-image" name="image"&gt;
+      &lt;location uri-template="/{map-type}{scale}/{planet}/images/{latitude},{longitude}.png"/&gt;
+      &lt;interface ref="int-image"/&gt;
+    &lt;/resource&gt;
+  &lt;/resources&gt;
+
+&lt;/service&gt;
+</pre></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a name="d5e196"></a>Bibliography</h2></div></div></div><div class="bibliomixed"><a name="WADL"></a><p class="bibliomixed">[WADL] Marc Hadley, Sun Microsystems. <span class="ital">Web Application Description Language</span>, W3C Member Submission 31 August 2009.
+        http://www.w3.org/Submission/wadl/. </p></div><div class="bibliomixed"><a name="rfc6570"></a><p class="bibliomixed">[URI Templates] Joe Gregorio, Google; Roy Fielding,
       Adobe; Marc Hadley, MITRE; Mark Nottingham, Rackspace; David Orchard, Salesforce.com.
         <span class="ital">URI Template</span>, IETF RFC 6570, March 2012.
         http://tools.ietf.org/html/rfc6570</p></div><div class="bibliomixed"><a name="json-home"></a><p class="bibliomixed">[JSON Home Documents] Mark Nottingham, Rackspace.
@@ -802,11 +990,9 @@ representation</p></td></tr></table></div></div><div class="bibliography"><div c
         http://www.ietf.org/id/draft-wilde-home-xml-01.txt</p></div><div class="bibliomixed"><a name="rfc6838"></a><p class="bibliomixed">[Media Type       Specifications and Registration Procedures] N. Freed, Oracle; J.
       Klensin; T. Hansen, AT&amp;T Laboratories. <span class="ital">Media Type Specifications and
         Registration Procedures</span>, IETF RFC 6838, January 2013.
-        http://tools.ietf.org/html/rfc6838</p></div><div class="bibliomixed"><a name="rfc2048"></a><p class="bibliomixed">[RFC 2048] 
-      N. Freed, J. Klensin, J. Postel.
-      <span class="ital">Multipurpose Internet Mail Extensions
-      (MIME) Part Four: Registration Procedures</span>, IETF RFC 2048, November 1996.
-      http://tools.ietf.org/html/rfc2048
+        http://tools.ietf.org/html/rfc6838</p></div><div class="bibliomixed"><a name="rfc2048"></a><p class="bibliomixed">[RFC 2048]  N. Freed, J. Klensin, J. Postel. <span class="ital">Multipurpose Internet Mail Extensions (MIME) Part Four: Registration
+        Procedures</span>, IETF RFC 2048, November 1996.
+        http://tools.ietf.org/html/rfc2048
     </p></div><div class="bibliomixed"><a name="Burke"></a><p class="bibliomixed">[To WADL or not to WADL]  Bill Burke. <span class="ital">To WADL or not to WADL</span>, blog post, May 21, 2009.
         http://bill.burkecentral.com/2009/05/21/to-wadl-or-not-to-wadl/.</p></div><div class="bibliomixed"><a name="hypertext-driven"></a><p class="bibliomixed">[REST APIs must be hypertext-driven]  Roy
       Fielding. <span class="ital">REST APIs must be hypertext-driven</span>, blog post, Mon
@@ -843,20 +1029,23 @@ representation</p></td></tr></table></div></div><div class="bibliography"><div c
     </p></div><div class="bibliomixed"><a name="Fielding2000"></a><p class="bibliomixed">[Architectural Styles and the Design of Network-based Software Architectures, PhD Dissertation Thesis.]  Roy Thomas Fielding, <span class="ital">Architectural Styles and the Design of
         Network-based Software Architectures, PhD Dissertation Thesis</span>, University of
       California, Irvine &copy; 2000.
-        http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm.</p></div><div class="bibliomixed"><a name="RSDL1"></a><p class="bibliomixed">[RESTful Service Description     Language (Ovirt)] RESTful Service Description Language
-    (RSDL). Michael Pasternak, Red Hat. Available at
-    http://www.ovirt.org/RSDL.</p></div><div class="bibliomixed"><a name="RSDL2"></a><p class="bibliomixed">[RESTful Service Description     Language (EMC)] Jonathan Robie, Rob Cavicchio, R&eacute;mon Sinnema and
-    Erik Wilde. <span class="ital">RESTful Service Description
-    Language (RSDL): Describing RESTful Services Without Tight
-    Coupling.</span> Presented at Balisage: The Markup Conference
-    2013, Montr&eacute;al, Canada, August 6 - 9, 2013. In Proceedings of
-    Balisage: The Markup Conference 2013. Balisage Series on Markup
-    Technologies, vol. 10
-    (2013). doi:10.4242/BalisageVol10.Robie01.</p></div></div><div class="footnotes"><br><hr style="width:100; text-align:left;margin-left: 0"><div id="ftn.d5e42" class="footnote"><p><a href="#d5e42" class="para"><sup class="para">[1] </sup></a>Here, RSDL refers to <a class="xref" href="#RSDL2">RESTful Service Description     Language (EMC)</a>, the
-    language we presented at Balisage 2013.  Unfortunately, we found
-    that the name and the acronym were previously used by Red Hat for
-    a different language, <a class="xref" href="#RSDL1">RESTful Service Description     Language (Ovirt)</a>, which concentrates
-    on describing URIs as standalone entry points for an
-    application.</p></div><div id="ftn.d5e80" class="footnote"><p><a href="#d5e80" class="para"><sup class="para">[2] </sup></a>This
-    definition is taken from a Twitter tweet by Erik Wilde, 21 August
-    2013.</p></div></div></div></body></html>
+        http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm.</p></div><div class="bibliomixed"><a name="RSDL1"></a><p class="bibliomixed">[RESTful Service Description     Language (Ovirt)] RESTful
+      Service Description Language (RSDL). Michael Pasternak, Red Hat. Available at
+        http://www.ovirt.org/RSDL.</p></div><div class="bibliomixed"><a name="RSDL2"></a><p class="bibliomixed">[RESTful Service Description     Language (EMC)] Jonathan
+      Robie, Rob Cavicchio, R&eacute;mon Sinnema and Erik Wilde. <span class="ital">RESTful Service
+        Description Language (RSDL): Describing RESTful Services Without Tight Coupling.</span>
+      Presented at Balisage: The Markup Conference 2013, Montr&eacute;al, Canada, August 6 - 9, 2013. In
+      Proceedings of Balisage: The Markup Conference 2013. Balisage Series on Markup Technologies,
+      vol. 10 (2013). doi:10.4242/BalisageVol10.Robie01. Available at
+        http://www.balisage.net/Proceedings/vol10/html/Robie01/BalisageVol10-Robie01.html.</p></div><div class="bibliomixed"><a name="swagger"></a><p class="bibliomixed">[Swagger] Swagger. Available at
+        http://developers.helloreverb.com/swagger/,
+        https://github.com/wordnik/swagger-ui.</p></div><div class="bibliomixed"><a name="RAML"></a><p class="bibliomixed">[RAML (RESTful API Modeling Language)]  RAML (RESTful API
+      Modeling Language. Available at raml.org. </p></div><div class="bibliomixed"><a name="iodocs"></a><p class="bibliomixed">[I/O Docs (Mashery)]  I/O Docs (Mashery). Available at
+        https://github.com/mashery/iodocs. </p></div></div><div class="footnotes"><br><hr style="width:100; text-align:left;margin-left: 0"><div id="ftn.d5e90" class="footnote"><p><a href="#d5e90" class="para"><sup class="para">[1] </sup></a> RADL provides the same information as RESTful Service Description Language (<a class="xref" href="#RSDL2">RESTful Service Description     Language (EMC)</a>), an earlier language that we presented at Balisage 2013, but the
+          structure of RSDL is driven by resources, describing an implementation. (The name RESTful
+          Service Description Language and the acronym RSDL were previously used by Red Hat for a
+          different language, <a class="xref" href="#RSDL1">RESTful Service Description     Language (Ovirt)</a>, which concentrates on describing URIs as
+          standalone entry points for an application.)</p></div><div id="ftn.d5e97" class="footnote"><p><a href="#d5e97" class="para"><sup class="para">[2] </sup></a>If you need run-time metadata for well known media types, you need a RADL description
+          that provides this information, which cannot be automatically extracted from a HTMl
+          document.</p></div><div id="ftn.d5e122" class="footnote"><p><a href="#d5e122" class="para"><sup class="para">[3] </sup></a>A link type can also be used, if a link does not have a link relation.</p></div><div id="ftn.d5e155" class="footnote"><p><a href="#d5e155" class="para"><sup class="para">[4] </sup></a>URI Templates allow URIs to be created using variables, which can be supplied by the
+          client in the REST API. They are not used in this example.</p></div></div></div></body></html>
