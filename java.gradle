@@ -108,32 +108,11 @@ if (!project.hasProperty('alternateDistribution')) {
   }
   
   assemble.dependsOn createPom, javadocJar, sourcesJar
-
-  apply plugin: 'maven-publish'
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        groupId 'radl'
-        artifactId archiveBase
-        from project.components.java
-      }
-    }
-    repositories {
-      maven {
-        url version.endsWith('SNAPSHOT') ? 'http://pls-jfrogrepo.lss.emc.com/artifactory/libs-snapshot-local' :
-            'http://pls-jfrogrepo.lss.emc.com/artifactory/libs-release-local'
-        credentials {
-          username 'cmabuild'
-          password '{DESede}0oYO24/hQiEJ7MyrUYuW9Q=='
-        }
-      }
-    }
-  }
 }
 
 repositories {
-  maven {
-    url mavenRepo
+  jcenter {
+    url 'http://jcenter.bintray.com'
   }
 }
 
