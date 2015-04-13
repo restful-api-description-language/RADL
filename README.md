@@ -1,5 +1,6 @@
-# RADL image:https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master["Build Status", link="https://travis-ci.org/restful-api-description-language/RADL"] #
+# RADL #
 
+image:https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master["Build Status", link="https://travis-ci.org/restful-api-description-language/RADL"]
 
 * [What is RADL?](#What_is_RADL)
 * [How can I get RADL?](#How_can_I_get_RADL)
