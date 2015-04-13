@@ -1,0 +1,370 @@
+default namespace radl = "urn:radl:service"
+namespace rng = "http://relaxng.org/ns/structure/1.0"
+
+##
+## Copyright © EMC Corporation. All rights reserved.
+##
+
+start = service
+include "ref.rnc"
+include "documentation.rnc"
+service =
+  element service {
+    name,
+    documentation*,
+    states?,    
+    link-relations?,
+    data-models?,
+    media-types?,
+    service-conventions?,
+    resources?,
+    authentication?
+  }
+
+#
+# Generic definitions
+#
+
+title = element title { text }
+name = attribute name { text }
+href = attribute href { xsd:anyURI }
+any-attribute = attribute * { text? }
+public = attribute public { "true" | "false" }
+status = attribute status { "future" | "assigned" | "poc" | "partial" | "complete" | "passed" }
+
+identity-provider-ref = attribute identity-provider { xsd:string }
+
+# Client State
+#
+# State is abstract, and contains both properties and transitions. A
+# state describes the properties and links of a document without
+# specifying how they are represented in a physical document.  This
+# allows the same states to be used for multiple concrete documents,
+# e.g. to allow +xml and +json representations of the same model.
+
+states = element states { start-state?, state* }
+
+start-state = element start-state {
+    documentation*,
+    properties?,
+    state-transitions?
+}
+
+state =
+  element state {
+    extends?,
+    name,
+    documentation*,
+    properties?,
+    state-transitions?
+  }
+
+state-ref = attribute state { xsd:string }
+
+#
+# Properties
+#
+
+properties = element properties { documentation*, name, property* }
+property = element property { name, documentation*, (properties* | text?) }
+properties-ref = attribute properties { text }
+
+#
+#  Link relations, Links
+#
+
+link-relations =
+  element link-relations { documentation*, link-relation* }
+link-relation =
+  element link-relation {
+    documentation*, status?, name, href?, linkrel-transitions? 
+  }
+link-relation-name = attribute link-relation { xsd:anyURI }
+
+
+#
+# Transitions
+#
+
+state-transitions = element transitions { transition* }
+transition =
+  element transition {
+    name,
+    to?,
+    documentation*,
+    transition-input?
+  }
+
+from = attribute from { xsd:string }   
+to = attribute to { xsd:string }  
+transition-input = element input { properties }
+
+transition-ref =  attribute ref { xsd:string }
+transition-ref-element = 
+  element transition {
+    transition-ref,
+    from?,
+    documentation*
+  }
+
+method-transitions = element transitions { transition-ref-element* }
+linkrel-transitions  = element transitions { transition-ref-element* }
+
+#
+# Data models
+#
+
+data-models = element data-models { data-model* }
+data-model = element data-model {
+    name?,
+    documentation*,
+    schema?,
+    examples?
+}
+
+#
+# Media Types
+#
+# A media type describes the concrete representation of a state
+# as a sequence of bytes.
+
+media-types = element media-types { media-type* }
+
+media-type = element media-type {
+    name,   
+    documentation*,
+    specification*,
+    media-type-schema*,
+    representation* 
+}
+
+specification = element specification { href, documentation* }
+media-type-schema = element schema { href, type, documentation *}
+media-type-ref = attribute media-type { xsd:string }
+
+type =
+  attribute type {
+    "rnc" | "rng" | "xsd" | "dtd" | "JSONSchema" 
+  }
+
+#  You can inline a schema in RELAX-NG's XML notation.
+#  Other schema languages can be used via href.
+
+schema = element schema { href?, relax-ng? }
+relax-ng = element rng:* { any-attribute*, (relax-ng* | text)* } 
+
+# Service Conventions
+#
+# service-conventions are used by both resources and media types when
+# conventions are shared by more than one media type.
+
+service-conventions = element conventions { documentation*, headers?, uri-parameters?, status-codes? }
+
+uri-parameters =
+  element uri-parameters { documentation*, uri-parameter* }
+uri-parameter =
+  element uri-parameter {
+    name, documentation, datatype, value-range?, default-value?
+  }
+uri-parameter-ref = attribute uri-parameter { xsd:string }
+
+headers = element headers { header* }
+header = element header { name, header-type, documentation* }
+header-type =
+  attribute type { "request" | "response" | "general" | "entity" }
+methods = element methods { method* }
+method =
+  element method { method-name, status?, documentation*, method-transitions?, request?, response? }
+method-name = attribute name { http-method }
+http-method =
+  "GET"
+  | "PUT"
+  | "HEAD"
+  | "POST"
+  | "DELETE"
+  | "TRACE"
+  | "OPTIONS"
+  | "CONNECT"
+  | "PATCH"
+
+#  A method-transition differs from a transition in that it allows a
+# "from" attribute to identify the origin state.
+#
+#  The "from" attribute is only needed when the same transition name
+#  is used for transitions originating from multiple states,
+#  e.g. "parent", "children", "next", etc.  In this case, the
+#  transition name does not uniquely identify a transition, so the
+#  "from" attribute must be used.
+
+request =
+  element request {  
+    documentation*, request-uri-parameters?, header-refs?, representation-refs?
+  }
+request-uri-parameters =
+  element uri-parameters { request-uri-parameter-ref* }
+request-uri-parameter-ref =
+  element uri-parameter {
+    attribute ref { xsd:string }
+  }
+header-refs = element headers { documentation*, header-ref* }
+header-ref = element header { attribute ref { xsd:string} }
+representations = element representations { representation* }
+
+# Examples are now in representations. A representation can be associated with a properties-ref.
+representation = element representation { name, documentation*, properties?, description*, examples? }
+representation-refs = element representations { representation-ref* }
+representation-ref = element representation { media-type-name, documentation* }
+description = element description { (type, href, documentation*) | ( documentation*, schema ) } 
+examples = element examples { example* }
+example = element example { documentation*, text }
+value = attribute value { text }
+media-type-name = attribute media-type { xsd:string }
+response =
+  element response {
+    documentation*, status-code-refs?, header-refs?, representation-refs?
+  }
+
+status-codes = element status-codes { documentation*, status-code* }
+status-code = element status-code { code, documentation* }
+status-code-refs =  element status-codes { status-code-ref*  }
+status-code-ref = element status-code { code-ref }
+code = attribute name { HTTP-status-enum }
+code-ref = attribute ref { HTTP-status-enum }
+
+HTTP-status-enum =
+  "100"
+  | "101"
+  | "102"
+  | "200"
+  | "201"
+  | "202"
+  | "203"
+  | "204"
+  | "205"
+  | "206"
+  | "207"
+  | "208"
+  | "301"
+  | "302"
+  | "303"
+  | "304"
+  | "305"
+  | "306"
+  | "307"
+  | "308"
+  | "400"
+  | "401"
+  | "402"
+  | "403"
+  | "404"
+  | "405"
+  | "406"
+  | "407"
+  | "408"
+  | "409"
+  | "410"
+  | "411"
+  | "412"
+  | "413"
+  | "414"
+  | "415"
+  | "416"
+  | "417"
+  | "418"
+  | "420"
+  | "422"
+  | "423"
+  | "424"
+  | "425"
+  | "426"
+  | "428"
+  | "429"
+  | "431"
+  | "444"
+  | "449"
+  | "450"
+  | "451"
+  | "494"
+  | "495"
+  | "496"
+  | "497"
+  | "499"
+  | "500"
+  | "501"
+  | "502"
+  | "503"
+  | "504"
+  | "505"
+  | "506"
+  | "507"
+  | "508"
+  | "509"
+  | "510"
+  | "511"
+  | "598"
+  | "599"
+
+resources = element resources { documentation*, resource* }
+
+resource =
+  element resource {
+    documentation*,
+    name,
+    identity-provider-ref?,
+    public?,
+    status?,
+    location?,
+    methods?
+  }
+
+resource-ref = attribute resource { xsd:string }
+extends = attribute extends { xsd:string }
+
+# URI templates in locations specify variables that can be used in URI parameters
+# in the user interface. 
+#
+# If they are not also specified as URI parameters, they are not part of the interface.
+
+location = element location { documentation*, (uri | uri-template), location-var* }
+location-var = element var { name, documentation* }
+uri-template = attribute uri-template { text }
+
+authentication =
+  element authentication { authentication-conventions?, mechanism*, identity-provider* }
+authentication-conventions = element conventions { documentation*, header-refs?, status-code-refs? }
+mechanism =
+  element mechanism {
+    name, authentication-type, documentation*, scheme*
+  }
+mechanism-ref = attribute mechanism { xsd:string }
+identity-provider = element identity-provider { mechanism-ref, documentation* }
+authentication-type = attribute authentication-type { text }
+scheme = element scheme { name, documentation*, scheme-parameter* }
+scheme-parameter = element parameter { name, documentation* }
+
+datatype =
+  attribute datatype {
+    "string"
+    | "boolean"
+    | "decimal"
+    | "float"
+    | "double"
+    | "duration"
+    | "dateTime"
+    | "time"
+    | "date"
+    | "hexBinary"
+    | "base64Binary"
+    | "anyURI"
+    | "integer"
+    | "language"
+    | "ID"
+    | "IDREF"
+    | "integer"
+    | "long"
+    | "short"
+    | "byte"
+  }
+value-range = element value-range { text }
+default-value = element default { text }
+uri = attribute uri { xsd:anyURI }

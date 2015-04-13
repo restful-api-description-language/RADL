@@ -1,0 +1,29 @@
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+##
+## Copyright © EMC Corporation. All rights reserved.
+##
+
+# ref elements are used in the documentation modules
+ref =
+  element ref {
+    ((attribute idref { xsd:string }
+      | attribute uri { xsd:anyURI }
+      | attribute media-type { xsd:string }
+      | attribute header { xsd:string }
+      | attribute mechanism { xsd:string }
+      | attribute identity-provider { xsd:string }
+      | attribute scheme { xsd:string }
+      | attribute scheme-parameter { xsd:string }
+      | attribute status-code { xsd:string }
+      | attribute uri-parameter { xsd:string }
+      | attribute resources { xsd:string }
+      | attribute resource { xsd:string }
+      | attribute var { xsd:string }
+      | attribute property { xsd:string }
+      | attribute header { xsd:string }
+      | attribute method { xsd:string }),
+     text?)
+    # Uses the name of the referred item if not provided
+    
+  }

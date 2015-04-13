@@ -1,0 +1,246 @@
+configurations {
+  bnd
+}
+
+dependencies {
+  bnd 'biz.aQute:bnd:0.0.384'
+}
+
+def toBase(fileName) {
+  fileName.substring(0, fileName.lastIndexOf('.'))
+}
+
+def toName(fileName) {
+  def name = toBase(fileName)
+  def index = name.lastIndexOf('-')
+  index <= 0 ? name : name.substring(0, index) 
+}
+
+// Eclipse is extremely picky about version numbers
+def toEclipseVersion(fileName) {
+  def version = toBase(fileName)
+  version = version.substring(1 + version.lastIndexOf('-'))
+  if (version.length() == 8 && version.indexOf('.') < 0) {
+    version = version.substring(0, 4) + '.' + Integer.parseInt(version.substring(4, 6)) + '.' +
+        Integer.parseInt(version.substring(6))
+  } else {
+    while (version.replaceAll('[^.]', '').length() < 2) {
+      version += '.0'
+    }
+  }
+  version
+}
+
+def features = [
+  [
+    alias: 'Radl',
+    name: project.name,
+    version: project.version,
+    label: 'RADL Tools',
+    provider: 'RADL',
+    url: 'https://github.com/restful-api-description-language/radl-eclipse',
+    copyright: "(c) ${Calendar.instance.get(Calendar.YEAR)} RADL",
+    license: [
+      description: project.rootProject.file('LICENSE').text
+    ],
+    plugins: project.configurations.runtime.resolvedConfiguration.resolvedArtifacts*.file.collect { [
+        path: it.path, 
+        name: toName(it.name), 
+        version: toEclipseVersion(it.name)
+      ] } + [path: jar.archivePath.path, name: name, version: version],
+    requiresEclipse: true,
+  ]
+]
+
+
+// Eclipse update site generation
+
+def updateSiteDir = file('build/update')
+
+task deleteUpdateSite(type: Delete) {
+  delete updateSiteDir
+}
+clean.dependsOn deleteUpdateSite
+
+
+
+// See http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.isv/reference/misc/update_sitemap.html
+def featuresXml(features, categoryName, categoryDescription, xml) {
+  features.each { feature ->
+    xml.feature(url: "features/${feature.name}.feature_${feature.version}.jar" , id: "${feature.name}.feature", 
+        version: feature.version) {
+      category(name: categoryName)
+    }
+  }
+  xml.'category-def'(name: categoryName, label: categoryDescription)
+}
+
+features.each { feature ->
+  // See http://help.eclipse.org/help33/topic/org.eclipse.platform.doc.isv/reference/misc/feature_manifest.html
+  def featureDir = new File(updateSiteDir, feature.name)
+  featureDir.mkdirs()
+  def featureXmlFile = new File(featureDir, 'feature.xml')
+  
+  // See http://help.eclipse.org/help33/topic/org.eclipse.platform.doc.isv/reference/misc/feature_manifest.html
+  def generateFeatureXmlTaskName = "generate${feature.alias}FeatureXml"
+  task(generateFeatureXmlTaskName) << {
+    def writer = newWriter(featureXmlFile)
+    def xml = newMarkupBuilder(writer)
+    xml.feature(id: feature.name + '.feature', label: feature.label, version: feature.version,
+      'provider-name': feature.provider, plugin: feature.name) {
+      description(url: feature.url) {
+        mkp.yield feature.label
+      }
+      copyright(url: feature.url) {
+        mkp.yield feature.copyright
+      }
+      license(url: feature.license.url) {
+        mkp.yield feature.license.description
+      }
+      if (feature.requiresEclipse || feature.dependsOn) {
+        xml.requires {
+          appendPluginImports(feature.requiresEclipse, requires, xml)
+          appendFeatureImports(features, feature.dependsOn, xml)
+        }
+      }
+      appendPlugins(feature.plugins, xml)
+    }
+    writer.close()
+  }
+  tasks[generateFeatureXmlTaskName].dependsOn deleteUpdateSite
+
+  // See http://help.eclipse.org/help33/topic/org.eclipse.platform.doc.isv/reference/misc/feature_archive.html
+  def generateFeatureJarTaskName = "generate${feature.alias}FeatureJar"
+  
+  task(generateFeatureJarTaskName, type: Jar, dependsOn: generateFeatureXmlTaskName) {
+    destinationDir = featureDir
+    // Eclipse requires an underscore between name and version
+    archiveName = "${feature.name}.feature_${feature.version}.jar" 
+    from(featureXmlFile.parent)
+    include(featureXmlFile.name)
+  }
+}
+
+def appendPluginImports(shouldImport, imports, xml) {
+  if (shouldImport) {
+    imports.each { id ->
+      xml.'import'(plugin : id)
+    }
+  }
+}
+
+def appendPlugins(plugins, xml) {
+  plugins.each { plugin ->
+    xml.plugin(id: plugin.name, version: plugin.version, unpack: 'false', 'download-size': '0', 'install-size': '0')
+  }
+}
+
+task generateFeatureXml {
+  tasks.each { task ->
+    if (task.name.startsWith('generate') && task.name.endsWith('FeatureXml') && task.name != name ) {
+      dependsOn task
+    }
+  }
+}
+generateRadlFeatureXml.dependsOn jar
+
+
+def featureVersion(features, name) {
+  def result = null
+  features.each { feature ->
+    if (feature.name == name) {
+      result = feature.version
+    }
+  }
+  result
+}
+
+def appendFeatureImports(features, imports, xml) {
+  imports.each { name ->
+    xml.'import'(feature : name, version: featureVersion(features, name), match: 'greaterOrEqual')
+  }
+}
+
+task generateFeatureJar {
+  tasks.each { task ->
+    if (task.name.startsWith('generate') && task.name.endsWith('FeatureJar') && task.name != name ) {
+      dependsOn task
+    }
+  }
+  doLast {
+    def featuresDir = new File(updateSiteDir, 'features')
+    featuresDir.mkdirs()
+    updateSiteDir.listFiles().each { dir ->
+      if (dir.name != 'features') {
+        new File(dir, 'feature.xml').delete()
+        def jarFile = dir.listFiles()[0]
+        ant.copy(file: jarFile, todir: featuresDir)
+        jarFile.delete()
+        dir.delete()
+      }
+    }
+  }
+}
+
+
+task assemblePlugins(dependsOn: generateFeatureJar) << {
+  def pluginsDir = new File(updateSiteDir, 'plugins')
+  pluginsDir.mkdirs()
+  ant.taskdef(resource: 'aQute/bnd/ant/taskdef.properties', classpath: configurations.bnd.asPath)
+  features.each { feature ->
+    feature.plugins.unique().each { plugin ->
+      def file = new File(pluginsDir, "${plugin.name}_${plugin.version}.jar")
+      def source = new File(plugin.path)
+      if (zipTree(source).matching { include '**/MANIFEST.MF' }.files[0].text.contains('Bundle-Name')) {
+        ant.copy(file: source.path, tofile: file.path)
+      } else {
+        def bndFile = new File(pluginsDir, source.name.replace('.jar', '.bnd'))
+        bndFile.text = "Bundle-SymbolicName: $plugin.name\nBundle-Version: $plugin.version"
+        ant.bndwrap(jars: plugin.path, output: file.path, definitions: pluginsDir)
+      }
+    }
+  }
+  pluginsDir.listFiles().findAll { it.name.endsWith('.bnd') }.each { it.delete() }
+}
+
+task generateSiteXml(dependsOn: assemblePlugins) << {
+  def categoryName = 'radl.eclipse'
+  def categoryDescription = 'RESTful API Description Language (RADL)'
+  def siteXml = new File(updateSiteDir, 'site.xml')
+  def writer = newWriter(siteXml)
+  def xml = newMarkupBuilder(writer)
+  xml.site {
+    featuresXml(features, categoryName, categoryDescription, xml)
+  }
+  writer.close()
+}
+
+assemble.dependsOn generateSiteXml
+
+
+task uploadToUpdateSite(dependsOn: assemble) {
+  onlyIf { !version.endsWith('SNAPSHOT') }
+  doLast {
+    ant.taskdef(name: 'scp',
+        classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
+        classpath: configurations.sshAntTask.asPath)
+    ant.scp(
+        todir: 'root:vinkensl@karimun.xhive.archipel:/var/www/localhost/htdocs/radl-update-site',
+        trust: 'true', verbose: 'true') {
+      fileset(dir: updateSiteDir.path) {
+        include(name: '**/**')
+      }
+    }
+  }
+}
+
+def newWriter(file) {
+  file.parentFile.mkdirs()
+  new PrintWriter(new FileOutputStream(file))
+}
+
+def newMarkupBuilder(writer) {
+  def xml = new groovy.xml.MarkupBuilder(writer)
+  xml.doubleQuotes = true
+  xml
+}

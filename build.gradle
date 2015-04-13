@@ -1,0 +1,12 @@
+task wrapper(type: Wrapper) {
+  description = 'Generates gradlew (for internal use only)'
+  gradleVersion = '2.3'
+  jarFile = 'wrapper/wrapper.jar'
+}
+
+subprojects.findAll { it.path.startsWith(':java:') }.each {
+  it.apply from: file('java.gradle')
+}
+
+
+defaultTasks 'check'

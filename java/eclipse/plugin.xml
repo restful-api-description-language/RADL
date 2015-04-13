@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="radlBuilder"
+         name="RADL Project Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="radl.eclipse.builder.RadlBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         id="radlNature"
+         name="RADL Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="radl.eclipse.builder.RadlNature">
+         </run>
+      </runtime>
+      <builder
+            id="radl.eclipse.radlBuilder">
+      </builder>
+   </extension>
+   <extension
+         id="radl.eclipse.radlProblem"
+         name="RADL Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="RESTful API"
+            id="radl.eclipse">
+      </category>
+      <wizard
+            name="New RESTful API"
+            icon="icons/api.gif"
+            category="radl.eclipse"
+            class="radl.eclipse.wizards.RadlNewWizard"
+            id="radl.eclipse.wizards.RadlNewWizard">
+      </wizard>
+   </extension>
+   
+   <extension point="org.eclipse.core.runtime.contentTypes">
+      <content-type 
+        id="radl"
+        name="RADL"
+        base-type="org.eclipse.core.runtime.xml"
+        file-extensions="radl">
+      </content-type>
+      
+      <file-association content-type="radl.eclipse.radl" file-names=".radl"/>
+    </extension>
+    
+</plugin>

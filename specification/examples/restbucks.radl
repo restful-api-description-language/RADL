@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+##
+## Sample RADL file for RESTBucks.
+##
+## Copyright © EMC Corporation. All rights reserved.
+##
+-->
+<service name="RESTBucks" xmlns="urn:radl:service" xmlns:radl="urn:radl:service" 
+    xmlns:html="http://www.w3.org/1999/xhtml">
+  <documentation>
+    This example service follows <html:a href="http://www.infoq.com/articles/webber-rest-workflow">RESTBucks</html:a>,
+    an online version of coffee shop Starbucks based on Gregor Hohpe's  
+    <html:a href="http://www.enterpriseintegrationpatterns.com/ramblings/18_starbucks.html">observation</html:a>
+    that it is an asynchronous processing pipeline.
+  </documentation>
+
+  <states>
+    <start-state>
+      <transitions>
+        <transition name="Arrive" to="Arrived">
+          <documentation>
+            The process starts when the customer walks into the store.
+          </documentation>
+        </transition>
+      </transitions>
+    </start-state>
+
+    <state name="Arrived">
+      <transitions>
+        <transition name="Read menu" to="Deciding">
+          <documentation>
+            Once the customer has arrived in the store, she reads the menu to see what the store offers.
+          </documentation>
+        </transition>
+      </transitions>
+    </state>
+
+    <state name="Deciding">
+      <properties name="menu"/>
+      <transitions>
+        <transition name="Place order" to="Ordered">
+          <documentation>
+            The customer composes an order from the items on the menu and places the order with the cashier.
+          </documentation>
+          <input>
+            <properties name="order"/>
+          </input>
+        </transition>
+      </transitions>
+    </state>
+
+    <state name="Ordered">
+      <properties name="order"/>
+      <transitions>
+        <transition name="Change" to="Ordered">
+          <documentation>
+            As long as the customer hasn't paid, she can change her order.
+          </documentation>
+          <input>
+            <properties name="order"/>
+          </input>
+        </transition>
+        <transition name="Cancel" to="Canceled">
+          <documentation>
+            The customer may decide she doesn't want anything after all and cancel the whole order.
+          </documentation>
+        </transition>
+        <transition name="Pay" to="Paid">
+          <documentation>
+            The customer pays for the order.
+          </documentation>
+          <input>
+            <properties name="payment"/>
+          </input>
+        </transition>
+      </transitions>
+    </state>
+
+    <state name="Canceled"/>
+
+    <state name="Paid">
+      <properties name="receipt"/>
+      <transitions>
+        <transition name="Take receipt" to="Waiting">
+          <documentation>
+            The customer accepts the confirmation of her payment.
+          </documentation>
+        </transition>
+      </transitions>
+    </state>
+
+    <state name="Waiting">
+      <transitions>
+        <transition name="Wait" to="Waiting">
+          <documentation>
+            The customer has to wait a while.
+          </documentation>
+        </transition>
+        <transition name="Receive notification" to="Served">
+          <documentation>
+            The barista notifies the customer once he has prepared her serving.
+          </documentation>
+        </transition>
+      </transitions>
+    </state>
+
+    <state name="Served">
+      <properties name="serving"/>
+      <transitions>
+        <transition name="Take serving" to="Happy">
+          <documentation>
+            The customer picks up her serving.
+          </documentation>
+        </transition>
+      </transitions>
+    </state>
+
+    <state name="Happy"/>
+  </states>
+
+  <link-relations>
+    <link-relation name="http://api.restbucks.com/linkrel/menu">
+      <transitions>
+        <transition ref="Read menu"/>
+      </transitions>
+    </link-relation>
+    <link-relation name="http://api.restbucks.com/linkrel/orders">
+      <transitions>
+        <transition ref="Place order"/>
+      </transitions>
+    </link-relation>
+    <link-relation name="edit">
+      <transitions>
+        <transition ref="Change"/>
+        <transition ref="Cancel"/>
+      </transitions>
+    </link-relation>
+    <link-relation name="payment">
+      <transitions>
+        <transition ref="Pay"/>
+      </transitions>
+    </link-relation>
+    <link-relation name="http://api.restbucks.com/linkrel/accept">
+      <transitions>
+        <transition ref="Take receipt"/>
+        <transition ref="Take serving"/>
+      </transitions>
+    </link-relation>
+    <link-relation name="self">
+      <transitions>
+        <transition ref="Wait"/>
+      </transitions>
+    </link-relation>
+    <link-relation name="http://api.restbucks.com/linkrel/serving">
+      <transitions>
+        <transition ref="Receive notification"/>
+      </transitions>
+    </link-relation>
+  </link-relations>
+
+  <data-models>
+    <data-model name="menu">
+      <!-- TODO: Describe semantics and data types -->
+    </data-model>
+
+    <data-model name="order">
+      <!-- TODO: Describe semantics and data types -->
+    </data-model>
+
+    <data-model name="payment">
+      <!-- TODO: Describe semantics and data types -->
+    </data-model>
+
+    <data-model name="receipt">
+      <!-- TODO: Describe semantics and data types -->
+    </data-model>
+  </data-models>
+
+  <media-types>
+    <media-type name="application/ld+json">
+      <specification href="http://www.w3.org/TR/json-ld/"/>
+    </media-type>
+  </media-types>
+
+  <conventions>
+    <status-codes>
+      <status-code name="200"/>
+      <status-code name="202">
+        <documentation>
+          This status is returned while the barista is preparing the serving. The customer has to wait and
+          periodically poll for status changes. When the serving is prepared, the response status will be 
+          <ref status-code="200"/>.
+        </documentation>
+      </status-code>
+    </status-codes>
+  </conventions>
+
+  <resources>
+    <resource name="Home">
+      <location uri="/"/>
+      <methods>
+        <method name="GET">
+          <transitions>
+            <transition ref="Arrive"/>
+          </transitions>
+          <response>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </response>
+        </method>
+      </methods>
+    </resource>
+    
+    <resource name="Menu">
+      <location uri="/menu/"/>
+      <methods>
+        <method name="GET">
+          <transitions>
+            <transition ref="Read menu"/>
+          </transitions>
+          <response>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </response>
+        </method>
+      </methods>
+    </resource>
+    
+    <resource name="Orders">
+      <location uri="/orders/"/>
+      <methods>
+        <method name="POST">
+          <transitions>
+            <transition ref="Place order"/>
+          </transitions>
+          <request>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </request>
+          <response>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </response>
+        </method>
+      </methods>
+    </resource>
+    
+    <resource name="Order">
+      <location uri-template="/orders/{id}/"/>
+      <methods>
+        <method name="DELETE">
+          <transitions>
+            <transition ref="Cancel"/>
+          </transitions>
+        </method>
+        <method name="PUT">
+          <transitions>
+            <transition ref="Change"/>
+          </transitions>
+          <request>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </request>
+          <response>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </response>
+        </method>
+        <method name="GET">
+          <transitions>
+            <transition ref="Take receipt"/>
+          </transitions>
+          <response>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </response>
+        </method>
+      </methods>
+    </resource>
+    
+    <resource name="Payments">
+      <location uri-template="/orders/{id}/payments/"/>
+      <methods>
+        <method name="POST">
+          <transitions>
+            <transition ref="Pay"/>
+          </transitions>
+          <request>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </request>
+          <response>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </response>
+        </method>
+      </methods>
+    </resource>
+    
+    <resource name="Serving">
+      <location uri-template="/orders/{id}/serving/"/>
+      <methods>
+        <method name="GET">
+          <transitions>
+            <transition ref="Wait"/>
+            <transition ref="Receive notification"/>
+          </transitions>
+          <response>
+            <status-codes>
+              <status-code ref="200"/>
+              <status-code ref="202"/>
+            </status-codes>
+            <representations>
+              <representation media-type="application/ld+json"/>
+            </representations>
+          </response>
+        </method>
+        <method name="DELETE">
+          <transitions>
+            <transition ref="Take serving"/>
+          </transitions>
+        </method>
+      </methods>
+    </resource>
+  </resources>
+</service>

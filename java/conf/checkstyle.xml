@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+
+<module name="Checker">
+  <property name="severity" value="warning"/>
+
+  <module name="SuppressionCommentFilter">
+    <property name="offCommentFormat" value="stop methodname check"/>
+    <property name="onCommentFormat" value="resume methodname check"/>
+    <property name="checkFormat" value="MethodName"/>
+  </module>
+  <module name="SuppressionCommentFilter">
+    <property name="offCommentFormat" value="stop visibility check"/>
+    <property name="onCommentFormat" value="resume visibility check"/>
+    <property name="checkFormat" value="VisibilityModifier"/>
+  </module>
+  <!-- Needed due to checkstyle bug, see
+       https://sourceforge.net/tracker/?func=detail&aid=3216180&group_id=29721&atid=397078
+    -->
+  <module name="SuppressionCommentFilter">
+    <property name="offCommentFormat" value="stop generic whitespace check"/>
+    <property name="onCommentFormat" value="resume generic whitespace check"/>
+    <property name="checkFormat" value="GenericWhitespace"/>
+  </module>
+
+  <!--
+  <module name="SuppressionFilter">
+    <property name="file" value="${basedir}/bin/checkstyle-suppressed.xml"/>
+  </module>
+  -->
+
+  <!-- Checks whether files end with a new line.                        -->
+  <!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
+  <module name="NewlineAtEndOfFile">
+    <property name="fileExtensions" value="java,txt,xml,xsl,xslt,rnc,gradle,groovy" />
+  </module>
+
+  <!-- Checks that property files contain the same keys.         -->
+  <!-- See http://checkstyle.sf.net/config_misc.html#Translation -->
+  <module name="Translation"/>
+
+  <!-- Checks for whitespace                               -->
+  <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+  <module name="FileTabCharacter">
+    <property name="fileExtensions" value="java,txt,xml,xsl,gradle,groovy"/>
+  </module>
+
+  <module name="RegexpMultiline">
+    <property name="format" value="@Ignore[^(]"/>
+    <property name="message" value="@Ignore annotation without a cause"/>
+  </module>
+
+  <module name="TreeWalker">
+
+    <!-- Needed for SuppressionCommentFilter -->
+    <module name="FileContentsHolder"/>
+
+    <!-- Checks for Javadoc comments.                     -->
+    <!-- See http://checkstyle.sf.net/config_javadoc.html -->
+    <module name="JavadocStyle">
+      <property name="checkHtml" value="false"/>
+    </module>
+
+    <!-- Checks for Naming Conventions.                  -->
+    <!-- See http://checkstyle.sf.net/config_naming.html -->
+    <module name="ClassTypeParameterName"/>
+    <module name="ConstantName"/>
+    <module name="LocalFinalVariableName"/>
+    <module name="LocalVariableName"/>
+    <module name="MemberName"/>
+    <module name="MethodName"/>
+    <module name="MethodTypeParameterName"/>
+    <module name="PackageName">
+      <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+    </module>
+    <module name="ParameterName"/>
+    <module name="StaticVariableName"/>
+    <module name="TypeName"/>
+
+    <!-- Checks for imports                              -->
+    <!-- See http://checkstyle.sf.net/config_import.html -->
+    <module name="AvoidStarImport"/>
+    <module name="IllegalImport">
+      <property name="illegalPkgs" value="sun, com.sun.org.apache, junit"/>
+    </module>
+    <module name="RedundantImport"/>
+
+    <!-- Checks for whitespace                               -->
+    <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+    <module name="EmptyForInitializerPad"/>
+    <module name="EmptyForIteratorPad"/>
+    <module name="GenericWhitespace"/>
+    <module name="MethodParamPad"/>
+    <module name="NoWhitespaceAfter">
+      <property name="tokens" value="BNOT, DEC, DOT, INC, LNOT, TYPECAST, UNARY_MINUS, UNARY_PLUS"/>
+    </module>
+    <module name="NoWhitespaceBefore"/>
+    <module name="OperatorWrap"/>
+    <module name="ParenPad"/>
+    <module name="TypecastParenPad"/>
+    <module name="WhitespaceAfter">
+      <property name="tokens" value="COMMA, SEMI"/>
+    </module>
+    <module name="WhitespaceAround"/>
+
+    <!-- Modifier Checks                                    -->
+    <!-- See http://checkstyle.sf.net/config_modifiers.html -->
+    <module name="ModifierOrder"/>
+    <module name="RedundantModifier"/>
+
+    <!-- Checks for blocks. You know, those {}'s         -->
+    <!-- See http://checkstyle.sf.net/config_blocks.html -->
+    <module name="AvoidNestedBlocks">
+      <property name="allowInSwitchCase" value="true"/>
+    </module>
+    <module name="EmptyBlock">
+      <property name="option" value="text"/>
+    </module>
+    <module name="LeftCurly"/>
+    <module name="NeedBraces"/>
+    <module name="RightCurly"/>
+
+    <!-- Checks for common coding problems               -->
+    <!-- See http://checkstyle.sf.net/config_coding.html -->
+    <module name="CovariantEquals"/>
+    <module name="DefaultComesLast"/>
+    <module name="EmptyStatement"/>
+    <module name="EqualsAvoidNull"/>
+    <module name="EqualsHashCode"/>
+    <module name="ExplicitInitialization"/>
+    <module name="FallThrough">
+      <property name="reliefPattern" value="FALLTHROUGH"/>
+    </module>
+    <module name="HiddenField">
+      <property name="ignoreConstructorParameter" value="true"/>
+      <property name="ignoreSetter" value="true"/>
+    </module>
+    <module name="IllegalInstantiation">
+      <property name="classes" value="java.lang.Boolean"/>
+      <property name="classes" value="java.lang.Byte"/>
+      <property name="classes" value="java.lang.Character"/>
+      <property name="classes" value="java.lang.Integer"/>
+      <property name="classes" value="java.lang.Long"/>
+      <property name="classes" value="java.lang.Short"/>
+    </module>
+    <module name="ModifiedControlVariable"/>
+    <module name="MultipleVariableDeclarations"/>
+    <module name="PackageDeclaration"/>
+    <module name="ParameterAssignment"/>
+    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanReturn"/>
+    <module name="StringLiteralEquality"/>
+    <module name="SuperClone"/>
+    <module name="UnnecessaryParentheses"/>
+
+    <!-- Checks for class design                         -->
+    <!-- See http://checkstyle.sf.net/config_design.html -->
+    <module name="FinalClass"/>
+    <module name="HideUtilityClassConstructor"/>
+    <module name="MutableException"/>
+    <module name="VisibilityModifier"/>
+
+    <!-- Miscellaneous other checks.                   -->
+    <!-- See http://checkstyle.sf.net/config_misc.html -->
+    <module name="ArrayTypeStyle"/>
+    <module name="UpperEll"/>
+    
+    <!-- Annotation checks.                                  -->
+    <!-- See http://checkstyle.sf.net/config_annotation.html -->
+    <module name="PackageAnnotation"/>
+    
+    <!-- Regular expression checks.                      -->
+    <!-- See http://checkstyle.sf.net/config_regexp.html -->
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="\s+$"/>
+      <property name="message" value="Line has trailing spaces."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+  </module>
+</module>

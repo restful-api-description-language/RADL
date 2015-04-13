@@ -1,0 +1,146 @@
+apply plugin: 'java'
+sourceCompatibility = '1.6'
+
+apply plugin: 'eclipse'
+eclipse {
+  classpath {
+    defaultOutputDir = file('classes')
+  }
+}
+
+apply plugin: 'jdepend'
+
+apply plugin: 'codenarc'
+codenarc {
+  toolVersion = codeNarcVersion
+  sourceSets = []
+}
+task codenarc(type: CodeNarc) {
+  mustRunAfter 'clean'
+  configFile = project.rootProject.file('java/conf/codenarc.groovy')
+  ignoreFailures = false
+
+  reports {
+    xml {
+      destination = project.file('build/results/codenarc.xml')
+      enabled = true
+    }
+    html {
+      destination = project.file('build/reports/codenarc.html')
+      enabled = true
+    }
+  }
+
+  source = project.fileTree(project.projectDir) {
+    include '**/*.gradle'
+    include '**/*.groovy'
+  }
+}
+check.dependsOn 'codenarc'
+
+apply plugin: 'checkstyle'
+checkstyle.toolVersion = '6.4'
+checkstyle.sourceSets = subprojects.collectMany { it.sourceSets }
+
+apply plugin: 'pmd'
+pmd {
+  toolVersion = '5.1.1'
+  ignoreFailures = false
+  ruleSetFiles = project.rootProject.files('java/conf/pmd.xml')
+}
+task pmd(type: Pmd) {
+  mustRunAfter 'clean'
+}
+
+apply from: project.rootProject.file('jacoco.gradle')
+jacoco {
+  toolVersion = jacocoVersion
+}
+
+apply plugin: 'maven'
+
+def archiveBase = "radl-$project.name"
+
+jar {
+  baseName archiveBase
+}
+
+if (!project.hasProperty('alternateDistribution')) {
+  task javadocJar(type: Jar) {
+    baseName archiveBase
+    classifier = 'javadoc'
+    from javadoc
+  }
+  
+  task sourcesJar(type: Jar) {
+    baseName archiveBase
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+  
+  artifacts {
+    archives javadocJar, sourcesJar
+  }
+  
+  task createPom << {
+    pom {
+      project {
+        groupId 'radl'
+        artifactId archiveBase
+        version project.version
+  
+        inceptionYear '2015'
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution 'repo'
+          }
+        }
+      }
+      whenConfigured { pom ->
+        pom.dependencies.findAll { it.groupId == 'RADL.java' }.each { dep ->
+          dep.groupId = 'radl'
+          dep.artifactId = "radl-$dep.artifactId"
+        }
+      }
+    }.writeTo("$buildDir/libs/${archiveBase}-${project.version}.pom")
+  }
+  
+  assemble.dependsOn createPom, javadocJar, sourcesJar
+
+  apply plugin: 'maven-publish'
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        groupId 'radl'
+        artifactId archiveBase
+        from project.components.java
+      }
+    }
+    repositories {
+      maven {
+        url version.endsWith('SNAPSHOT') ? 'http://pls-jfrogrepo.lss.emc.com/artifactory/libs-snapshot-local' :
+            'http://pls-jfrogrepo.lss.emc.com/artifactory/libs-release-local'
+        credentials {
+          username 'cmabuild'
+          password '{DESede}0oYO24/hQiEJ7MyrUYuW9Q=='
+        }
+      }
+    }
+  }
+}
+
+repositories {
+  maven {
+    url mavenRepo
+  }
+}
+
+dependencies {  
+  compile "com.google.guava:guava:$guavaVersion"
+  testCompile "org.powermock:powermock-api-mockito:$powermockVersion",
+      "org.powermock:powermock-module-junit4:$powermockVersion"
+}
+
+check.dependsOn 'assemble'

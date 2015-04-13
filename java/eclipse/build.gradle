@@ -1,0 +1,97 @@
+apply plugin: 'osgi'
+
+configurations {
+  eclipseLibs
+  compile.extendsFrom eclipseLibs
+  sshAntTask
+}
+
+dependencies {
+  eclipseLibs fileTree(dir: 'lib/eclipse', includes: [ '*.jar' ])
+  compile project(':java:core')
+  testCompile project(':java:core').sourceSets.test.output
+  sshAntTask 'org.apache.ant:ant-jsch:1.7.1', 'jsch:jsch:0.1.29'
+}
+
+ext.requires = [ 'org.eclipse.core.resources',
+  'org.eclipse.core.runtime',
+  'org.eclipse.jdt.core',
+  'org.eclipse.ui',
+  'org.eclipse.ui.ide',
+  'org.eclipse.jdt.launching',
+  'org.eclipse.jdt.ui',
+  'org.eclipse.jface.text',
+  'org.eclipse.ui.editors'
+]
+
+jar {
+  def manifestFile = file('META-INF/MANIFEST.MF')
+  file('build/classes/main').mkdirs() // Prevent 'A Jar can only accept a valid file or directory'
+  // Eclipse requires an underscore between name and version
+  archiveName = "radl.eclipse_${project.version}.jar"
+  manifest {
+    instruction 'Require-Bundle', requires.join(',')
+    instruction 'Import-Package', 'javax.xml.parsers,\
+ org.xml.sax,\
+ org.eclipse.core.resources,\
+ org.eclipse.core.runtime,\
+ org.eclipse.jface.dialogs,\
+ org.eclipse.jface.operation,\
+ org.eclipse.jface.viewers,\
+ org.eclipse.jface.wizard,\
+ org.eclipse.swt,\
+ org.eclipse.swt.events,\
+ org.eclipse.swt.layout,\
+ org.eclipse.swt.widgets,\
+ org.eclipse.ui,\
+ org.eclipse.ui.dialogs,\
+ org.eclipse.ui.ide,\
+ org.xml.sax.helpers'
+  }
+  exclude '**/.*ignore'
+  from('.') { 
+    include 'plugin.xml', 'license.txt'
+  }
+}
+
+eclipse {
+  project {
+    natures 'org.eclipse.pde.PluginNature'
+    buildCommand 'org.eclipse.pde.ManifestBuilder'
+    buildCommand 'org.eclipse.pde.SchemaBuilder'
+    
+    def buildProperties = file('build.properties')
+    file.whenMerged {
+      buildProperties.text = 'source.. = src/main/java/, src/test/java/\n\
+output.. = classes/\n\
+bin.includes = plugin.xml, META-INF/, .'
+    }
+  }
+  
+  classpath {
+    containers 'org.eclipse.pde.core.requiredPlugins'
+    pathVariables GRADLE_USER_HOME: gradle.gradleUserHomeDir
+  }
+}
+
+apply from: 'features.gradle'
+
+// Eclipse code is harder to test, so set lower expectations
+ext {
+  limits = [
+    'instruction': 30,
+    'branch' : 25,
+    'line' : 30,
+    'complexity' : 25,
+    'method' : 30,
+    'class' : 30 // TODO: 100%
+  ]
+}
+
+eclipse.classpath.file {
+  whenMerged { classpath ->
+    classpath.entries.removeAll { entry -> 
+      entry.kind == 'lib' && entry.path.contains('build') 
+    }
+  }
+}
