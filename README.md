@@ -32,9 +32,9 @@ RADL describes both the hypermedia client API and the resource model, which desc
 
 ### <a name="Downloading_built_artifacts"/> Downloading built artifacts ###
 
-If you do not need source code, the easiest way to get RADL is to download pre-built binaries from [Bintray.com / radl](https://bintray.com/radl/RADL)
+If you do not need source code, the easiest way to get RADL is to download pre-built binaries from [Bintray.com / radl](https://bintray.com/radl/RADL):
 
->  *TODO* - need to say how to download built artifacts given the new structure.
+[ ![Download](https://api.bintray.com/packages/radl/RADL/radl-core/images/download.svg) ](https://bintray.com/radl/RADL/radl-core/_latestVersion)
 
 ## <a name="Building_from_Source_Code"/> Building from Source Code
 
