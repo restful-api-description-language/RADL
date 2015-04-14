@@ -164,7 +164,7 @@ uri-parameters =
   element uri-parameters { documentation*, uri-parameter* }
 uri-parameter =
   element uri-parameter {
-    name, documentation, datatype, value-range?, default-value?
+    name, documentation*, datatype, value-range?, default-value?
   }
 uri-parameter-ref = attribute uri-parameter { xsd:string }
 
