@@ -34,16 +34,31 @@ The ever increasing number of APIs requires tooling to manage. Such tools need t
 which leads to a need to describe APIs in a machine-processable way.
 
 There have been several attempts at API description languages. WSDL [3] is the language of choice for SOAP-based APIs.
-For HTTP APIs, we've seen WADL [4], RAML [5], Swagger [6], and API Blueprint [7].
+For HTTP APIs, we've seen WADL [4], RAML [5], Swagger [6].
 
 While these description languages work, and have tooling ecosystems of varying maturity around them, they don't have 
 special provisions for the hypermedia aspect of truly RESTful APIs. In terms of the Richardson Maturity Model [8], they 
 can only describe APIs up to level 2.
 
-RADL can describe level 3 APIs that are fully hypermedia-driven. Its structure guides the author through
-the API design process.
+API Blueprint [7] supports link relations, and as such can be used to describe level 3 APIs. It is based on
+Markdown syntax, which makes it relatively easy to read and write by a human. However, there is no schema language
+that can be used to describe and validate Markdown. The API Blueprint specification is therefore a lot less readable
+than it could have been and it places a greater burden on tooling to validate API descriptions than necessary.
+An API description language's primary function is to enable tooling. Optimizing for human readers and writers should
+come second. XML meets those requirements much better than Markdown.
 
-TODO: API Blueprint has the concept of link relations. How is RADL better?
+Many developers struggle with REST concepts. It would therefore be advantageous if the description language could guide 
+developers when making their choices. The structure of the description language should take the developer by the hand
+and make it easy to do the right thing.
+API Blueprint has no such facilities. It merely records the end product and provides no help along the way.
+
+Another problem that API Blueprint shares with RAML and Swagger is that encourages certain anti-patterns. For instance,
+each HTTP method must include a response which must include a status code. This encourages client to expect only the
+documented status codes. It's much better for clients to have general status code handling capabilities, so that they
+don't break whenever the server changes. The same holds true for HTTP headers.
+
+RADL is an XML-based API description language that can describe fully hypermedia-driven APIs (level 3). Its structure
+guides the author through the API design process and makes it easy to do the right thing.
 
 
 ## Namespace and Version ##
