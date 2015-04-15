@@ -67,7 +67,7 @@ The XML Namespaces URI [W3C.REC-xml-names-19990114] for the XML data format desc
 
     urn:radl:service
 
-For convenience, this data format may be referred to as "RADL 1.0". This specification uses "RADL" internally.
+When this specification uses "RADL", it refers to an XML document in the above namespace.
 
 
 ## Notational Conventions ##
