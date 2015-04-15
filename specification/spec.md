@@ -114,7 +114,7 @@ A name is a simple string, not an XML ID, so it doesn't have the limitations of 
 A named element can be referred to from other elements.
 
 
-## The `radl:documentation` Element ##    
+## The `radl:documentation` Element ##
 
 Many elements in RADL support the `documentation` element that contains information that is intended to be read
 by a human. Documentation is mostly meant for client developers that program against the REST API, but it can also
