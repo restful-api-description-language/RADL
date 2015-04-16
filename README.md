@@ -1,3 +1,5 @@
+![logo](logo.png "Logo")
+
 # RADL ![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) #
 
 * [What is RADL?](#What_is_RADL)
@@ -10,8 +12,6 @@
   * [Using RADL with Maven](#Using_RADL_with_Maven)
 * [License](#License)
 
-
-![logo](logo.png "Logo")
 
 ## <a name="What_is_RADL"/> What is RADL? ##
 
