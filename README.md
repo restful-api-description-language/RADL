@@ -11,6 +11,8 @@
 * [License](#License)
 
 
+![logo](logo.png "Logo")
+
 ## <a name="What_is_RADL"/> What is RADL? ##
 
 *RESTful API Description Language* (RADL) is an XML vocabulary for
