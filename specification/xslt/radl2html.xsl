@@ -3,7 +3,7 @@
 ##
 ## Converts a RADL description to HTML.
 ##
-## Copyright © EMC Corporation. All rights reserved.
+## Copyright © 2013-2015 EMC Corporation. All rights reserved.
 ##
 -->
 
@@ -434,7 +434,7 @@
             <li>
               <xsl:call-template name="a-href">
                 <xsl:with-param name="prefix">statuscode</xsl:with-param>
-                <xsl:with-param name="name" select="@name"/>
+                <xsl:with-param name="name" select="@ref"/>
               </xsl:call-template>
             </li>
           </xsl:for-each>
