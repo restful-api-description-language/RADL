@@ -601,9 +601,9 @@
         <dd>
           <ul>
             <xsl:for-each select="$transitions">
-              <xsl:sort select="@name"/>
+              <xsl:sort select="@ref"/>
 
-              <xsl:variable name="transition-name" select="@name"/>
+              <xsl:variable name="transition-name" select="@ref"/>
               <xsl:variable name="from" select="@from"/>
               <xsl:variable name="states" select="if ($from) then
                                                     if ($from = $start-state-name)
