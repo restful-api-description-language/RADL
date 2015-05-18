@@ -18,3 +18,5 @@ deploy:
     - java/gradle/build/libs/*
   on:
     repo: restful-api-description-language/RADL
+    tags: true
+    all_branches: true
