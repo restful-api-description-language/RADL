@@ -44,6 +44,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
 
   protected abstract Collection<String> getProduces(Element element, TypeElement annotation);
 
+  protected abstract Parameter getParameter(Element element, TypeElement annotation);
 
   private final Set<String> supportedAnnotations = new LinkedHashSet<String>();
   private String[] loggableClasses = new String[0];
@@ -91,7 +92,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
   }
 
   private boolean shouldIgnore(ElementKind kind) {
-    return kind != ElementKind.CLASS && kind != ElementKind.METHOD;
+    return kind != ElementKind.CLASS && kind != ElementKind.METHOD && kind != ElementKind.PARAMETER;
   }
 
   private void processAnnotations(Set<? extends Element> allElements, Element element,
@@ -100,13 +101,21 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
     String method = null;
     Collection<String> consumes = null;
     Collection<String> produces = null;
+    Collection<Parameter> parameters = new ArrayList<Parameter>();
     uri = getUri(element, annotations);
     for (TypeElement annotation : annotations) {
       method = update(getMethod(element, annotation), method);
       consumes = update(getConsumes(element, annotation), consumes);
       produces = update(getProduces(element, annotation), produces);
+      addParameters(getParameter(element, annotation), parameters);
     }
-    processElement(allElements, element, uri, method, consumes, produces);
+    processElement(allElements, element, uri, method, consumes, produces, parameters);
+  }
+
+  private void addParameters(Parameter parameter, Collection<Parameter> parameters) {
+    if (parameter != null) {
+      parameters.add(parameter);
+    }
   }
 
   private String update(String newValue, String oldValue) {
@@ -117,14 +126,14 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
     return newValue == null ? oldValue : newValue;
   }
 
-  private void processElement(Set<? extends Element> allElements, Element element, Collection<String> uris, String method,
-      Collection<String> consumes, Collection<String> produces) {
+  private void processElement(Set<? extends Element> allElements, Element element, Collection<String> uris,
+      String method, Collection<String> consumes, Collection<String> produces, Collection<Parameter> parameters) {
     Element classElement = element;
     while (classElement.getKind() != ElementKind.CLASS) {
       classElement = classElement.getEnclosingElement();
     }
     for (Element concreteSubClassElement : getConcreteSubClassesOf(allElements, classElement)) {
-      processElement(allElements, element, concreteSubClassElement, uris, method, consumes, produces);
+      processElement(allElements, element, concreteSubClassElement, uris, method, consumes, produces, parameters);
     }
   }
 
@@ -139,11 +148,16 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
   }
 
   private void processElement(Set<? extends Element> allTypes, Element element, Element classElement,
-      Collection<String> uris, String method, Collection<String> consumes, Collection<String> produces) {
+      Collection<String> uris, String method, Collection<String> consumes, Collection<String> produces,
+      Collection<Parameter> parameters) {
     String resourceName = qualifiedNameOf(classElement);
     addResource(resourceName, getDocumentationFor(classElement));
 
-    if (uris == null) {
+    if (!parameters.isEmpty()) {
+      for (Parameter parameter : parameters) {
+        addParameter(resourceName, parameter);
+      }
+    } else if (uris == null) {
       addMethod(resourceName, method, consumes, produces, getDocumentationFor(element));
     } else {
       if (element.getKind() == ElementKind.METHOD) {
@@ -160,9 +174,9 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
     }
   }
 
-  private void addResource(String className, String documentation) {
-    logClass("Added", className);
-    getResourceModel().addResource(className, documentation);
+  private void addParameter(String className, Parameter parameter) {
+    logClass("Added parameter " + parameter.getName(), className);
+    getResourceModel().addLocationVar(className, parameter.getName(), parameter.getDocumentation());
   }
 
   private void logClass(String message, String className) {
@@ -172,6 +186,11 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
         return;
       }
     }
+  }
+
+  private void addResource(String className, String documentation) {
+    logClass("Added", className);
+    getResourceModel().addResource(className, documentation);
   }
 
   private void addMethod(String resource, String method, Collection<String> consumes, Collection<String> produces,

@@ -56,7 +56,7 @@ public class JaxrsProcessorTest extends AbstractRestAnnotationProcessorTest {
     for (String annotation : annotations) {
       assertTrue("Incorrect annotation: " + annotation, annotation.startsWith(JAXRS_PACKAGE));
     }
-    assertTrue("Doesn't support QueryParam", annotations.contains(JAXRS_PACKAGE + "QueryParam"));
+    assertTrue("Doesn't support PathParam", annotations.contains(JAXRS_PACKAGE + "PathParam"));
   }
 
   @Test
@@ -503,6 +503,33 @@ public class JaxrsProcessorTest extends AbstractRestAnnotationProcessorTest {
     );
 
     verify(resourceModel).addResource(className, null);
+  }
+
+  // Issue 22
+  @Test
+  public void addsLocationVarForMethodParameterWithPathAnnotation() throws Exception {
+    String className = TestUtil.initCap(aName());
+    String varName = aName();
+    String documentation = aName();
+
+    processAnnotationsIn(project()
+        .withClass(className)
+            .withMethod(aName())
+                .annotatedWith()
+                    .path(aUri())
+                    .method("GET")
+                .end()
+                .withParameter(aName())
+                    .annotatedWith()
+                        .pathParam(varName)
+                    .end()
+                    .documentedWith(documentation)
+                .end()
+            .end()
+        .end()
+    );
+
+    verify(resourceModel).addLocationVar(className, varName, documentation);
   }
 
 }

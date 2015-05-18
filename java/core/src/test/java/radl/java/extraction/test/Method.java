@@ -11,12 +11,15 @@ public class Method extends Documentable {
   private final String name;
   private final String returnType;
   private final Collection<Annotation> annotations;
+  private final Collection<Parameter> parameters;
 
-  public Method(String name, String returnType, String documentation, Collection<Annotation> annotations) {
+  public Method(String name, String returnType, String documentation, Collection<Annotation> annotations,
+      Collection<Parameter> parameters) {
     super(documentation);
     this.name = name;
     this.returnType = returnType;
     this.annotations = annotations;
+    this.parameters = parameters;
   }
 
   public String getName() {
@@ -29,6 +32,10 @@ public class Method extends Documentable {
 
   public Collection<Annotation> getAnnotations() {
     return annotations;
+  }
+
+  public Collection<Parameter> getParameters() {
+    return parameters;
   }
 
   @Override

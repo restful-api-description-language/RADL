@@ -52,4 +52,9 @@ public class AnnotationBuilder<T extends Annotatable<T>> {
     return parent.annotateWith(annotations);
   }
 
+  public AnnotationBuilder<T> pathParam(String name) {
+    annotations.add(new Annotation(ANNOTATION_PACKAGE + "PathParam", name));
+    return this;
+  }
+
 }

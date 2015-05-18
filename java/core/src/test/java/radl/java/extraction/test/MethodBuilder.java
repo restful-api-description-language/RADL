@@ -3,6 +3,7 @@
  */
 package radl.java.extraction.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -14,6 +15,7 @@ public class MethodBuilder implements Annotatable<MethodBuilder> {
   private final Collection<Annotation> annotations = new HashSet<Annotation>();
   private String returnType;
   private String documentation;
+  private final Collection<Parameter> parameters = new ArrayList<Parameter>();
 
   public MethodBuilder(TypeBuilder parent, String name) {
     this.parent = parent;
@@ -36,11 +38,20 @@ public class MethodBuilder implements Annotatable<MethodBuilder> {
   }
 
   public TypeBuilder end() {
-    return parent.addMethod(new Method(name, returnType, documentation, annotations));
+    return parent.addMethod(new Method(name, returnType, documentation, annotations, parameters));
   }
 
   public MethodBuilder documentedWith(String provided) {
     this.documentation = provided;
+    return this;
+  }
+
+  public ParameterBuilder withParameter(String var) {
+    return new ParameterBuilder(this, var);
+  }
+
+  public MethodBuilder addParameter(Parameter parameter) {
+    parameters.add(parameter);
     return this;
   }
 

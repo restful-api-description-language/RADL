@@ -197,6 +197,12 @@ public final class ProjectBuilder {
         when(returnType.asElement()).thenReturn(element);
       }
     }
+    for (Parameter parameter : method.getParameters()) {
+      Element parameterElement = newElement(ElementKind.PARAMETER, parameter.getName());
+      when(parameterElement.getEnclosingElement()).thenReturn(result);
+      annotate(parameterElement, parameter.getAnnotations());
+      document(parameterElement, parameter);
+    }
     return result;
   }
 

@@ -49,4 +49,9 @@ public class SpringProcessor extends AbstractRestAnnotationProcessor {
     return valueOf(annotation, element, "produces");
   }
 
+  @Override
+  protected Parameter getParameter(Element element, TypeElement annotation) {
+    return null;
+  }
+
 }

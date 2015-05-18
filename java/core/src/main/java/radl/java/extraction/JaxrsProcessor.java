@@ -31,7 +31,7 @@ public class JaxrsProcessor extends AbstractRestAnnotationProcessor {
 
   public JaxrsProcessor() {
     super("javax.ws.rs.", new String[] { RELATIVE_URI, BASE_URI, "GET", "PUT", "DELETE", "POST", "Consumes",
-        "Produces", "QueryParam" });
+        "Produces", "PathParam" });
   }
 
   @Override
@@ -126,6 +126,12 @@ public class JaxrsProcessor extends AbstractRestAnnotationProcessor {
   @Override
   protected Collection<String> getProduces(Element element, TypeElement annotation) {
     return annotationValue(element, annotation, "Produces");
+  }
+
+  @Override
+  protected Parameter getParameter(Element element, TypeElement annotation) {
+    Collection<String> names = annotationValue(element, annotation, "PathParam");
+    return names == null ? null : new Parameter(names.iterator().next(), getDocumentationFor(element));
   }
 
 }
