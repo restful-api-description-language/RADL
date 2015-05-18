@@ -12,6 +12,7 @@ deploy:
   provider: releases
   api_key:
     secure: RWpPmmzrJ2Ddx8nwG6k6UZm98o7gMRpGJ2liCFUGy5Uuf8w5AXj6xMLKFdcK3pZFSYBQ1+4DycFPAXmFCfP+nv6dX9PbDkOVB669ecnxStfVse0zXYgjuNEmhAht6wDb/O6jiNUrnyXcmQDExhXC3SigtnWcLUiRbJOYGoc3oSQ=
+  file_glob: true
   file:
     - java/core/build/libs/*
     - java/eclipse/build/libs/*
