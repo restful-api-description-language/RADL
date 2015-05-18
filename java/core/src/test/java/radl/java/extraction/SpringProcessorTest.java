@@ -13,10 +13,13 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Set;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 
+import org.junit.Before;
 import org.junit.Test;
 
 
@@ -24,8 +27,17 @@ public class SpringProcessorTest extends AbstractRestAnnotationProcessorTest {
 
   private static final String SPRING_ANNOTATION_PACKAGE = "org.springframework.web.bind.annotation.";
   private static final String REQUEST_MAPPING_ANNOTATION = "RequestMapping";
+  private static final String REQUEST_PARAM_ANNOTATION = "RequestParam";
 
   private final SpringProcessor processor = new SpringProcessor();
+
+  @Before
+  public void init() {
+    ProcessingEnvironment processingEnv = mock(ProcessingEnvironment.class);
+    Elements elementUtils = mock(Elements.class);
+    when(processingEnv.getElementUtils()).thenReturn(elementUtils);
+    processor.init(processingEnv);
+  }
 
   @Test
   public void extendsAbstractRestAnnotationProcessor() {
@@ -42,6 +54,7 @@ public class SpringProcessorTest extends AbstractRestAnnotationProcessorTest {
     for (String annotation : annotations) {
       assertTrue("Invalid annotation: " + annotation, annotation.startsWith(SPRING_ANNOTATION_PACKAGE));
     }
+    assertTrue("Doesn't support RequestParam", annotations.contains(SPRING_ANNOTATION_PACKAGE + "RequestParam"));
   }
 
   @Test
@@ -94,6 +107,23 @@ public class SpringProcessorTest extends AbstractRestAnnotationProcessorTest {
     Element element = annotatedClass(annotation, "produces", produces);
 
     assertEquals("Produces", Arrays.asList(produces), processor.getProduces(element, annotation));
+  }
+
+  @Test
+  public void extractsParameter() throws Exception {
+    TypeElement annotation = requestParam();
+    String parameter = aName();
+    Element element = annotatedClass(annotation, "value", parameter);
+
+    assertEquals("RequestParam", parameter, processor.getParameter(element, annotation).getName());
+  }
+
+  private TypeElement requestParam() {
+    String value = SPRING_ANNOTATION_PACKAGE + REQUEST_PARAM_ANNOTATION;
+    TypeElement result = mock(TypeElement.class);
+    when(result.getQualifiedName()).thenReturn(name(value));
+    when(result.getSimpleName()).thenReturn(name(REQUEST_PARAM_ANNOTATION));
+    return result;
   }
 
 }

@@ -18,7 +18,7 @@ public class SpringProcessor extends AbstractRestAnnotationProcessor {
   private static final String METHOD_PREFIX = SPRING_ANNOTATION_PACKAGE + "RequestMethod.";
 
   public SpringProcessor() {
-    super(SPRING_ANNOTATION_PACKAGE, new String[] { "RequestMapping" });
+    super(SPRING_ANNOTATION_PACKAGE, new String[] { "RequestMapping", "RequestParam" });
   }
 
   @Override
@@ -51,7 +51,8 @@ public class SpringProcessor extends AbstractRestAnnotationProcessor {
 
   @Override
   protected Parameter getParameter(Element element, TypeElement annotation) {
-    return null;
+    Collection<String> names = valueOf(annotation, element, "value");
+    return names == null ? null : new Parameter(names.iterator().next(), getDocumentationFor(element));
   }
 
 }
