@@ -23,6 +23,12 @@ public interface ResourceModel {
 
   void setLocations(String resourceName, Collection<String> locations);
 
+  void addLocationVar(String resourceName, String varName, String documentation);
+
+  Iterable<String> getLocationVars(String resourceName);
+
+  String getLocationVarDocumentation(String resourceName, String varName);
+
   void addMethod(String resourceName, String methodName, String consumes, String produces, String documentation);
 
   Iterable<String> mediaTypes();

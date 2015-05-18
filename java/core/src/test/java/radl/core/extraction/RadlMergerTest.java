@@ -100,12 +100,18 @@ public class RadlMergerTest {
 
   @Test
   public void buildsUriTemplate() throws Exception {
-    String uri = aUri() + "{" + aName() + "}/";
+    String varName = aName();
+    String varDoc = aName();
+    String uri = aUri() + "{" + varName + "}/";
     String method = aMethod();
     radlBuilder.element("resources").element("resource")
         .attribute("name", resourceName)
         .element("location")
             .attribute("uri-template", uri)
+            .element("var")
+                .attribute("name", varName)
+                .element("documentation", varDoc)
+            .end()
         .end()
         .element("methods")
             .element("method")
@@ -115,6 +121,7 @@ public class RadlMergerTest {
     resourceModel.addResource(resourceName, null);
     resourceModel.addMethod(resourceName, method, null, null, null);
     resourceModel.addLocations(resourceName, Arrays.asList(uri));
+    resourceModel.addLocationVar(resourceName, varName, varDoc);
 
     assertRadl();
   }

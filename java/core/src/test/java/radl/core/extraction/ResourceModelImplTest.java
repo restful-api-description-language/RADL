@@ -206,4 +206,20 @@ public class ResourceModelImplTest {
     TestUtil.assertCollectionEquals("Media types", Collections.<String>emptyList(), model.mediaTypes());
   }
 
+  // Issue 22
+  @Test
+  public void maintainsUriTemplateVars() throws Exception {
+    String resourceName = aName();
+    String paramName = aName();
+    String paramDoc = aName();
+    String location = String.format("/%s/{%s}/", aName(), paramName);
+    model.addResource(resourceName, null);
+    model.addLocations(resourceName, Arrays.asList(location));
+
+    model.addLocationVar(resourceName, paramName, paramDoc);
+
+    assertEquals("Names", Arrays.asList(paramName), model.getLocationVars(resourceName));
+    assertEquals("Documentation", paramDoc, model.getLocationVarDocumentation(resourceName, paramName));
+  }
+
 }

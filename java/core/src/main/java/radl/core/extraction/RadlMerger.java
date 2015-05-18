@@ -189,9 +189,16 @@ public class RadlMerger implements ResourceModelMerger {
     String uri = resourceModel.getUri(resource);
     if (uri != null) {
       String uriAttribute = uri.contains("{") ? "uri-template" : "uri";
-      radl.element("location")
-          .attribute(uriAttribute, uri)
-      .end();
+      radl.element("location").attribute(uriAttribute, uri);
+      for (String var : resourceModel.getLocationVars(resource)) {
+        radl.element("var").attribute("name", var);
+        String documentation = resourceModel.getLocationVarDocumentation(resource, var);
+        if (documentation != null) {
+          radl.element("documentation", documentation);
+        }
+        radl.end();
+      }
+      radl.end();
     }
   }
 

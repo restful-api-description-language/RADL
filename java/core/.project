@@ -18,5 +18,10 @@
 			<type>2</type>
 			<location>/home/remon/workspace/sinner_lembata-radl/RADL/specification</location>
 		</link>
+		<link>
+			<name>specification</name>
+			<type>2</type>
+			<location>/home/remon/workspace/github/RADL/specification</location>
+		</link>
 	</linkedResources>
 </projectDescription>

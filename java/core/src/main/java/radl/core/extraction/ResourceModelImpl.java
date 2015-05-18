@@ -37,6 +37,8 @@ public class ResourceModelImpl implements ResourceModel {
   private final Collection<String> resources = new HashSet<String>();
   private final Map<String, Collection<Method>> methodsByResource = new HashMap<String, Collection<Method>>();
   private final Map<String, Collection<String>> locationsByResource = new HashMap<String, Collection<String>>();
+  private final Map<String, Collection<UriTemplateVar>> locationVarsByResource
+      = new HashMap<String, Collection<UriTemplateVar>>();
   private final Map<String, Collection<String>> parentResourcesByChild
       = new LinkedHashMap<String, Collection<String>>();
   private final Map<String, Collection<String>> childResourcesByParent
@@ -249,6 +251,43 @@ public class ResourceModelImpl implements ResourceModel {
   }
 
   @Override
+  public void addLocationVar(String resourceName, String varName, String documentation) {
+    logResource(resourceName, "location var: " + varName);
+    Collection<UriTemplateVar> vars = locationVarsByResource.get(resourceName);
+    if (vars == null) {
+      vars = new ArrayList<UriTemplateVar>();
+      locationVarsByResource.put(resourceName, vars);
+    }
+    vars.add(new UriTemplateVar(varName, documentation));
+  }
+
+  @Override
+  public Iterable<String> getLocationVars(String resourceName) {
+    Collection<String> result = new ArrayList<String>();
+    Collection<UriTemplateVar> vars = locationVarsByResource.get(resourceName);
+    if (vars != null) {
+      for (UriTemplateVar var : vars) {
+        result.add(var.getName());
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public String getLocationVarDocumentation(String resourceName, String varName) {
+    Collection<UriTemplateVar> vars = locationVarsByResource.get(resourceName);
+    if (vars == null) {
+      return null;
+    }
+    for (UriTemplateVar var : vars) {
+      if (var.getName().equals(varName)) {
+        return var.getDocumentation();
+      }
+    }
+    return null;
+  }
+
+  @Override
   public Iterable<String> mediaTypes() {
     Collection<String> result = new TreeSet<String>();
     for (Collection<Method> methods : methodsByResource.values()) {
@@ -389,6 +428,11 @@ public class ResourceModelImpl implements ResourceModel {
     if (locationsByResource.containsKey(oldChild)) {
       addLocations(newChild, locationsByResource.get(oldChild));
     }
+    if (locationVarsByResource.containsKey(oldChild)) {
+      for (UriTemplateVar var : locationVarsByResource.get(oldChild)) {
+        addLocationVar(newChild, var.getName(), var.getDocumentation());
+      }
+    }
   }
 
   private Iterable<String> getChildren(String parent) {
@@ -401,6 +445,7 @@ public class ResourceModelImpl implements ResourceModel {
     removeParentChild(name);
     methodsByResource.remove(name);
     locationsByResource.remove(name);
+    locationVarsByResource.remove(name);
     logResource(name, "is removed");
   }
 
@@ -606,6 +651,7 @@ public class ResourceModelImpl implements ResourceModel {
     replaceKey(parentResourcesByChild, newName, oldNames);
     replaceKey(childResourcesByParent, newName, oldNames);
     replaceKey(locationsByResource, newName, oldNames);
+    replaceKey(locationVarsByResource, newName, oldNames);
     replaceKey(methodsByResource, newName, oldNames);
   }
 
@@ -926,6 +972,7 @@ public class ResourceModelImpl implements ResourceModel {
     resources.add(newName);
     renameKey(oldName, newName, methodsByResource);
     renameKey(oldName, newName, locationsByResource);
+    renameKey(oldName, newName, locationVarsByResource);
     resources.remove(oldName);
   }
 
