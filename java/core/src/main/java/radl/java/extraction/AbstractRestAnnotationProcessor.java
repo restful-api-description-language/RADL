@@ -153,23 +153,25 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
     String resourceName = qualifiedNameOf(classElement);
     addResource(resourceName, getDocumentationFor(classElement));
 
-    if (!parameters.isEmpty()) {
+    if (parameters.isEmpty()) {
+      if (uris == null) {
+        addMethod(resourceName, method, consumes, produces, getDocumentationFor(element));
+      } else {
+        if (element.getKind() == ElementKind.METHOD) {
+          for (String childResourceName : getChildResourceNames(allTypes, resourceName, element)) {
+            addResource(childResourceName, null);
+            getResourceModel().addParentResource(childResourceName, resourceName);
+            getResourceModel().addLocations(childResourceName, uris);
+            addMethod(childResourceName, method, consumes, produces, getDocumentationFor(element));
+          }
+        } else {
+          getResourceModel().addLocations(resourceName, uris);
+          addMethod(resourceName, method, consumes, produces, getDocumentationFor(element));
+        }
+      }
+    } else {
       for (Parameter parameter : parameters) {
         addParameter(resourceName, parameter);
-      }
-    } else if (uris == null) {
-      addMethod(resourceName, method, consumes, produces, getDocumentationFor(element));
-    } else {
-      if (element.getKind() == ElementKind.METHOD) {
-        for (String childResourceName : getChildResourceNames(allTypes, resourceName, element)) {
-          addResource(childResourceName, null);
-          getResourceModel().addParentResource(childResourceName, resourceName);
-          getResourceModel().addLocations(childResourceName, uris);
-          addMethod(childResourceName, method, consumes, produces, getDocumentationFor(element));
-        }
-      } else {
-        getResourceModel().addLocations(resourceName, uris);
-        addMethod(resourceName, method, consumes, produces, getDocumentationFor(element));
       }
     }
   }
