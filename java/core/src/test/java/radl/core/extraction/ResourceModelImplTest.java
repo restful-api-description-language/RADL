@@ -210,16 +210,38 @@ public class ResourceModelImplTest {
   @Test
   public void maintainsUriTemplateVars() throws Exception {
     String resourceName = aName();
+    String paramName1 = 'z' + aName();
+    String paramDoc1 = aName();
+    String paramName2 = 'a' + aName();
+    String location = String.format("/%s/{%s}/{%s}/", aName(), paramName1, paramName2);
+    model.addResource(resourceName, null);
+    model.addLocations(resourceName, Arrays.asList(location));
+
+    model.addLocationVar(resourceName, paramName1, paramDoc1);
+    model.addLocationVar(resourceName, paramName2, null);
+
+    TestUtil.assertCollectionEquals("Names", Arrays.asList(paramName2, paramName1), model.getLocationVars(resourceName));
+    assertEquals("Documentation", paramDoc1, model.getLocationVarDocumentation(resourceName, paramName1));
+    assertEquals("Documentation", null, model.getLocationVarDocumentation(resourceName, paramName2));
+  }
+
+  // Issue 22
+  @Test
+  public void uriTemplateVarsAreUnique() throws Exception {
+    String resourceName = aName();
     String paramName = aName();
-    String paramDoc = aName();
+    String paramDoc1 = aName();
+    String paramDoc2 = aName();
     String location = String.format("/%s/{%s}/", aName(), paramName);
     model.addResource(resourceName, null);
     model.addLocations(resourceName, Arrays.asList(location));
 
-    model.addLocationVar(resourceName, paramName, paramDoc);
+    model.addLocationVar(resourceName, paramName, paramDoc1);
+    model.addLocationVar(resourceName, paramName, paramDoc2);
+    model.addLocationVar(resourceName, paramName, null);
 
-    assertEquals("Names", Arrays.asList(paramName), model.getLocationVars(resourceName));
-    assertEquals("Documentation", paramDoc, model.getLocationVarDocumentation(resourceName, paramName));
+    TestUtil.assertCollectionEquals("Names", Arrays.asList(paramName), model.getLocationVars(resourceName));
+    assertEquals("Documentation", paramDoc2, model.getLocationVarDocumentation(resourceName, paramName));
   }
 
 }

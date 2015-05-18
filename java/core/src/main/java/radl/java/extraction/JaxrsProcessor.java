@@ -31,7 +31,7 @@ public class JaxrsProcessor extends AbstractRestAnnotationProcessor {
 
   public JaxrsProcessor() {
     super("javax.ws.rs.", new String[] { RELATIVE_URI, BASE_URI, "GET", "PUT", "DELETE", "POST", "Consumes",
-        "Produces" });
+        "Produces", "QueryParam" });
   }
 
   @Override

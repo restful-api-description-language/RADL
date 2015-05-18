@@ -56,6 +56,7 @@ public class JaxrsProcessorTest extends AbstractRestAnnotationProcessorTest {
     for (String annotation : annotations) {
       assertTrue("Incorrect annotation: " + annotation, annotation.startsWith(JAXRS_PACKAGE));
     }
+    assertTrue("Doesn't support QueryParam", annotations.contains(JAXRS_PACKAGE + "QueryParam"));
   }
 
   @Test

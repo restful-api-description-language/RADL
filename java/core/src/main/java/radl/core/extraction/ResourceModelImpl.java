@@ -258,12 +258,22 @@ public class ResourceModelImpl implements ResourceModel {
       vars = new ArrayList<UriTemplateVar>();
       locationVarsByResource.put(resourceName, vars);
     }
+    UriTemplateVar found = null;
+    for (UriTemplateVar var : vars) {
+      if (var.getName().equals(varName)) {
+        if (documentation == null || documentation.equals(var.getDocumentation())) {
+          return;
+        }
+        found = var;
+      }
+    }
     vars.add(new UriTemplateVar(varName, documentation));
+    vars.remove(found);
   }
 
   @Override
   public Iterable<String> getLocationVars(String resourceName) {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new TreeSet<String>();
     Collection<UriTemplateVar> vars = locationVarsByResource.get(resourceName);
     if (vars != null) {
       for (UriTemplateVar var : vars) {
