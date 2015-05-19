@@ -2,7 +2,7 @@
 
 # RADL #
 
-![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) [code coverage](https://codecov.io/github/restful-api-description-language/RADL)
+![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) [code coverage](https://codecov.io/github/restful-api-description-language/RADL) [coverage %](https://codecov.io/github/codecov/browser-extension)https://codecov.io/github/codecov/browser-extension
 
 * [What is RADL?](#What_is_RADL)
 * [How can I get RADL?](#How_can_I_get_RADL)
