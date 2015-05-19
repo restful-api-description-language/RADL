@@ -1,6 +1,6 @@
 ![logo](logo.png "Logo")
 
-# RADL ![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) #
+# RADL ![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) [code coverage](https://codecov.io/github/restful-api-description-language/RADL) #
 
 * [What is RADL?](#What_is_RADL)
 * [How can I get RADL?](#How_can_I_get_RADL)
