@@ -28,10 +28,3 @@ deploy:
     repo: restful-api-description-language/RADL
     tags: true
     all_branches: true
-before_install:
-  - sudo add-apt-repository ppa:fkrull/deadsnakes
-  - sudo apt-get update
-  - sudo apt-get install python2.7
-  - pip install codecov
-after_success:
-  codecov
