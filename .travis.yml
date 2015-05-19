@@ -13,7 +13,8 @@ notifications:
     on_failure: always
     on_start: true
 after_success:
-  ./deploy_to_bintray.sh
+  - ./deploy_to_bintray.sh
+  - bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: releases
   api_key:
@@ -27,3 +28,7 @@ deploy:
     repo: restful-api-description-language/RADL
     tags: true
     all_branches: true
+before_install:
+  pip install codecov
+after_success:
+  codecov
