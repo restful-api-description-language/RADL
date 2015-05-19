@@ -1,3 +1,7 @@
+env:
+  global:
+    - USER=ApiSecRay
+    - secure: XgXG6UVWg8+MpXXaNH0c3w3Tsp9XBi1eXPbGUi16ztZUS/DVDnCbrFFX1ABXz4Dw+qCER67hjtcL6O0bczt1oJFFurC1tMzSXqZSrVIDcDAEVKCi08dy73yxm0QX4HFWg/z67O0DzJi8teYMcItSgBAsKbhnVEV+mnYxS/wR86c=
 language: java
 jdk:
 - openjdk6
@@ -21,3 +25,11 @@ deploy:
     repo: restful-api-description-language/RADL
     tags: true
     all_branches: true
+after_success:
+  if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "TRAVIS_SECURE_ENV_VARS" == "true"]; then
+    for $package in "core" "gradle" do
+      for file in java/$package/build/libs/*; do 
+        echo curl -T $file -u$USER:<key> https://api.bintray.com/content/radl/RADL/$file;bt_package=radl-$package;bt_version=$TRAVIS_TAG;publish=1;override=1
+      done
+    done
+  fi
