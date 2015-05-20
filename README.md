@@ -1,7 +1,7 @@
 # RADL
 
 [![license](https://img.shields.io/github/license/restful-api-description-language/RADL.svg)](https://raw.githubusercontent.com/restful-api-description-language/RADL/LICENSE)
-![Version](https://img.shields.io/github/release/restful-api-description-language/radl.svg)
+[![Version](https://img.shields.io/github/release/restful-api-description-language/radl.svg)](https://github.com/restful-api-description-language/RADL/releases)
 ![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) [![codecov.io](https://img.shields.io/codecov/c/github/restful-api-description-language/RADL.svg)](https://codecov.io/github/restful-api-description-language/RADL)
 
 * [What is RADL?](#What_is_RADL)
