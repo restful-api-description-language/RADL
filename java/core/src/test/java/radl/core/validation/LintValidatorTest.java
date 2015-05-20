@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.validation;
 
@@ -26,7 +26,7 @@ import radl.core.validation.Issue.Level;
 @RunWith(Parameterized.class)
 public class LintValidatorTest {
 
-  private static final File TESTS_DIR = new File("specification/tests/invalid");
+  private static final File TESTS_DIR = new File(System.getProperty("radl.dir", "."), "specification/tests/invalid");
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {

@@ -156,3 +156,8 @@ task testValidation(type: Test) {
     maxGranularity = 3
   } 
 }
+
+test {
+  systemProperty 'radl.dir', project.rootProject.projectDir
+}
+
