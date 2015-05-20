@@ -109,5 +109,5 @@ Java classes mentioned above.
 
 ## <a name="License"/> License ##
 
-Copyright Â© EMC Corporation. All rights reserved. EMC grants rights under the Apache 2.0 license.
-See the `LICENSE` file for more information.
+Copyright © EMC Corporation. All rights reserved. EMC grants rights under the Apache 2.0 license.
+See the [`LICENSE`](https://raw.githubusercontent.com/restful-api-description-language/RADL/LICENSE) file for more information.
