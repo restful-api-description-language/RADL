@@ -1,6 +1,6 @@
 # RADL
 
-[![license](https://img.shields.io/github/license/restful-api-description-language/RADL.svg)](https://raw.githubusercontent.com/restful-api-description-language/RADL/LICENSE)
+[![license](https://img.shields.io/github/license/restful-api-description-language/RADL.svg)](https://raw.githubusercontent.com/restful-api-description-language/RADL/master/LICENSE)
 [![Version](https://img.shields.io/github/release/restful-api-description-language/radl.svg)](https://github.com/restful-api-description-language/RADL/releases)
 ![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) [![codecov.io](https://img.shields.io/codecov/c/github/restful-api-description-language/RADL.svg)](https://codecov.io/github/restful-api-description-language/RADL)
 
@@ -110,4 +110,4 @@ Java classes mentioned above.
 ## <a name="License"/> License ##
 
 Copyright © EMC Corporation. All rights reserved. EMC grants rights under the Apache 2.0 license.
-See the [`LICENSE`](https://raw.githubusercontent.com/restful-api-description-language/RADL/LICENSE) file for more information.
+See the [`LICENSE`](https://raw.githubusercontent.com/restful-api-description-language/RADL/master/LICENSE) file for more information.
