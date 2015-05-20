@@ -1,5 +1,3 @@
-![logo](logo.png "Logo")
-
 # RADL
 
 [![license](https://img.shields.io/github/license/restful-api-description-language/RADL.svg)](https://raw.githubusercontent.com/restful-api-description-language/RADL/LICENSE)
@@ -15,6 +13,8 @@
   * [Using RADL with Java](#Using_RADL_with_Java)
   * [Using RADL with Maven](#Using_RADL_with_Maven)
 * [License](#License)
+
+![logo](logo.png "Logo")
 
 
 ## <a name="What_is_RADL"/> What is RADL? ##
