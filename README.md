@@ -1,6 +1,9 @@
 ![logo](logo.png "Logo")
 
-# RADL ![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) [![codecov.io](https://img.shields.io/codecov/c/github/restful-api-description-language/RADL.svg)](https://codecov.io/github/restful-api-description-language/RADL)
+# RADL
+
+[![license](https://img.shields.io/badge/license-apache_2.0-red.svg?style=flat)](https://raw.githubusercontent.com/restful-api-description-language/RADL/LICENSE)
+![Build Status](https://travis-ci.org/restful-api-description-language/RADL.svg?branch=master) [![codecov.io](https://img.shields.io/codecov/c/github/restful-api-description-language/RADL.svg)](https://codecov.io/github/restful-api-description-language/RADL)
 
 * [What is RADL?](#What_is_RADL)
 * [How can I get RADL?](#How_can_I_get_RADL)
