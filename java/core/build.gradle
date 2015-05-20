@@ -152,7 +152,7 @@ task testValidation(type: Test) {
   workingDir = project.rootProject.projectDir
   testLogging {
     showStandardStreams = true 
-    exceptionFormat "full"
+    exceptionFormat 'full'
     maxGranularity = 3
   } 
 }
