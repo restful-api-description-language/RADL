@@ -146,3 +146,13 @@ jar {
     symbolicName = 'radl-core'
   }
 }
+
+task testValidation(type: Test) {
+  include 'radl/core/validation/LintValidatorTest.class'
+  workingDir = project.rootProject.projectDir
+  testLogging {
+    showStandardStreams = true 
+    exceptionFormat "full"
+    maxGranularity = 3
+  } 
+}
