@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="vzt">
+  <resources>
+    <resource name="hjovegqt">
+      <methods>
+        <method name="doaatism">
+          <request>
+            <representations>
+              <representation media-type="mzcpapju"/>
+            </representations>
+          </request>
+        </method>
+      </methods>
+    </resource>
+  </resources>
+</service>
+

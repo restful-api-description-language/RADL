@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="wvn">
+  <resources>
+    <resource name="ycbqerog">
+      <methods>
+        <method name="iosalpwr">
+          <transitions>
+            <transition ref="jsfixdpq"/>
+          </transitions>
+        </method>
+      </methods>
+    </resource>
+  </resources>
+</service>
+

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="noz">
+  <resources>
+    <resource name="afgxpsxiz">
+      <location uri="/oostnhad/wktqgrta/abjvpnnr"/>
+      <methods>
+        <method name="ddmnzpqx"/>
+      </methods>
+    </resource>
+    <resource name="zbgftrnoj">
+      <location uri-template="/oostnhad/wktqgrta/{hqzayuoc}"/>
+      <methods>
+        <method name="ddmnzpqx"/>
+      </methods>
+    </resource>
+  </resources>
+</service>
+

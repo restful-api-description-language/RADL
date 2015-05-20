@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="nwv">
+  <resources>
+    <resource name="ibimpoej">
+      <location uri="/hefcwyls/gibjrvav/{komvysev}/hdarcloc/{komvysev}"/>
+    </resource>
+  </resources>
+</service>
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="ykp">
+  <link-relations>
+    <link-relation name="zvhbnkyr">
+      <transitions>
+        <transition ref="rfpttwjn"/>
+      </transitions>
+    </link-relation>
+  </link-relations>
+</service>
+

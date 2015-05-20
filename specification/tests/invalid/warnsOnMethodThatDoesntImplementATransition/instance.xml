@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="uae">
+  <resources>
+    <resource name="lpuyhmby">
+      <methods>
+        <method name="oddicerj"/>
+      </methods>
+    </resource>
+  </resources>
+</service>
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="flt">
+  <states>
+    <start-state>
+      <transitions>
+        <transition name="ltbqazkz" to="xfqqcpam"/>
+      </transitions>
+    </start-state>
+  </states>
+</service>
+

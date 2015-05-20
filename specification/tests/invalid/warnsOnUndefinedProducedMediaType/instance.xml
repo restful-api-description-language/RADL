@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="tfn">
+  <resources>
+    <resource name="ktkqcxmg">
+      <methods>
+        <method name="aklepjaf">
+          <response>
+            <representations>
+              <representation media-type="dycfcilh"/>
+            </representations>
+          </response>
+        </method>
+      </methods>
+    </resource>
+  </resources>
+</service>
+

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:radl:service" name="klv">
+  <link-relations>
+    <link-relation name="kkevauuu"/>
+    <link-relation name="kkevauuu"/>
+  </link-relations>
+</service>
+
