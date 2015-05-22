@@ -2,6 +2,8 @@ env:
   global:
     - USER=ApiSecRay
     - secure: XgXG6UVWg8+MpXXaNH0c3w3Tsp9XBi1eXPbGUi16ztZUS/DVDnCbrFFX1ABXz4Dw+qCER67hjtcL6O0bczt1oJFFurC1tMzSXqZSrVIDcDAEVKCi08dy73yxm0QX4HFWg/z67O0DzJi8teYMcItSgBAsKbhnVEV+mnYxS/wR86c=
+    # COVERITY_SCAN_TOKEN:
+    - secure: "Rtj2gG4t84+r62T4IXOsJPA+3R8cfFJaCrehh8W9gFGXTRvwEnpBLkjJGBT//DhpnENZFncjy7Kk5LdDY3dY4qBtek+lxrAXTWqHmxOAEuwHBymlSWsQt0II1LD8HmmHeMUvo2LPq6flbZG7x4qR6/bk2y5BFAtdLn8G3G/CbOg="
 language: java
 jdk:
 - openjdk6
@@ -28,3 +30,12 @@ deploy:
     repo: restful-api-description-language/RADL
     tags: true
     all_branches: true
+addons:
+  coverity_scan:
+    project:
+      name: "restful-api-description-language/RADL"
+      description: "Build submitted via Travis CI"
+    notification_email: rssinnema@yahoo.com
+    build_command_prepend: "./gradlew clean"
+    build_command:   "./gradlew assemble"
+    branch_pattern: coverity_scan
