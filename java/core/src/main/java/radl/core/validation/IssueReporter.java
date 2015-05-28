@@ -9,6 +9,8 @@ package radl.core.validation;
  */
 public interface IssueReporter {
 
+  void setReportFileName(String reportFileName);
+
   /**
    * Start the report.
    */
@@ -30,5 +32,10 @@ public interface IssueReporter {
    * End the report.
    */
   void end();
+
+  /**
+   * @return A unique identifier for the issue reporter
+   */
+  String getId();
 
 }

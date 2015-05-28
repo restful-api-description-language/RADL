@@ -3,11 +3,13 @@
  */
 package radl.core.validation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Locale;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import radl.common.io.IO;
@@ -23,7 +25,12 @@ public class CheckStyleIssueReporterTest {
   private static final RandomData RANDOM = new RandomData();
   private static final String OUTPUT_FILE = "build/checkstyle/radl-issues.xml";
 
-  private final IssueReporter reporter = new CheckStyleIssueReporter(OUTPUT_FILE);
+  private final IssueReporter reporter = new CheckStyleIssueReporter();
+
+  @Before
+  public void init() {
+    reporter.setReportFileName(OUTPUT_FILE);
+  }
 
   @Test
   public void writesCheckStyleCompatibleOutput() {
@@ -57,6 +64,11 @@ public class CheckStyleIssueReporterTest {
     } finally {
       IO.delete(checkStyleFile);
     }
+  }
+
+  @Test
+  public void identifiedAsCheckstyle() throws Exception {
+    assertEquals("ID", "checkstyle", reporter.getId());
   }
 
 }

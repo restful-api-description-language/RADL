@@ -17,14 +17,17 @@ import radl.common.xml.Xml;
  */
 public class CheckStyleIssueReporter implements IssueReporter {
 
-  private String currentFileName;
-  private final String outputFileName;
+  public static final String ID = "checkstyle";
+
   private final DocumentBuilder output = DocumentBuilder.newDocument()
       .element("checkstyle")
           .attribute("version", "5.6");
+  private String currentFileName;
+  private String outputFileName;
 
-  public CheckStyleIssueReporter(String outputFileName) {
-    this.outputFileName = outputFileName;
+  @Override
+  public void setReportFileName(String reportFileName) {
+    this.outputFileName = reportFileName;
   }
 
   @Override
@@ -74,6 +77,11 @@ public class CheckStyleIssueReporter implements IssueReporter {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public String getId() {
+    return ID;
   }
 
 }
