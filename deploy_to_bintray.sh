@@ -1,4 +1,4 @@
-if [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then
+if [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then
   for package in "core" "gradle"; do
     for path in java/$package/build/libs/*; do
       version=$(basename $path | awk -F- '{print $3}' | cut -d. -f1-3)
@@ -7,7 +7,6 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL
     done
   done
 else
-  echo TRAVIS_BRANCH=$TRAVIS_BRANCH
   echo TRAVIS_TAG=$TRAVIS_TAG
   echo TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST
   echo TRAVIS_SECURE_ENV_VARS=$TRAVIS_SECURE_ENV_VARS
