@@ -26,7 +26,7 @@ import radl.core.validation.Issue.Level;
 @RunWith(Parameterized.class)
 public class LintValidatorTest {
 
-  private static final File TESTS_DIR = new File(System.getProperty("radl.dir", "."), "specification/tests/invalid");
+  private static final File TESTS_DIR = new File(System.getProperty("radl.dir", "."), "specification/tests/validation");
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {

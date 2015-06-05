@@ -1,0 +1,6 @@
+<assert>
+  <equals message="Link to media type specification">
+    <literal>http://baz.com/gnu.html</literal>
+    <select element="h1#media-types + table td:has(code:contains(foo/bar)) + td a" attribute="href"/>
+  </equals>
+</assert>

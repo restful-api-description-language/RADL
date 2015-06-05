@@ -1,1 +1,0 @@
-This directory contains validation tests. The "valid" directory contains valid instances that each capture a particular use case that we want to support. The "invalid" directory contains invalid instances that demonstrate our validation beyond the schema.

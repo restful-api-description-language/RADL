@@ -548,4 +548,16 @@ public final class Xml {
     }
   }
 
+
+  public static Element nextElement(Element element) {
+    Node current = element.getNextSibling();
+    while (current != null) {
+      if (current.getNodeType() == Node.ELEMENT_NODE) {
+        return (Element)current;
+      }
+      current = current.getNextSibling();
+    }
+    return null;
+  }
+
 }
