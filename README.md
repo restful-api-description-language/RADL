@@ -42,9 +42,7 @@ RADL is formally defined in the [RADL Specification](specification/spec.md).
 
 * Get the [latest binary release](https://github.com/restful-api-description-language/RADL/releases)
 * Get from BinTray's Maven repository using the repository URL `http://dl.bintray.com/radl/RADL`
-* Get the source code using
-
-    git clone https://github.com/restful-api-description-language/RADL
+* Get the source code using `git clone https://github.com/restful-api-description-language/RADL`
 
 
 ##  <a name="How_do_I_use_RADL"/> How do I use RADL?
