@@ -12,7 +12,8 @@ dependencies {
       "net.sf.saxon:Saxon-HE:$saxonVersion", 
       // TODO: Java 7 only   'jgraphx:jgraphx:3.0.1.1', 
       'isorelax:isorelax:20030108', 
-      'commons-lang:commons-lang:2.6'
+      'commons-lang:commons-lang:2.6',
+      'org.jsoup:jsoup:1.8.2'
   compile('com.thaiopensource:jing:20091111') {
     exclude module: 'xml-apis'
     exclude module: 'saxon', group: 'net.sf.saxon'
@@ -161,3 +162,12 @@ test {
   systemProperty 'radl.dir', project.rootProject.projectDir
 }
 
+task testDocumentation(type: Test) {
+  include 'radl/core/documentation/DocumentationTest.class'
+  workingDir = project.rootProject.projectDir
+  testLogging {
+    showStandardStreams = true 
+    exceptionFormat 'full'
+    maxGranularity = 3
+  } 
+}

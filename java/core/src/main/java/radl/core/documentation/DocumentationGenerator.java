@@ -49,7 +49,7 @@ public final class DocumentationGenerator implements Application {
     File docDir = arguments.file();
     docDir.mkdirs();
     File configuration = arguments.hasNext() ? arguments.file() : null;
-    if (configuration != null && configuration.getName().endsWith(".radl")) {
+    if (configuration != null && isRadlFile(configuration)) {
       arguments.prev();
       configuration = null;
     }
@@ -67,6 +67,10 @@ public final class DocumentationGenerator implements Application {
       }
     }
     return 0;
+  }
+
+  private boolean isRadlFile(File configuration) {
+    return configuration.getName().endsWith(".radl") || configuration.getName().endsWith(".xml");
   }
 
   private void generateClientDocumentation(File radlFile, File docDir, File configuration) {
@@ -89,6 +93,9 @@ public final class DocumentationGenerator implements Application {
   private void generateClientDocumentation(Document radl, File destination) {
     try {
       InputStream stylesheet = getClass().getResourceAsStream(CLIENT_DOCUMENTATION_STYLESHEET);
+      if (stylesheet == null) {
+        throw new IllegalStateException("Missing stylesheet: " + CLIENT_DOCUMENTATION_STYLESHEET);
+      }
       try {
         generateClientDocumentation(radl, stylesheet, destination);
       } finally {

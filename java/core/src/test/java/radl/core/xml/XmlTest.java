@@ -4,9 +4,13 @@
 package radl.core.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static radl.common.xml.DocumentBuilder.newDocument;
 
 import java.io.ByteArrayInputStream;
@@ -18,10 +22,15 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 import radl.common.io.ByteArrayInputOutputStream;
 import radl.common.io.StringStream;
@@ -217,6 +226,37 @@ public class XmlTest {
     assertEquals("Simple text", "cat", Xml.escape("cat"));
     assertEquals("Quote", "&quot;duck", Xml.escape("\"duck"));
     assertEquals("Angle bracket", "&lt;elk", Xml.escape("<elk"));
+  }
+
+  @Test
+  public void filtersNamespaceAttributesFromAttributes() {
+    NamedNodeMap map = mock(NamedNodeMap.class);
+    when(map.getLength()).thenReturn(3);
+    when(map.item(any(Integer.class))).thenAnswer(new Answer<Node>() {
+      @Override
+      public Node answer(InvocationOnMock invocation) throws Throwable {
+        int index = (Integer)invocation.getArguments()[0];
+        switch (index) {
+          case 0: return nodeOf("xmlns");
+          case 1: return nodeOf("xmlns:falcon");
+          default: return nodeOf("grizzly");
+        }
+      }
+    });
+    Node node = mock(Node.class);
+    when(node.getAttributes()).thenReturn(map);
+
+    Iterator<Node> nodes = Xml.getAttributes(node).iterator();
+
+    assertTrue("Missing node", nodes.hasNext());
+    assertEquals("Node", "grizzly", nodes.next().getNodeName());
+    assertFalse("Extra node", nodes.hasNext());
+  }
+
+  private Node nodeOf(String name) {
+    Node result = mock(Node.class);
+    when(result.getNodeName()).thenReturn(name);
+    return result;
   }
 
 }

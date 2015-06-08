@@ -3,6 +3,7 @@
  */
 package radl.core.validation;
 
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import radl.core.validation.Issue.Level;
@@ -15,12 +16,25 @@ public class PrintStreamIssueReporter implements IssueReporter {
 
   private static final String NL = System.getProperty("line.separator");
 
-  private final PrintStream stream;
+  private PrintStream stream;
   private StringBuilder errors; // NOPMD AvoidStringBufferField
   private String currentFile;
 
+  public PrintStreamIssueReporter() {
+    this(System.out);
+  }
+
   public PrintStreamIssueReporter(PrintStream stream) {
     this.stream = stream;
+  }
+
+  @Override
+  public void setReportFileName(String reportFileName) {
+    try {
+      this.stream = new PrintStream(reportFileName);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -50,6 +64,11 @@ public class PrintStreamIssueReporter implements IssueReporter {
     if (errors.length() > 0) {
       throw new IllegalArgumentException(errors.toString());
     }
+  }
+
+  @Override
+  public String getId() {
+    return "stdout";
   }
 
 }

@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,8 @@ import com.google.common.escape.Escapers;
  * Utility methods for working with XML.
  */
 public final class Xml {
+
+  private static final String NAMESPACE_ATTRIBUTE_PREFIX = "xmlns";
 
   public static final String XML_PROLOG = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
@@ -425,7 +429,7 @@ public final class Xml {
   }
 
   private static boolean isNamespaceNode(Node node) {
-    return node.getNodeType() == Node.ATTRIBUTE_NODE && node.getNodeName().startsWith("xmlns")
+    return node.getNodeType() == Node.ATTRIBUTE_NODE && node.getNodeName().startsWith(NAMESPACE_ATTRIBUTE_PREFIX)
         && "http://www.w3.org/2000/xmlns/".equals(node.getNamespaceURI());
   }
 
@@ -517,6 +521,35 @@ public final class Xml {
     } catch (TransformerConfigurationException e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  public static Element nextElement(Element element) {
+    Node current = element.getNextSibling();
+    while (current != null) {
+      if (current.getNodeType() == Node.ELEMENT_NODE) {
+        return (Element)current;
+      }
+      current = current.getNextSibling();
+    }
+    return null;
+  }
+
+  public static Iterable<Node> getAttributes(Node node) {
+    Collection<Node> result = new ArrayList<Node>();
+    NamedNodeMap attributes = node.getAttributes();
+    for (int i = 0; i < attributes.getLength(); i++) {
+      Node attribute = attributes.item(i);
+      if (!isNamespaceAttribute(attribute)) {
+        result.add(attribute);
+      }
+    }
+    return result;
+  }
+
+
+  private static boolean isNamespaceAttribute(Node attribute) {
+    String name = attribute.getNodeName();
+    return NAMESPACE_ATTRIBUTE_PREFIX.equals(name) || name.startsWith(NAMESPACE_ATTRIBUTE_PREFIX + ':');
   }
 
 

@@ -25,7 +25,8 @@ import radl.core.validation.Issue.Level;
  */
 public final class RadlValidator implements Application {
 
-  private static final String DEFAULT_REPORT_FILE_NAME = "build/checkstyle/radl-issues.xml";
+  private static final String DEFAULT_ISSUE_REPORTER = CheckStyleIssueReporter.ID;
+  private static final String DEFAULT_REPORT_FILE_NAME = "build/radl-issues.xml";
 
   public static void main(String[] args) {
     Cli.run(RadlValidator.class, args);
@@ -33,20 +34,30 @@ public final class RadlValidator implements Application {
 
   /**
    * The following arguments are supported.<ul>
-   * <li>[Optional] The output report file name</li>
-   * <li> [Required] The file names of RADL documents to validate</li>
+   * <li>[Optional] The output report file name. Default is "build/radl-issues.xml"</li>
+   * <li>[Optional] The output report format. Default is "checkstyle"</li>
+   * <li> [Required] The file names of one or more RADL documents to validate</li>
    * </ul>
    */
   @Override
   public int run(Arguments arguments) {
     Map<String, Collection<Issue>> issues = new TreeMap<String, Collection<Issue>>();
     String reportFileName = arguments.hasNext() ? arguments.next() : DEFAULT_REPORT_FILE_NAME;
+    String issueReporterId = DEFAULT_ISSUE_REPORTER;
     if (reportFileName.endsWith(".radl")) {
       reportFileName = DEFAULT_REPORT_FILE_NAME;
       arguments.prev();
+    } else if (arguments.hasNext()) {
+      issueReporterId = arguments.next();
+      if (issueReporterId.endsWith(".radl")) {
+        issueReporterId = DEFAULT_ISSUE_REPORTER;
+        arguments.prev();
+      }
     }
     validate(arguments, issues);
-    reportIssues(issues, new CheckStyleIssueReporter(reportFileName));
+    IssueReporter reporter = IssueReporterFactory.newInstance(issueReporterId);
+    reporter.setReportFileName(reportFileName);
+    reportIssues(issues, reporter);
     return numErrors(issues);
   }
 

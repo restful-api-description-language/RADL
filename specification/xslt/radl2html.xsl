@@ -1055,7 +1055,7 @@
                 </td>
                 <td>
                   <xsl:apply-templates select="radl:documentation"/>
-                  <xsl:apply-templates select="radl:description"/>
+                  <xsl:apply-templates select="radl:specification"/>
                 </td>
               </tr>
             </xsl:for-each>
@@ -1138,15 +1138,37 @@
         <xsl:value-of select="@href"/>
       </xsl:attribute>
       <xsl:choose>
-        <xsl:when test="@type = 'html'">
-          <xsl:text>Media Type Specification</xsl:text>
-        </xsl:when>
         <xsl:when test="@type = 'xsd'">
           <xsl:text>XML Schema</xsl:text>
         </xsl:when>
-        <xsl:when test="@type = 'html'">
+        <xsl:when test="@type = 'rnc'">
           <xsl:text>RELAX-NG Schema (Compact)</xsl:text>
         </xsl:when>
+        <xsl:when test="@type = 'rng'">
+          <xsl:text>RELAX-NG Schema</xsl:text>
+        </xsl:when>
+        <xsl:when test="@type = 'dtd'">
+          <xsl:text>Document Type Definition</xsl:text>
+        </xsl:when>
+        <xsl:when test="@type = 'JSONSchema'">
+          <xsl:text>JSON Schema</xsl:text>
+        </xsl:when>
+      </xsl:choose>
+    </a>
+  </xsl:template>
+
+  <xsl:template match="radl:specification">
+    <a>
+      <xsl:attribute name="href">
+        <xsl:value-of select="@href"/>
+      </xsl:attribute>
+      <xsl:choose>
+        <xsl:when test="text()">
+          <xsl:value-of select="text()"/>          
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>Specification</xsl:text>
+        </xsl:otherwise>
       </xsl:choose>
     </a>
   </xsl:template>

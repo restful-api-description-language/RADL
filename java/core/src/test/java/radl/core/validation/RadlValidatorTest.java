@@ -164,4 +164,16 @@ public class RadlValidatorTest {
     assertEquals("Exit code", 0, exitCode);
   }
 
+  // #5: Support other formats than CheckStyle for reporting validation issues
+  @Test
+  public void writesIssuesInProvidedFormat() {
+    File issuesFile = new File(TestIssueReporter.FILE_NAME);
+    String radlFileName = RANDOM.string() + ".radl";
+
+    radlValidator.run(new Arguments(new String[] { RANDOM.string(), TestIssueReporter.ID, radlFileName }));
+
+    assertTrue("Configured issue reporter not used", issuesFile.exists());
+    issuesFile.delete();
+  }
+
 }

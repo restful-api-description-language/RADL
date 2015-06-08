@@ -45,7 +45,7 @@ public class JaxrsProcessorTest extends AbstractRestAnnotationProcessorTest {
 
   @Test
   public void supportsJava6() {
-    assertEquals("Java version", SourceVersion.RELEASE_6,  processor.getSupportedSourceVersion());
+    assertEquals("Java version", SourceVersion.latestSupported(),  processor.getSupportedSourceVersion());
   }
 
   @Test
