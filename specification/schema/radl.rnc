@@ -131,13 +131,15 @@ data-model = element data-model {
 media-types = element media-types { media-type* }
 
 media-type = element media-type {
-    name,   
+    name,  
+    default-media-type?, 
     documentation*,
     specification*,
     media-type-schema*,
     representation* 
 }
 
+default-media-type = attribute default { xsd:string }
 specification = element specification { href, documentation* }
 media-type-schema = element schema { href, type, documentation *}
 media-type-ref = attribute media-type { xsd:string }
