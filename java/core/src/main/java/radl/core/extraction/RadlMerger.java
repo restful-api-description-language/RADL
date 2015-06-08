@@ -192,10 +192,7 @@ public class RadlMerger implements ResourceModelMerger {
       radl.element("location").attribute(uriAttribute, uri);
       for (String var : resourceModel.getLocationVars(resource)) {
         radl.element("var").attribute("name", var);
-        String documentation = resourceModel.getLocationVarDocumentation(resource, var);
-        if (documentation != null) {
-          radl.element("documentation", documentation);
-        }
+        addDocumentation(radl, resourceModel.getLocationVarDocumentation(resource, var));
         radl.end();
       }
       radl.end();

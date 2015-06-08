@@ -9,6 +9,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import radl.common.xml.DocumentBuilder;
+import radl.common.xml.Xml;
 
 
 /**
@@ -56,12 +57,10 @@ public class XmlMerger implements DocumentProcessor {
 
   private void update(Element source, Element destination) {
     NamedNodeMap attributes = destination.getAttributes();
-    for (int i = 0; i < attributes.getLength(); i++) {
-      attributes.removeNamedItem(attributes.item(i).getNodeName());
+    for (Node attribute : Xml.getAttributes(destination)) {
+      attributes.removeNamedItem(attribute.getNodeName());
     }
-    attributes = source.getAttributes();
-    for (int i = 0; i < attributes.getLength(); i++) {
-      Node attribute = attributes.item(i);
+    for (Node  attribute : Xml.getAttributes(source)) {
       destination.setAttribute(attribute.getNodeName(), attribute.getNodeValue());
     }
   }
@@ -95,9 +94,7 @@ public class XmlMerger implements DocumentProcessor {
   }
 
   private boolean hasSameAttributes(Element element1, Element element2) {
-    NamedNodeMap attributes1 = element1.getAttributes();
-    for (int i = 0; i < attributes1.getLength(); i++) {
-      Node attribute = attributes1.item(i);
+    for (Node attribute : Xml.getAttributes(element1)) {
       if (!attribute.getNodeValue().equals(element2.getAttribute(attribute.getNodeName()))) {
         return false;
       }
