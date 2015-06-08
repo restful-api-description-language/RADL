@@ -58,6 +58,7 @@ class RadlPlugin implements Plugin<Project> {
   
   def addRadlToDocumentationTask(project, radlFile) {
     project.task('generateDocumentationFromRadl', type: JavaExec, dependsOn: 'validateRadl') {
+      mustRunAfter 'extractRadlFromCode'
       main = 'radl.core.documentation.DocumentationGenerator'
       args new File(project.rootProject.buildDir, project.radl.docsDir).path
       args radlFile.path
