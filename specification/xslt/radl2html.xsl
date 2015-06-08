@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
 ##
-## Converts a RADL description to HTML.
+## Converts a RADL description to HsaniTML.
 ##
 ## Copyright © 2013-2015 EMC Corporation. All rights reserved.
 ##
@@ -27,7 +27,6 @@
   <xsl:variable name="general-media-types" select="('application/ld+json', 'application/vnd.mason+json', 'application/vnd.siren+json', 'application/hal+json', '*/*')"/>
 
   <xsl:template match="/radl:service">
-    <xsl:call-template name="sanity-checks"/>    
     <html>
       <head>
         <title>
@@ -1369,126 +1368,6 @@
     return $candidate-states/radl:transitions/radl:transition[@name=$transition/@ref]/string(@to)
     "/>
     <xsl:sequence select="distinct-values($end-states)"/>
-  </xsl:template>
-
-  <xsl:template name="sanity-checks">
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These result states used in radl:transition/@to are undefined</xsl:with-param>
-       <xsl:with-param name="names" select="//radl:transition/@to[not(. = /radl:service/radl:states/radl:state/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These transitions are not associated with a link relation</xsl:with-param>
-       <xsl:with-param name="names"  select="/radl:service/radl:states/radl:state/radl:transitions/radl:transition/@ref[not (. = /radl:service/radl:link-relations/radl:link-relation//radl:transition/@name) ]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These states are unreachable</xsl:with-param>
-       <xsl:with-param name="names"  select="/radl:service/radl:states/radl:state/@name[not (. = /radl:service/radl:states//radl:transition/@to) ]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These transition names are associated with link relations, but do not exist in any state</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:link-relation//radl:transition/@name[not (. = /radl:service/radl:states//radl:transition/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These transition names occur in methods, but do not exist in any state</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:method//radl:transition/@ref[not (. = /radl:service/radl:states//radl:transition/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These URI parameters are used in methods, but have not been declared</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:method//radl:uri-parameter/@ref[not (. = //radl:conventions//radl:uri-parameters/radl:uri-parameter/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These media types are used in methods, but are not defined in the media-types section</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:resource//radl:representation/@media-type[not (.= /radl:service/radl:media-types/radl:media-type/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These location variables are not specified in the URI template in the given location</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:location/radl:var/@name[not(contains(ancestor::radl:location/@uri, concat('{',.,'}'))) ]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These headers are used in methods, but not defined</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:method//radl:header/@ref[ not(. = //radl:conventions//radl:headers/radl:header/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These headers are used in authentication, but not defined</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:method//radl:header/@ref[ not(. = //radl:conventions//radl:headers/radl:header/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These status codes are used in methods, but not defined</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:method//radl:status-code/@ref[ not(. = /radl:service/radl:conventions//radl:status-code/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These status codes are used in authentication, but not defined</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:authentication//radl:status-code/@ref[ not(. = /radl:service/radl:conventions//radl:status-code/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These responses are not associated with transitions, and therefore do not specify what is actually returned</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:response[ empty(preceding-sibling::radl:transitions)]/concat(ancestor::radl:resource/@name, ' (', ancestor::radl:method/@name, ')')"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These URI parameters are used in requests, but not defined in /service/conventions</xsl:with-param>
-       <xsl:with-param name="names"  select="//radl:request//radl:uri-parameter/@name[ not( . = /radl:service/radl:conventions//radl:uri-parameter/@name)]"/>
-    </xsl:call-template>
-
-    <xsl:variable name="missing-response-representations" as="xs:string*">
-      <xsl:for-each select="//radl:response"> 
-        <xsl:variable name="end-states" as="xs:string*">
-          <xsl:call-template name="end-states-from-transitions">
-            <xsl:with-param name="transitions" select="preceding-sibling::radl:transitions/radl:transition"/>
-          </xsl:call-template>
-        </xsl:variable>
-        <xsl:variable name="media-types" as="xs:string*" select=".//radl:representation/@media-type[not(.=$general-media-types)]"/>
-        <xsl:for-each select="//radl:media-type[@name=$media-types]">
-          <xsl:variable name="media-type" select="."/>
-          <xsl:for-each select="$end-states[not(. = $media-type//radl:representation/@name)]">
-            <item><xsl:value-of select="concat(., ' (', string($media-type/@name), ')')"/></item>
-          </xsl:for-each>
-        </xsl:for-each>
-      </xsl:for-each>
-    </xsl:variable>    
-
-    <xsl:call-template name="sanity-check">
-       <xsl:with-param name="message">These representations are underspecified - they are used in responses, but not listed in the media type</xsl:with-param>
-       <xsl:with-param name="names" select="$missing-response-representations"/>
-    </xsl:call-template>
-
-    <xsl:variable name="missing-input-representations" as="xs:string*">
-      <xsl:for-each select="//radl:request"> 
-        <xsl:variable name="property-names" as="xs:string*" select="preceding-sibling::radl:transitions//radl:input/radl:properties/@name"/>     <!-- ### @ref! ### -->
-        <xsl:variable name="media-types" as="xs:string*" select=".//radl:representation/@media-type[not(.=$general-media-types)]"/>
-        <xsl:for-each select="//radl:media-type[@name=$media-types]">
-          <xsl:variable name="media-type" select="."/>
-          <xsl:for-each select="$property-names[not(. = $media-type//radl:representation/@name)]">
-            <item><xsl:value-of select="concat(., ' (', string($media-type/@name), ')')"/></item>
-          </xsl:for-each>
-        </xsl:for-each>
-      </xsl:for-each>
-    </xsl:variable>    
-
-    <xsl:call-template name="sanity-check">
-     <xsl:with-param name="message">These representations are underspecified - they are used as input to transitions, but not listed in the media type</xsl:with-param>
-     <xsl:with-param name="names" select="$missing-input-representations"/>
-    </xsl:call-template>
-  </xsl:template>
-
-  <xsl:template name="sanity-check">
-    <xsl:param name="message">Something doesn't smell right</xsl:param>
-    <xsl:param name="names">Names of elements that smell bad</xsl:param>
-    <xsl:if test="count($names) > 0">
-      <xsl:message><xsl:value-of select="$message"/> (<xsl:value-of select="count($names)"/> warnings): <xsl:value-of select="$names"/></xsl:message>
-    </xsl:if>
   </xsl:template>
 
   <xsl:template match="*">
