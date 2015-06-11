@@ -33,6 +33,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String CONSTANT_PREFIX_URL = "URL_";
   private static final String DEFAULT_MEDIA_TYPE = "application/";
   private static final String NAME_ATTRIBUTE = "name";
+  private static final String REF_ATTRIBUTE = "ref";
   private static final String MEDIA_TYPES_ELEMENT = "media-types";
   private static final String MEDIA_TYPE_ELEMENT = "media-type";
   private static final String MEDIA_TYPE_REF_ATTRIBUTE = "media-type";
@@ -261,7 +262,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     Xml.processNestedElements(resourceElement, new ElementProcessor() {
       @Override
       public void process(Element startElement) throws Exception {
-        if (startElement.getAttributeNS(null, NAME_ATTRIBUTE).equals(startState)) {
+        if (startElement.getAttributeNS(null, REF_ATTRIBUTE).equals(startState)) {
           result.set(true);
         }
       }

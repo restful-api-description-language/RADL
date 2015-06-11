@@ -18,12 +18,12 @@
         <transition name="Decide access" to="XACML response"/>
       </transitions>
     </state>
-    <state name="XACML response" />
+    <state name="XACML response"/>
   </states>
   <link-relations>
     <link-relation name="http://docs.oasis-open.org/ns/xacml/relation/pdp">
       <documentation>
-        <ref uri="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/xacml-rest-v1.0.pdf" />
+        <ref uri="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/xacml-rest-v1.0.pdf"/>
       </documentation>
       <transitions>
         <transition ref="Decide access"/>
@@ -31,26 +31,28 @@
     </link-relation>
   </link-relations>
   <media-types>
-    <media-type name="application/home+xml">
-      <specification href="http://tools.ietf.org/html/draft-wilde-home-xml-03" />
-    </media-type>
     <media-type name="application/json-home">
-      <specification href="http://tools.ietf.org/html/draft-nottingham-json-home-03" />
-      <representation name="Home"/>
+      <specification href="http://tools.ietf.org/html/draft-nottingham-json-home-03"/>
     </media-type>
-    <media-type name="application/vnd.xacml+json">
-      <specification href="https://www.oasis-open.org/apps/org/workgroup/xacml/download.php/52828/xacml-json-http-v1.0-wd18.doc" />
+    <media-type name="application/home+xml">
+      <specification href="http://tools.ietf.org/html/draft-wilde-home-xml-03"/>
+      <schema href="...home.xsd" type="xsd"/>
     </media-type>
     <media-type name="application/xacml+xml; version=2.0">
-      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml" />
+      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml"/>
+      <schema href="...xacml2.xsd" type="xsd"/>
     </media-type>
     <media-type name="application/xacml+xml; version=3.0">
-      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml" />
+      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml"/>
+      <schema href="...xacml3.xsd" type="xsd"/>
+    </media-type>
+    <media-type name="application/vnd.xacml+json">
+      <specification href="https://www.oasis-open.org/apps/org/workgroup/xacml/download.php/52828/xacml-json-http-v1.0-wd18.doc"/>
     </media-type>
   </media-types>
   <resources>
     <resource name="Home">
-      <location uri="/" />
+      <location uri="/"/>
       <methods>
         <method name="GET">
           <transitions>
@@ -59,14 +61,14 @@
           <response>
             <representations>
               <representation media-type="application/json-home" />
-              <representation media-type="application/home+xml" />
+              <representation media-type="application/home+xml"/>
             </representations>
           </response>
         </method>
       </methods>
     </resource>
     <resource name="PDP">
-      <location uri="/pdp/" />
+      <location uri="/pdp/"/>
       <methods>
         <method name="POST">
           <transitions>
@@ -74,16 +76,16 @@
           </transitions>
           <request>
             <representations>
-              <representation media-type="application/xacml+xml; version=2.0" />
-              <representation media-type="application/xacml+xml; version=3.0" />
-              <representation media-type="application/vnd.xacml+json" />
+              <representation media-type="application/xacml+xml; version=2.0"/>
+              <representation media-type="application/xacml+xml; version=3.0"/>
+              <representation media-type="application/vnd.xacml+json"/>
             </representations>
           </request>
           <response>
             <representations>
-              <representation media-type="application/xacml+xml; version=2.0" />
-              <representation media-type="application/xacml+xml; version=3.0" />
-              <representation media-type="application/vnd.xacml+json" />
+              <representation media-type="application/xacml+xml; version=2.0"/>
+              <representation media-type="application/xacml+xml; version=3.0"/>
+              <representation media-type="application/vnd.xacml+json"/>
             </representations>
           </response>
         </method>
