@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -32,6 +31,7 @@ import radl.core.Log;
 import radl.core.cli.Application;
 import radl.core.cli.Arguments;
 import radl.core.cli.Cli;
+import radl.core.code.SourceFile;
 import radl.core.extraction.ExtractOptions;
 import radl.core.extraction.RadlExtractor;
 import radl.core.extraction.RadlMerger;
@@ -43,6 +43,7 @@ import radl.core.scm.SourceCodeManagementSystem;
 import radl.core.xml.DocumentProcessor;
 import radl.core.xml.XmlMerger;
 import radl.java.code.Java;
+import radl.java.code.JavaCode;
 
 
 /**
@@ -54,8 +55,6 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   private static final String CLASSPATH_FILE = ".classpath";
   private static final String ENVIRONMENT_VAR_MARKER = "${env_var:";
   private static final String WORKSPACE_LOCATION_MARKER = "${workspace_loc:";
-  private static final Collection<String> TOP_LEVEL_PACKAGES = Arrays.asList("com", "org", "net", "edu", "javax", "io",
-      "it", "de", "ch", "biz");
 
   private final ResourceModelMerger merger;
   private final ResourceModel resourceModel;
@@ -314,29 +313,13 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   }
 
   private String toFullyQualifiedClassName(File javaFile) throws IOException {
-    StringBuilder result = new StringBuilder();
-    boolean inJava = false;
-    String prefix = "";
-    String path = javaFile.getCanonicalPath();
-    boolean lookForTopLevelPackages = !path.contains(File.separator + "java" + File.separator);
-    for (String part : path.split("\\" + File.separator)) {
-      if (inJava) {
-        String name = part.endsWith(".java") ? part.substring(0, part.length() - 5) : part;
-        result.append(prefix).append(name);
-        prefix = ".";
-      } else if ("java".equals(part)) {
-        inJava = true;
-      } else if (lookForTopLevelPackages && TOP_LEVEL_PACKAGES.contains(part)) {
-        result.append(prefix).append(part);
-        prefix = ".";
-        inJava = true;
-      }
-    }
-    if (!inJava) {
-      Log.error("Can't determine qualified name for file: " + javaFile.getAbsolutePath());
+    try {
+      SourceFile source = new SourceFile(javaFile.getAbsolutePath());
+      JavaCode javaCode = (JavaCode)source.code();
+      return javaCode.packageName() + '.' + javaCode.typeName();
+    } catch (Exception e) {
       return null;
     }
-    return result.toString();
   }
 
   private void writeOptions(FromJavaExtractOptions options, PrintWriter writer) {
@@ -593,6 +576,14 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
 
     public File getRadlFile() {
       return radlFile;
+    }
+
+    @Override
+    public String toString() {
+      return "serviceName=" + serviceName + "\nbaseDir=" + baseDir + "\nclasspath=" + classpath
+          + "\nextraProcessors=" + extraProcessors + "\nradlFile=" + radlFile + "\nconfigurationFileName="
+          + configurationFileName + "\njavaVersion=" + javaVersion + "\nextraSource=" + extraSource + "\nscmId="
+          + scmId;
     }
 
   }

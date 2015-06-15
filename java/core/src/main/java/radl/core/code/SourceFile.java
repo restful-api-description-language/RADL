@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import radl.java.code.JavaCode;
+
 
 /**
  * A source file that contains code. Two source files are considered equal if they are stored at the same path.
@@ -60,6 +62,9 @@ public class SourceFile {
     }
     if (path.endsWith(".xml")) {
       return new XmlCode();
+    }
+    if (path.endsWith(".java")) {
+      return new JavaCode();
     }
     return new Code();
   }

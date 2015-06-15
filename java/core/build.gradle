@@ -82,14 +82,13 @@ task radl2documentation(type: JavaExec, dependsOn: 'validateRadl') {
 assemble.dependsOn 'radl2documentation'
 
 task integrationTest(dependsOn: 'jar') << {
-  def generatedSourceDir = new File(buildDir, 'spring')
   examples.each { radlFile ->
     def example = radlFile.name.substring(0, radlFile.name.indexOf('.'))
     println "* $example"
+    def exampleDir = new File(buildDir, "integrationTest/$example")
     
-    // Generate source from RADL
-    def baseDir = new File(generatedSourceDir, example)
-    println "  - Generating Spring server code in ${relative(project, baseDir)}"
+    def baseDir = new File(exampleDir, 'spring')
+    println "  - Generate Spring server code"
     ant.delete(dir: baseDir, failonerror: false)
     ant.java(classname: 'radl.java.generation.spring.RadlToSpringServer') {
       arg(line: "$radlFile.path $baseDir.path radl.${example.replaceAll('[^a-zA-Z0-9_]+', '_')}.rest")
@@ -99,18 +98,16 @@ task integrationTest(dependsOn: 'jar') << {
       }
     }
     
-    // Verify that the generated source compiles
+    println "  - Compile generated code"
     ant.javac(srcdir: baseDir.path, includeantruntime: false) {
       classpath {
         pathelement(path: configurations.springWeb.asPath)
       }
     }
 
-    /* TODO: Make this work      
-    // Extract RADL from the generated source
-    def generatedRadlFile = new File(buildDir, "${example}.radl")
-    println "  - Extracting ${relative(project, generatedRadlFile)} from generated Spring server code"
-    def argumentsFile = new File(buildDir, "${example}.arguments")
+    println "  - Extract RADL from generated code"
+    def generatedRadlFile = new File(exampleDir, "${example}.radl")
+    def argumentsFile = new File(exampleDir, 'extract.arguments')
     argumentsFile.withWriter { writer ->
       writer.println "service.name = $example"
       writer.println "base.dir = $baseDir.path"
@@ -118,7 +115,7 @@ task integrationTest(dependsOn: 'jar') << {
       writer.println "classpath = ${configurations.runtime.asPath}${File.pathSeparator}${jar.archivePath}"
       writer.println "java.version = $project.sourceCompatibility"
     }
-    def outputFile = new File(buildDir, "${example}.out")
+    def outputFile = new File(exampleDir, 'extract.out')
     ant.java(classname: 'radl.java.extraction.FromJavaRadlExtractor', failonerror: 'true', output: outputFile.path) {
       arg(line: "@$argumentsFile.path")
       classpath {
@@ -126,11 +123,26 @@ task integrationTest(dependsOn: 'jar') << {
         pathelement(path: configurations.runtime.asPath)
       }
     }
+    outputFile.eachLine { line -> 
+      println "      $line"
+    }
     
-    // TODO: Compare generated RADL to original
-    println outputFile.text
-    println generatedRadlFile.text
-    */
+    println "  - Compare original RADL to extracted one"
+    outputFile = new File(exampleDir, 'compare.out')
+    ant.java(classname: 'radl.core.extraction.RadlDiff', error: outputFile.path, fork: true, failonerror: false,
+        resultproperty: 'compareResult') {
+      arg(line: "$radlFile.path $generatedRadlFile.path")
+      classpath {
+        pathelement(location: jar.archivePath)
+        pathelement(path: configurations.testRuntime.asPath)
+      }
+    }
+    outputFile.eachLine { line -> 
+      println "      $line"
+    }
+    if (!outputFile.text.isEmpty()) {
+      throw new GradleException("Extracted RADL doesn't match original RADL")
+    }
   }
 }
 
@@ -138,8 +150,6 @@ def relative(project, file) {
   file.canonicalPath.substring(project.projectDir.canonicalPath.length() + 1)
 }
 
-
-check.dependsOn 'integrationTest'
 
 jar {
   manifest {
