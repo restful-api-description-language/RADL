@@ -1,4 +1,4 @@
-package radl.core.extraction;
+package radl.core.integration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class RadlDiff implements Application {
       Log.error("Missing original and revised RADL files");
       return 2;
     }
-    File original = arguments.file();
+    File original = arguments.file(); // NOPMD PrematureDeclaration
     if (!arguments.hasNext()) {
       Log.error("Missing revised RADL file");
       return 1;
