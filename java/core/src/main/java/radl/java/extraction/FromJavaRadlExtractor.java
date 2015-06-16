@@ -259,6 +259,9 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
 
   @Override
   public Document extractFrom(String serviceName, File baseDir, ExtractOptions options) {
+    if (!baseDir.exists()) {
+      throw new IllegalArgumentException("Missing base directory: " + baseDir.getAbsolutePath());
+    }
     FromJavaExtractOptions javaOptions = (FromJavaExtractOptions)options;
     composeRadl(serviceName, baseDir, javaOptions);
     return merger.toRadl(resourceModel);

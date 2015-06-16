@@ -56,7 +56,7 @@ public class FromJavaRadlExtractorTest {
       writer.close();
     }
 
-    radlExtractor.run(new Arguments(new String[] { "", "", radlFile.getAbsolutePath(),
+    radlExtractor.run(new Arguments(new String[] { "", dir.getPath(), radlFile.getAbsolutePath(),
         configurationFile.getAbsolutePath() }));
 
     verify(resourceModel).configure(eq(properties));
@@ -85,7 +85,7 @@ public class FromJavaRadlExtractorTest {
     File argumentsFile = TestUtil.randomFile(FromJavaRadlExtractorTest.class, ".arguments");
     writer = new PrintWriter(argumentsFile, "UTF8");
     try {
-      writer.println("base.dir = .");
+      writer.println("base.dir = " + encodePathForPropertiesFile(dir));
       writer.println("radl.file = " + encodePathForPropertiesFile(radlFile));
       writer.println("configuration.file = " + encodePathForPropertiesFile(configurationFile));
     } finally {
@@ -118,7 +118,7 @@ public class FromJavaRadlExtractorTest {
     }
     when(merger.toRadl(resourceModel)).thenReturn(simpleRadlDocument(newServiceName));
 
-    radlExtractor.run(new Arguments(new String[] { newServiceName, "", radlFile.getAbsolutePath() }));
+    radlExtractor.run(new Arguments(new String[] { newServiceName, dir.getPath(), radlFile.getAbsolutePath() }));
 
     TestUtil.assertXmlEquals("RADL", simpleRadlDocument(newServiceName), Xml.parse(radlFile));
   }

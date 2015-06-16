@@ -29,7 +29,7 @@ public class GenerateAndExtractTest {
 
   private static final File TESTS_DIR = new File(System.getProperty("radl.dir", "."), "specification/examples");
   private static final String RADL_FILE_EXTENSION = ".radl";
-  private static final String CLASSPATH = System.getProperty("classpath");
+  private static final String CLASSPATH = System.getProperty("classpath", "");
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {
@@ -53,7 +53,7 @@ public class GenerateAndExtractTest {
   @Before
   public void init() {
     radlFile = new File(TESTS_DIR, example + RADL_FILE_EXTENSION);
-    outputDir = new File(String.format("build/integrationTest/%s/%s", getClass().getSimpleName(), example));
+    outputDir = new File(String.format("build/integration-tests/%s/%s", getClass().getSimpleName(), example));
     outputDir.mkdirs();
     ResourceModelHolder.setInstance(null);
   }
@@ -67,7 +67,7 @@ public class GenerateAndExtractTest {
 
     generateCodeFromRadl(generatedSpringCodeDir, generatedSpringCodePackagePrefix);
     extractRadlFromCode(argumentsFile);
-    // TODO: Make this work: compareOriginalWithGeneratedRadl(generatedRadlFile);
+    compareOriginalWithGeneratedRadl(generatedRadlFile);
   }
 
   private File extractionArgumentsFile(File generatedSpringCodeDir, File generatedRadlFile) throws IOException {
@@ -75,14 +75,28 @@ public class GenerateAndExtractTest {
     PrintWriter writer = new PrintWriter(argumentsFile, "UTF-8");
     try {
       writer.println("service.name = " + example);
-      writer.println("base.dir = " + generatedSpringCodeDir.getPath());
-      writer.println("radl.file = " + generatedRadlFile.getPath().replaceAll("\\" + File.separator, "/"));
-      writer.println("classpath = " + CLASSPATH);
+      writer.println("base.dir = " + fileToPropertiesPath(generatedSpringCodeDir));
+      writer.println("radl.file = " + fileToPropertiesPath(generatedRadlFile));
+      writer.println("classpath = " + getClassPath());
       writer.println("java.version = " + Java.getVersion());
     } finally {
       writer.close();
     }
     return argumentsFile;
+  }
+
+  private String fileToPropertiesPath(File file) {
+    return file.getPath().replaceAll("\\" + File.separator, "/");
+  }
+
+  private String getClassPath() {
+    StringBuilder result = new StringBuilder();
+    String prefix = "";
+    for (String path : CLASSPATH.split("\\" + File.pathSeparator)) {
+      result.append(prefix).append(fileToPropertiesPath(new File(path)));
+      prefix = File.pathSeparator;
+    }
+    return result.toString();
   }
 
   private void generateCodeFromRadl(File generatedSpringCodeDir, String generatedSpringCodePackagePrefix)
@@ -100,10 +114,8 @@ public class GenerateAndExtractTest {
     run(FromJavaRadlExtractor.class, "@" + argumentsFile.getPath());
   }
 
-  /*
   private void compareOriginalWithGeneratedRadl(File generatedRadlFile) throws Exception {
     run(RadlDiff.class, radlFile.getPath(), generatedRadlFile.getPath());
   }
-  */
 
 }
