@@ -18,6 +18,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import radl.core.cli.Application;
 import radl.core.cli.Arguments;
+import radl.core.extraction.ResourceModelHolder;
 import radl.java.code.Java;
 import radl.java.extraction.FromJavaRadlExtractor;
 import radl.java.generation.spring.RadlToSpringServer;
@@ -53,6 +54,8 @@ public class GenerateAndExtractTest {
   public void init() {
     radlFile = new File(TESTS_DIR, example + RADL_FILE_EXTENSION);
     outputDir = new File(String.format("build/integrationTest/%s/%s", getClass().getSimpleName(), example));
+    outputDir.mkdirs();
+    ResourceModelHolder.setInstance(null);
   }
 
   @Test
