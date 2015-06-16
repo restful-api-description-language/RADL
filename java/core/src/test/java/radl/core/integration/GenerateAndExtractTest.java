@@ -115,7 +115,7 @@ public class GenerateAndExtractTest {
   }
 
   private void compareOriginalWithGeneratedRadl(File generatedRadlFile) throws Exception {
-    run(RadlDiff.class, radlFile.getPath(), generatedRadlFile.getPath());
+    run(RadlComparer.class, radlFile.getPath(), generatedRadlFile.getPath());
   }
 
 }

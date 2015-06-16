@@ -67,7 +67,7 @@
         </method>
       </methods>
     </resource>
-    <resource name="PDP">
+    <resource name="Pdp">
       <location uri="/pdp/"/>
       <methods>
         <method name="POST">
