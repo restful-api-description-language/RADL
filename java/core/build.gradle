@@ -88,7 +88,7 @@ task integrationTest(dependsOn: 'jar') << {
     def exampleDir = new File(buildDir, "integrationTest/$example")
     
     def baseDir = new File(exampleDir, 'spring')
-    println "  - Generate Spring server code"
+    println '  - Generate Spring server code'
     ant.delete(dir: baseDir, failonerror: false)
     ant.java(classname: 'radl.java.generation.spring.RadlToSpringServer') {
       arg(line: "$radlFile.path $baseDir.path radl.${example.replaceAll('[^a-zA-Z0-9_]+', '_')}.rest")
@@ -98,14 +98,14 @@ task integrationTest(dependsOn: 'jar') << {
       }
     }
     
-    println "  - Compile generated code"
+    println '  - Compile generated code'
     ant.javac(srcdir: baseDir.path, includeantruntime: false) {
       classpath {
         pathelement(path: configurations.springWeb.asPath)
       }
     }
 
-    println "  - Extract RADL from generated code"
+    println '  - Extract RADL from generated code'
     def generatedRadlFile = new File(exampleDir, "${example}.radl")
     def argumentsFile = new File(exampleDir, 'extract.arguments')
     argumentsFile.withWriter { writer ->
@@ -127,7 +127,7 @@ task integrationTest(dependsOn: 'jar') << {
       println "      $line"
     }
     
-    println "  - Compare original RADL to extracted one"
+    println '  - Compare original RADL to extracted one'
     outputFile = new File(exampleDir, 'compare.out')
     ant.java(classname: 'radl.core.extraction.RadlDiff', error: outputFile.path, fork: true, failonerror: false,
         resultproperty: 'compareResult') {
