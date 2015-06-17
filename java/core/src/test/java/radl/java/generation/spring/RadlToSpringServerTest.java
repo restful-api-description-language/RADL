@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -21,7 +22,9 @@ import org.w3c.dom.Document;
 
 import radl.common.io.IO;
 import radl.common.xml.Xml;
+import radl.core.code.SourceFile;
 import radl.core.scm.SourceCodeManagementSystem;
+import radl.java.code.JavaCode;
 import radl.test.RadlBuilder;
 import radl.test.RandomData;
 import radl.test.TestUtil;
@@ -65,19 +68,27 @@ public class RadlToSpringServerTest {
     String generatedSourceSetDir = someSourceSetDir();
     String mainSourceSetDir = someSourceSetDir();
     SourceCodeManagementSystem scm = mock(SourceCodeManagementSystem.class);
+    String header = RANDOM.string();
 
-    generator.generate(radlFile, baseDir, packagePrefix, generatedSourceSetDir, mainSourceSetDir, scm);
+    generator.generate(radlFile, baseDir, packagePrefix, generatedSourceSetDir, mainSourceSetDir, scm, header);
 
     Collection<File> files = generatedFiles();
     File controller = find(files, upper + name + "Controller.java");
     assertNotNull("Missing controller: " + files, controller);
     String expectedPath = expectedFilePath(generatedSourceSetDir, packagePrefix, lower + name, controller);
     assertEquals("Path", expectedPath, controller.getPath());
+    JavaCode javaCode = toJava(controller);
+    TestUtil.assertCollectionEquals("Header for " + controller.getName(), Arrays.asList(header),
+        javaCode.fileComments());
 
     File service = find(files, upper + name + "Service.java");
     assertNotNull("Missing service: " + files, service);
     expectedPath = expectedFilePath(mainSourceSetDir, packagePrefix, lower + name, service);
     assertEquals("Path", expectedPath, service.getPath());
+  }
+
+  private JavaCode toJava(File file) {
+    return (JavaCode)new SourceFile(file.getPath()).code();
   }
 
   private String somePackage() {

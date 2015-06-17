@@ -27,8 +27,9 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
   private final String generatedSourceSetDir;
   private final String mainSourceSetDir;
 
-  public SpringSourceFilesGenerator(String packagePrefix, String generatedSourceSetDir, String mainSourceSetDir) {
-    this(new SpringCodeGenerator(packagePrefix), generatedSourceSetDir, mainSourceSetDir);
+  public SpringSourceFilesGenerator(String packagePrefix, String generatedSourceSetDir, String mainSourceSetDir,
+      String header) {
+    this(new SpringCodeGenerator(packagePrefix, header), generatedSourceSetDir, mainSourceSetDir);
   }
 
   SpringSourceFilesGenerator(CodeGenerator codeGenerator, String generatedSourceSetDir, String mainSourceSetDir) {

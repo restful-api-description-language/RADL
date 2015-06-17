@@ -27,6 +27,7 @@ import radl.java.code.JavaCode;
  */
 public class SpringCodeGenerator implements CodeGenerator {
 
+  private static final String DEFAULT_HEADER = "Generated from RADL.";
   private static final String IMPL_PACKAGE = "impl";
   private static final String API_PACKAGE = "api";
   private static final String BILLBOARD_URL = "BILLBOARD";
@@ -58,9 +59,15 @@ public class SpringCodeGenerator implements CodeGenerator {
   private final String packagePrefix;
   private final Map<String, String> mediaTypeConstants = new TreeMap<String, String>();
   private final Map<String, String> uriConstants = new TreeMap<String, String>();
+  private final String header;
 
   public SpringCodeGenerator(String packagePrefix) {
+    this(packagePrefix, null);
+  }
+
+  public SpringCodeGenerator(String packagePrefix, String header) {
     this.packagePrefix = packagePrefix;
+    this.header = header == null || header.trim().isEmpty() ? DEFAULT_HEADER : header;
   }
 
   @Override
@@ -173,7 +180,9 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private void addPackage(String name, Code code) {
     code.add("/*");
-    code.add(" * Generated from RADL.");
+    for (String line : header.split("\n")) {
+      code.add(" * %s", line);
+    }
     code.add(" */");
     code.add("package %s.%s;", packagePrefix, toPackage(name));
   }

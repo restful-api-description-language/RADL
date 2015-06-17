@@ -7,6 +7,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.Before;
@@ -18,10 +19,14 @@ import org.junit.runners.Parameterized.Parameters;
 
 import radl.core.cli.Application;
 import radl.core.cli.Arguments;
+import radl.core.code.SourceFile;
 import radl.core.extraction.ResourceModelHolder;
 import radl.java.code.Java;
+import radl.java.code.JavaCode;
 import radl.java.extraction.FromJavaRadlExtractor;
 import radl.java.generation.spring.RadlToSpringServer;
+import radl.test.RandomData;
+import radl.test.TestUtil;
 
 
 @RunWith(Parameterized.class)
@@ -30,6 +35,7 @@ public class GenerateAndExtractTest {
   private static final File TESTS_DIR = new File(System.getProperty("radl.dir", "."), "specification/examples");
   private static final String RADL_FILE_EXTENSION = ".radl";
   private static final String CLASSPATH = System.getProperty("classpath", "");
+  private static final RandomData RANDOM = new RandomData();
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {
@@ -53,7 +59,8 @@ public class GenerateAndExtractTest {
   @Before
   public void init() {
     radlFile = new File(TESTS_DIR, example + RADL_FILE_EXTENSION);
-    outputDir = new File(String.format("build/integration-tests/%s/%s", getClass().getSimpleName(), example));
+    outputDir = new File(String.format("build/integration-tests/%s/%s/%s", getClass().getSimpleName(), example,
+        RANDOM.string(5)));
     outputDir.mkdirs();
     ResourceModelHolder.setInstance(null);
   }
@@ -65,7 +72,7 @@ public class GenerateAndExtractTest {
     File generatedRadlFile = new File(outputDir, radlFile.getName());
     File argumentsFile = extractionArgumentsFile(generatedSpringCodeDir, generatedRadlFile);
 
-    generateCodeFromRadl(generatedSpringCodeDir, generatedSpringCodePackagePrefix);
+    generateCodeFromRadl(generatedSpringCodeDir, generatedSpringCodePackagePrefix, "");
     extractRadlFromCode(argumentsFile);
     compareOriginalWithGeneratedRadl(generatedRadlFile);
   }
@@ -99,10 +106,10 @@ public class GenerateAndExtractTest {
     return result.toString();
   }
 
-  private void generateCodeFromRadl(File generatedSpringCodeDir, String generatedSpringCodePackagePrefix)
-      throws Exception {
+  private void generateCodeFromRadl(File generatedSpringCodeDir, String generatedSpringCodePackagePrefix,
+      String header) throws Exception {
     run(RadlToSpringServer.class, radlFile.getPath(), generatedSpringCodeDir.getPath(),
-        generatedSpringCodePackagePrefix);
+        generatedSpringCodePackagePrefix, "build/src/java", "src/main/java", "default", header);
   }
 
   private void run(Class<? extends Application> applicationClass, String... arguments) throws Exception {
@@ -116,6 +123,38 @@ public class GenerateAndExtractTest {
 
   private void compareOriginalWithGeneratedRadl(File generatedRadlFile) throws Exception {
     run(RadlComparer.class, radlFile.getPath(), generatedRadlFile.getPath());
+  }
+
+  @Test
+  public void generatesCodeWithConfiguredHeader() throws Exception {
+    File generatedSpringCodeDir = new File(outputDir, "spring");
+    String generatedSpringCodePackagePrefix = String.format("radl.example.%s.rest", Java.toIdentifier(example));
+    String header = "Copyright (c) 2015 EMC Corporation. All Rights Reserved.\n"
+        + "EMC Confidential: Restricted Internal Distribution.";
+
+    generateCodeFromRadl(generatedSpringCodeDir, generatedSpringCodePackagePrefix, header);
+
+    for (File file : collectFilesIn(generatedSpringCodeDir)) {
+      JavaCode code = (JavaCode)new SourceFile(file.getPath()).code();
+      TestUtil.assertCollectionEquals("Header for " + file.getPath(), Arrays.asList(header.split("\n")),
+          code.fileComments());
+    }
+  }
+
+  private Iterable<File> collectFilesIn(File dir) {
+    Collection<File> result = new ArrayList<File>();
+    collectFilesIn(dir, result);
+    return result;
+  }
+
+  private void collectFilesIn(File dir, Collection<File> files) {
+    for (File child : dir.listFiles()) {
+      if (child.isDirectory()) {
+        collectFilesIn(child, files);
+      } else if (child.isFile()) {
+        files.add(child);
+      }
+    }
   }
 
 }
