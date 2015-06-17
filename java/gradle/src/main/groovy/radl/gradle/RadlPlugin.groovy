@@ -15,11 +15,11 @@ class RadlPlugin implements Plugin<Project> {
 
   void apply(Project project) {
     project.extensions.create('radl', RadlExtension)
-    
+
     project.configurations {
       radl
     }
-    
+
     project.sourceSets {
       main {
         java {
@@ -27,19 +27,19 @@ class RadlPlugin implements Plugin<Project> {
         }
       }
     }
-    
+
     project.afterEvaluate {
       project.dependencies {
         radl ("radl:radl-core:$project.radl.radlCoreVersion") {
           transitive = true
         }
       }
-      
+
       def serviceName = getServiceName(project)
       def radlFile = getRadlFile(project, serviceName)
-      def extractionPropertiesFile = new File(radlFile.parentFile, 
+      def extractionPropertiesFile = new File(radlFile.parentFile,
           "${radlFile.name.substring(0, radlFile.name.lastIndexOf('.'))}.properties")
-      
+
       addValidateRadlTask        project, radlFile
       addRadlToDocumentationTask project, radlFile
       addRadlToSpringTask        project, radlFile
@@ -55,7 +55,7 @@ class RadlPlugin implements Plugin<Project> {
     }
     project.check.dependsOn 'validateRadl'
   }
-  
+
   def addRadlToDocumentationTask(project, radlFile) {
     project.task('generateDocumentationFromRadl', type: JavaExec, dependsOn: 'validateRadl') {
       mustRunAfter 'extractRadlFromCode'
@@ -69,7 +69,7 @@ class RadlPlugin implements Plugin<Project> {
     }
     project.assemble.dependsOn 'generateDocumentationFromRadl'
   }
-  
+
   def addRadlToSpringTask(project, radlFile) {
     project.task('radl2spring', type: JavaExec) {
       // TODO: inputs & outputs
@@ -80,12 +80,13 @@ class RadlPlugin implements Plugin<Project> {
         main = 'radl.java.generation.spring.RadlToSpringServer'
         args = [radlFile.path, project.projectDir.path, "${prefix}.${name}.rest.server",
             relative(project.projectDir, project.sourceSets.main.java.srcDirs[1]),
-            relative(project.projectDir, project.sourceSets.main.java.srcDirs[0]), project.radl.scm]
+            relative(project.projectDir, project.sourceSets.main.java.srcDirs[0]), project.radl.scm,
+            project.radl.header]
         classpath project.configurations.radl
       }
     }
   }
-  
+
   def addJavaToRadlTask(project, radlFile, serviceName, extractionPropertiesFile) {
     project.task('extractRadlFromCode', type: JavaExec) {
       project.rootProject.allprojects.each { proj ->
@@ -128,7 +129,7 @@ class RadlPlugin implements Plugin<Project> {
       }
     }
   }
-  
+
   def getServiceName(project) {
     if (project.radl.serviceName != null) {
       return project.radl.serviceName
@@ -139,7 +140,7 @@ class RadlPlugin implements Plugin<Project> {
   def getRadlFile(project, serviceName) {
     new File(project.file(project.radl.radlDirName), "${serviceName.toLowerCase()}.radl")
   }
-  
+
   def relative(base, instance) {
     def result
     if (instance.path.startsWith(base.path)) {
@@ -147,7 +148,7 @@ class RadlPlugin implements Plugin<Project> {
     } else {
       result = instance.path
     }
-    result.startsWith(File.separator) ? result.substring(File.separator.length()) : result  
+    result.startsWith(File.separator) ? result.substring(File.separator.length()) : result
   }
 
   def getClasspath(project) {
@@ -165,7 +166,7 @@ class RadlPlugin implements Plugin<Project> {
     }
     result.asPath
   }
-  
+
   def configurationFiles(project, name, projectJars) {
     def result = project.files()
     def configuration = project.configurations.findByName(name)
@@ -183,5 +184,5 @@ class RadlPlugin implements Plugin<Project> {
   def escape(value) {
     value.replace('\\', '/')
   }
-      
+
 }
