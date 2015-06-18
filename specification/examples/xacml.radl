@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-##
-## Sample RADL file for the XACML REST Profile.
-##
-## Copyright © EMC Corporation. All rights reserved.
-##
--->
 <service xmlns="urn:radl:service" name="XACML">
   <states>
     <start-state>
       <transitions>
-        <transition name="Start" to="Home"/>
+        <transition name="Start" to="Home">
+          <documentation>
+            You start interacting with the API via the billboard URI, which is the URI at which the service 
+            implementing the API is deployed. This URI varies from deployment to deployment and should be provided to
+            you separately from this documentation.
+          </documentation>
+        </transition>
       </transitions>
     </start-state>
     <state name="Home">
       <transitions>
-        <transition name="Decide access" to="XACML response"/>
+        <transition name="Decide access" to="XACML response">
+          <documentation>
+            Ask the XACML PDP to decide whether access should be granted. You have to provide the XACML request context.
+          </documentation>
+        </transition>
       </transitions>
     </state>
-    <state name="XACML response"/>
+    <state name="XACML response">
+      <documentation>
+        The PDP returns with the XACML response context.
+      </documentation>
+    </state>
   </states>
   <link-relations>
     <link-relation name="http://docs.oasis-open.org/ns/xacml/relation/pdp">
       <documentation>
-        <ref uri="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/xacml-rest-v1.0.pdf"/>
+        <ref uri="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/cs02/xacml-rest-v1.0-cs02.pdf">
+          XACML REST Profile
+        </ref>
       </documentation>
       <transitions>
         <transition ref="Decide access"/>
@@ -60,7 +69,7 @@
           </transitions>
           <response>
             <representations>
-              <representation media-type="application/json-home" />
+              <representation media-type="application/json-home"/>
               <representation media-type="application/home+xml"/>
             </representations>
           </response>
