@@ -470,7 +470,10 @@ public class SpringCodeGenerator implements CodeGenerator {
       public void process(Element representationElement) throws Exception {
         String mediaTypeName = representationElement.getAttributeNS(null, MEDIA_TYPE_REF_ATTRIBUTE);
         if (!mediaTypeName.isEmpty()) {
-          mediaTypes.add(getMediaType(methodElement.getOwnerDocument().getDocumentElement(), mediaTypeName));
+          String mediaType = getMediaType(methodElement.getOwnerDocument().getDocumentElement(), mediaTypeName);
+          if (mediaType != null) {
+            mediaTypes.add(mediaType);
+          }
         }
       }
     }, messageType, REPRESENTATIONS_ELEMENT, REPRESENTATION_ELEMENT);
@@ -490,8 +493,14 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private String getMediaType(Element serviceElement, String mediaTypeName) throws Exception {
     Element mediaTypesElement = Xml.getFirstChildElement(serviceElement, MEDIA_TYPES_ELEMENT);
+    if (mediaTypesElement == null) {
+      return null;
+    }
     Element mediaTypeElement = Xml.getChildElementByAttribute(mediaTypesElement,
         MEDIA_TYPE_ELEMENT, NAME_ATTRIBUTE, mediaTypeName);
+    if (mediaTypeElement == null) {
+      return null;
+    }
     String mediaType = mediaTypeElement.getAttributeNS(null, NAME_ATTRIBUTE);
     return getMediaTypeConstant(mediaType);
   }
