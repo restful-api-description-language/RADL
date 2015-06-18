@@ -11,7 +11,11 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -25,7 +29,6 @@ import radl.java.code.Java;
 import radl.java.code.JavaCode;
 import radl.java.extraction.FromJavaRadlExtractor;
 import radl.java.generation.spring.RadlToSpringServer;
-import radl.test.RandomData;
 import radl.test.TestUtil;
 
 
@@ -35,7 +38,6 @@ public class GenerateAndExtractTest {
   private static final File TESTS_DIR = new File(System.getProperty("radl.dir", "."), "specification/examples");
   private static final String RADL_FILE_EXTENSION = ".radl";
   private static final String CLASSPATH = System.getProperty("classpath", "");
-  private static final RandomData RANDOM = new RandomData();
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {
@@ -55,12 +57,21 @@ public class GenerateAndExtractTest {
   public String example;
   private File radlFile;
   private File outputDir;
+  private String testName;
+
+  @Rule
+  public TestRule watcher = new TestWatcher() {
+    @Override
+    protected void starting(Description description) {
+      testName = description.getMethodName();
+    }
+  };
 
   @Before
   public void init() {
     radlFile = new File(TESTS_DIR, example + RADL_FILE_EXTENSION);
     outputDir = new File(String.format("build/integration-tests/%s/%s/%s", getClass().getSimpleName(), example,
-        RANDOM.string(5)));
+        testName));
     outputDir.mkdirs();
     ResourceModelHolder.setInstance(null);
   }
@@ -129,8 +140,7 @@ public class GenerateAndExtractTest {
   public void generatesCodeWithConfiguredHeader() throws Exception {
     File generatedSpringCodeDir = new File(outputDir, "spring");
     String generatedSpringCodePackagePrefix = String.format("radl.example.%s.rest", Java.toIdentifier(example));
-    String header = "Copyright (c) 2015 EMC Corporation. All Rights Reserved.\n"
-        + "EMC Confidential: Restricted Internal Distribution.";
+    String header = "First header line.\nSecond line.";
 
     generateCodeFromRadl(generatedSpringCodeDir, generatedSpringCodePackagePrefix, header);
 
