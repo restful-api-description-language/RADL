@@ -319,7 +319,12 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     try {
       SourceFile source = new SourceFile(javaFile.getAbsolutePath());
       JavaCode javaCode = (JavaCode)source.code();
-      return javaCode.packageName() + '.' + javaCode.typeName();
+      String className = javaCode.typeName();
+      int index = className.indexOf('<');
+      if (index >= 0) {
+        className = className.substring(0, index);
+      }
+      return javaCode.packageName() + '.' + className;
     } catch (Exception e) {
       return null;
     }
