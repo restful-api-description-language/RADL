@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
 ##
-## Converts a RADL description to HsaniTML.
+## Converts a RADL description to HTML.
 ##
 ## Copyright © 2013-2015 EMC Corporation. All rights reserved.
 ##
