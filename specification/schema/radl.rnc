@@ -31,6 +31,8 @@ href = attribute href { xsd:anyURI }
 any-attribute = attribute * { text? }
 public = attribute public { "true" | "false" }
 status = attribute status { "future" | "assigned" | "poc" | "partial" | "complete" | "passed" }
+required = attribute required {"true" | "false"}  # default is 'false'
+occurs = attribute occurs {"?" | "+" | "?" | "once"} # default is 'once'
 
 identity-provider-ref = attribute identity-provider { xsd:string }
 
@@ -66,7 +68,7 @@ state-ref = attribute state { xsd:string }
 #
 
 properties = element properties { documentation*, name, property* }
-property = element property { name, documentation*, (properties* | text?) }
+property = element property { name, occurs?, documentation*, (properties* | text?) }
 properties-ref = attribute properties { text }
 
 #
@@ -91,6 +93,7 @@ transition =
   element transition {
     name,
     to?,
+    required?,
     documentation*,
     transition-input?
   }
@@ -168,7 +171,7 @@ uri-parameter =
   element uri-parameter {
     name, documentation*, datatype, value-range?, default-value?
   }
-uri-parameter-ref = attribute uri-parameter { xsd:string }
+uri-parameter-ref = { attribute uri-parameter { xsd:string }, required? }
 
 headers = element headers { header* }
 header = element header { name, header-type, documentation* }
@@ -209,7 +212,7 @@ request-uri-parameter-ref =
     attribute ref { xsd:string }
   }
 header-refs = element headers { documentation*, header-ref* }
-header-ref = element header { attribute ref { xsd:string} }
+header-ref = element header { attribute ref { xsd:string}, required? }
 representations = element representations { representation* }
 
 # Examples are now in representations. A representation can be associated with a properties-ref.
