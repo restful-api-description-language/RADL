@@ -171,7 +171,7 @@ uri-parameter =
   element uri-parameter {
     name, documentation*, datatype, value-range?, default-value?
   }
-uri-parameter-ref = { attribute uri-parameter { xsd:string }, required? }
+uri-parameter-ref = attribute uri-parameter { xsd:string }
 
 headers = element headers { header* }
 header = element header { name, header-type, documentation* }
@@ -208,9 +208,7 @@ request =
 request-uri-parameters =
   element uri-parameters { request-uri-parameter-ref* }
 request-uri-parameter-ref =
-  element uri-parameter {
-    attribute ref { xsd:string }
-  }
+  element uri-parameter {  attribute ref { xsd:string }, required?  }
 header-refs = element headers { documentation*, header-ref* }
 header-ref = element header { attribute ref { xsd:string}, required? }
 representations = element representations { representation* }
