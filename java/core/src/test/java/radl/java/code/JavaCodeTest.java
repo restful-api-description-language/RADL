@@ -246,6 +246,16 @@ public class JavaCodeTest {
   }
 
   @Test
+  public void extractsPackageWhenLineEndsWithComment() throws Exception {
+    String packageName = String.format("%s.%s", someValue(), someValue());
+    code.add("package %s; // NOPMD", packageName);
+    code.add("public class %s {", someValue());
+    code.add("}");
+
+    assertEquals("Package", packageName, code.packageName());
+  }
+
+  @Test
   public void extractsFields() {
     String field1 = 'z' + someValue();
     String field2 = 'a' + someValue();

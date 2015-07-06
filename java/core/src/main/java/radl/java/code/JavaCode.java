@@ -20,7 +20,7 @@ import radl.core.code.Code;
 public class JavaCode extends Code {
 
   private static final Pattern PACKAGE_PATTERN = Pattern.compile(
-      ".*^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*;\\s*$.*",
+      ".*^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*;\\s*(//.*)?$.*",
       Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNIX_LINES);
   private static final String SCOPE = "(?:(private|protected|public)\\s+)?+";
   private static final String COMMENT_PATTERN = "(?:\\s*/\\*.*\\*/\\s*)?";

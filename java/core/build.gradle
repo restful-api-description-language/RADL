@@ -81,66 +81,6 @@ task radl2documentation(type: JavaExec, dependsOn: 'validateRadl') {
 
 assemble.dependsOn 'radl2documentation'
 
-task integrationTest(dependsOn: 'jar') << {
-  def generatedSourceDir = new File(buildDir, 'spring')
-  examples.each { radlFile ->
-    def example = radlFile.name.substring(0, radlFile.name.indexOf('.'))
-    println "* $example"
-    
-    // Generate source from RADL
-    def baseDir = new File(generatedSourceDir, example)
-    println "  - Generating Spring server code in ${relative(project, baseDir)}"
-    ant.delete(dir: baseDir, failonerror: false)
-    ant.java(classname: 'radl.java.generation.spring.RadlToSpringServer') {
-      arg(line: "$radlFile.path $baseDir.path radl.${example.replaceAll('[^a-zA-Z0-9_]+', '_')}.rest")
-      classpath {
-        pathelement(location: jar.archivePath)
-        pathelement(path: configurations.runtime.asPath)
-      }
-    }
-    
-    // Verify that the generated source compiles
-    ant.javac(srcdir: baseDir.path, includeantruntime: false) {
-      classpath {
-        pathelement(path: configurations.springWeb.asPath)
-      }
-    }
-
-    /* TODO: Make this work      
-    // Extract RADL from the generated source
-    def generatedRadlFile = new File(buildDir, "${example}.radl")
-    println "  - Extracting ${relative(project, generatedRadlFile)} from generated Spring server code"
-    def argumentsFile = new File(buildDir, "${example}.arguments")
-    argumentsFile.withWriter { writer ->
-      writer.println "service.name = $example"
-      writer.println "base.dir = $baseDir.path"
-      writer.println "radl.file = $generatedRadlFile.path"
-      writer.println "classpath = ${configurations.runtime.asPath}${File.pathSeparator}${jar.archivePath}"
-      writer.println "java.version = $project.sourceCompatibility"
-    }
-    def outputFile = new File(buildDir, "${example}.out")
-    ant.java(classname: 'radl.java.extraction.FromJavaRadlExtractor', failonerror: 'true', output: outputFile.path) {
-      arg(line: "@$argumentsFile.path")
-      classpath {
-        pathelement(location: jar.archivePath)
-        pathelement(path: configurations.runtime.asPath)
-      }
-    }
-    
-    // TODO: Compare generated RADL to original
-    println outputFile.text
-    println generatedRadlFile.text
-    */
-  }
-}
-
-def relative(project, file) {
-  file.canonicalPath.substring(project.projectDir.canonicalPath.length() + 1)
-}
-
-
-check.dependsOn 'integrationTest'
-
 jar {
   manifest {
     name = 'radl-core'
@@ -160,6 +100,7 @@ task testValidation(type: Test) {
 
 test {
   systemProperty 'radl.dir', project.rootProject.projectDir
+  systemProperty 'classpath', "${configurations.runtime.asPath}${File.pathSeparator}${jar.archivePath}"
 }
 
 task testDocumentation(type: Test) {

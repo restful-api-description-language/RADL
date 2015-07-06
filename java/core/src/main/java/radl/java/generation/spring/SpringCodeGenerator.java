@@ -27,12 +27,14 @@ import radl.java.code.JavaCode;
  */
 public class SpringCodeGenerator implements CodeGenerator {
 
+  private static final String DEFAULT_HEADER = "Generated from RADL.";
   private static final String IMPL_PACKAGE = "impl";
   private static final String API_PACKAGE = "api";
   private static final String BILLBOARD_URL = "BILLBOARD";
   private static final String CONSTANT_PREFIX_URL = "URL_";
   private static final String DEFAULT_MEDIA_TYPE = "application/";
   private static final String NAME_ATTRIBUTE = "name";
+  private static final String REF_ATTRIBUTE = "ref";
   private static final String MEDIA_TYPES_ELEMENT = "media-types";
   private static final String MEDIA_TYPE_ELEMENT = "media-type";
   private static final String MEDIA_TYPE_REF_ATTRIBUTE = "media-type";
@@ -57,9 +59,15 @@ public class SpringCodeGenerator implements CodeGenerator {
   private final String packagePrefix;
   private final Map<String, String> mediaTypeConstants = new TreeMap<String, String>();
   private final Map<String, String> uriConstants = new TreeMap<String, String>();
+  private final String header;
 
   public SpringCodeGenerator(String packagePrefix) {
+    this(packagePrefix, null);
+  }
+
+  public SpringCodeGenerator(String packagePrefix, String header) {
     this.packagePrefix = packagePrefix;
+    this.header = header == null || header.trim().isEmpty() ? DEFAULT_HEADER : header;
   }
 
   @Override
@@ -172,7 +180,9 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private void addPackage(String name, Code code) {
     code.add("/*");
-    code.add(" * Generated from RADL.");
+    for (String line : header.split("\n")) {
+      code.add(" * %s", line);
+    }
     code.add(" */");
     code.add("package %s.%s;", packagePrefix, toPackage(name));
   }
@@ -261,7 +271,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     Xml.processNestedElements(resourceElement, new ElementProcessor() {
       @Override
       public void process(Element startElement) throws Exception {
-        if (startElement.getAttributeNS(null, NAME_ATTRIBUTE).equals(startState)) {
+        if (startElement.getAttributeNS(null, REF_ATTRIBUTE).equals(startState)) {
           result.set(true);
         }
       }
@@ -460,7 +470,10 @@ public class SpringCodeGenerator implements CodeGenerator {
       public void process(Element representationElement) throws Exception {
         String mediaTypeName = representationElement.getAttributeNS(null, MEDIA_TYPE_REF_ATTRIBUTE);
         if (!mediaTypeName.isEmpty()) {
-          mediaTypes.add(getMediaType(methodElement.getOwnerDocument().getDocumentElement(), mediaTypeName));
+          String mediaType = getMediaType(methodElement.getOwnerDocument().getDocumentElement(), mediaTypeName);
+          if (mediaType != null) {
+            mediaTypes.add(mediaType);
+          }
         }
       }
     }, messageType, REPRESENTATIONS_ELEMENT, REPRESENTATION_ELEMENT);
@@ -480,8 +493,14 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private String getMediaType(Element serviceElement, String mediaTypeName) throws Exception {
     Element mediaTypesElement = Xml.getFirstChildElement(serviceElement, MEDIA_TYPES_ELEMENT);
+    if (mediaTypesElement == null) {
+      return null;
+    }
     Element mediaTypeElement = Xml.getChildElementByAttribute(mediaTypesElement,
         MEDIA_TYPE_ELEMENT, NAME_ATTRIBUTE, mediaTypeName);
+    if (mediaTypeElement == null) {
+      return null;
+    }
     String mediaType = mediaTypeElement.getAttributeNS(null, NAME_ATTRIBUTE);
     return getMediaTypeConstant(mediaType);
   }

@@ -8,9 +8,11 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.lang.model.SourceVersion;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
@@ -169,6 +171,18 @@ public final class Java {
       result.append(part).append(File.separator);
     }
     return result.toString();
+  }
+
+  public static String getVersion() {
+    Iterator<SourceVersion> versions = getCompiler().getSourceVersions().iterator();
+    SourceVersion result = versions.next();
+    while (versions.hasNext()) {
+      SourceVersion version = versions.next();
+      if (version.compareTo(result) > 0) {
+        result = version;
+      }
+    }
+    return "1." + result.toString().substring("RELEASE_".length());
   }
 
 }

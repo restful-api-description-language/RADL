@@ -64,7 +64,7 @@ public class MethodBuilder {
   public ResourceBuilder transitioningTo(String name) {
     builder().element("transitions")
         .element("transition")
-            .attribute("name", name)
+            .attribute("ref", name)
         .end()
     .end()
     .end().end();

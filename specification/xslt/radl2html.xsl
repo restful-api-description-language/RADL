@@ -1304,7 +1304,7 @@
         </xsl:for-each>
       </xsl:when>
       <xsl:otherwise>
-        <p>No URI parameters</p>
+        <p>No URI parameters.</p>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>

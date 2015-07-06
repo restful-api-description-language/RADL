@@ -401,7 +401,7 @@ public class LintValidator implements Validator {
         return;
       }
     }
-    warn("Method '%s' in resource '%s' %s undefined media type '%s'", method, resource, action, representation);
+    error("Method '%s' in resource '%s' %s undefined media type '%s'", method, resource, action, representation);
   }
 
   private void validateMethodTransitions(String resource, String method) {

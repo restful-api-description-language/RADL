@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-##
-## Sample RADL file for the XACML REST Profile.
-##
-## Copyright © EMC Corporation. All rights reserved.
-##
--->
 <service xmlns="urn:radl:service" name="XACML">
   <states>
     <start-state>
       <transitions>
-        <transition name="Start" to="Home"/>
+        <transition name="Start" to="Home">
+          <documentation>
+            You start interacting with the API via the billboard URI, which is the URI at which the service 
+            implementing the API is deployed. This URI varies from deployment to deployment and should be provided to
+            you separately from this documentation.
+          </documentation>
+        </transition>
       </transitions>
     </start-state>
     <state name="Home">
       <transitions>
-        <transition name="Decide access" to="XACML response"/>
+        <transition name="Decide access" to="XACML response">
+          <documentation>
+            Ask the XACML PDP to decide whether access should be granted. You have to provide the XACML request context.
+          </documentation>
+        </transition>
       </transitions>
     </state>
-    <state name="XACML response" />
+    <state name="XACML response">
+      <documentation>
+        The PDP returns with the XACML response context.
+      </documentation>
+    </state>
   </states>
   <link-relations>
     <link-relation name="http://docs.oasis-open.org/ns/xacml/relation/pdp">
       <documentation>
-        <ref uri="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/xacml-rest-v1.0.pdf" />
+        <ref uri="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/cs02/xacml-rest-v1.0-cs02.pdf">
+          XACML REST Profile
+        </ref>
       </documentation>
       <transitions>
         <transition ref="Decide access"/>
@@ -31,26 +40,28 @@
     </link-relation>
   </link-relations>
   <media-types>
-    <media-type name="application/home+xml">
-      <specification href="http://tools.ietf.org/html/draft-wilde-home-xml-03" />
-    </media-type>
     <media-type name="application/json-home">
-      <specification href="http://tools.ietf.org/html/draft-nottingham-json-home-03" />
-      <representation name="Home"/>
+      <specification href="http://tools.ietf.org/html/draft-nottingham-json-home-03"/>
     </media-type>
-    <media-type name="application/vnd.xacml+json">
-      <specification href="https://www.oasis-open.org/apps/org/workgroup/xacml/download.php/52828/xacml-json-http-v1.0-wd18.doc" />
+    <media-type name="application/home+xml">
+      <specification href="http://tools.ietf.org/html/draft-wilde-home-xml-03"/>
+      <schema href="...home.xsd" type="xsd"/>
     </media-type>
     <media-type name="application/xacml+xml; version=2.0">
-      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml" />
+      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml"/>
+      <schema href="...xacml2.xsd" type="xsd"/>
     </media-type>
     <media-type name="application/xacml+xml; version=3.0">
-      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml" />
+      <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml"/>
+      <schema href="...xacml3.xsd" type="xsd"/>
+    </media-type>
+    <media-type name="application/vnd.xacml+json">
+      <specification href="https://www.oasis-open.org/apps/org/workgroup/xacml/download.php/52828/xacml-json-http-v1.0-wd18.doc"/>
     </media-type>
   </media-types>
   <resources>
     <resource name="Home">
-      <location uri="/" />
+      <location uri="/"/>
       <methods>
         <method name="GET">
           <transitions>
@@ -58,15 +69,15 @@
           </transitions>
           <response>
             <representations>
-              <representation media-type="application/json-home" />
-              <representation media-type="application/home+xml" />
+              <representation media-type="application/json-home"/>
+              <representation media-type="application/home+xml"/>
             </representations>
           </response>
         </method>
       </methods>
     </resource>
-    <resource name="PDP">
-      <location uri="/pdp/" />
+    <resource name="Pdp">
+      <location uri="/pdp/"/>
       <methods>
         <method name="POST">
           <transitions>
@@ -74,16 +85,16 @@
           </transitions>
           <request>
             <representations>
-              <representation media-type="application/xacml+xml; version=2.0" />
-              <representation media-type="application/xacml+xml; version=3.0" />
-              <representation media-type="application/vnd.xacml+json" />
+              <representation media-type="application/xacml+xml; version=2.0"/>
+              <representation media-type="application/xacml+xml; version=3.0"/>
+              <representation media-type="application/vnd.xacml+json"/>
             </representations>
           </request>
           <response>
             <representations>
-              <representation media-type="application/xacml+xml; version=2.0" />
-              <representation media-type="application/xacml+xml; version=3.0" />
-              <representation media-type="application/vnd.xacml+json" />
+              <representation media-type="application/xacml+xml; version=2.0"/>
+              <representation media-type="application/xacml+xml; version=3.0"/>
+              <representation media-type="application/vnd.xacml+json"/>
             </representations>
           </response>
         </method>

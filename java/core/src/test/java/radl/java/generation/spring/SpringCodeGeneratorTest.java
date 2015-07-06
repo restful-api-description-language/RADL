@@ -396,4 +396,29 @@ public class SpringCodeGeneratorTest {
         controller.typeAnnotations().contains(requestMappingAnnotation));
   }
 
+  @Test
+  public void doesntAddProducesForInvalidMediaTypeReference() {
+    Document radl = RadlBuilder.aRadlDocument()
+        .withMediaTypes(aMediaType())
+        .withResource()
+            .named(aName())
+            .locatedAt(aLocalUri())
+            .withMethod("GET")
+                .producing(aMediaType())
+        .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+
+    for (Code source : sources) {
+      JavaCode code = (JavaCode)source;
+      if (code.typeName().endsWith("Controller")) {
+        for (String method : code.methods()) {
+          for (String annotation : code.methodAnnotations(method)) {
+            assertEquals("Annotation", "@RequestMapping(method = RequestMethod.GET)", annotation);
+          }
+        }
+      }
+    }
+  }
+
 }

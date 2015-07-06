@@ -58,15 +58,17 @@ public class RadlToSpringServer implements Application {
     String mainSourceSetDir = arguments.next("src/main/java");
     String scmId = arguments.next("default");
     SourceCodeManagementSystem scm = ScmFactory.newInstance(scmId);
-    new RadlToSpringServer().generate(radlFile, baseDir, packagePrefix, generatedSourceSetDir, mainSourceSetDir, scm);
+    String header = arguments.next(null);
+    new RadlToSpringServer().generate(radlFile, baseDir, packagePrefix, generatedSourceSetDir, mainSourceSetDir, scm,
+        header);
     return 0;
   }
 
   void generate(File radlFile, File baseDir, String packagePrefix, String generatedSourceSetDir,
-      String mainSourceSetDir, SourceCodeManagementSystem scm) {
+      String mainSourceSetDir, SourceCodeManagementSystem scm, String header) {
     Document radlDocument = Xml.parse(radlFile);
     Desired<String, SourceFile> desired = new DesiredSourceFiles(radlDocument,
-        new SpringSourceFilesGenerator(packagePrefix, generatedSourceSetDir, mainSourceSetDir), baseDir);
+        new SpringSourceFilesGenerator(packagePrefix, generatedSourceSetDir, mainSourceSetDir, header), baseDir);
     Reality<String, SourceFile> reality = new RealSourceFiles(baseDir, generatedSourceSetDir, mainSourceSetDir,
         Java.packageToDir(packagePrefix), scm);
     new Enforcer<String, SourceFile>().enforce(desired, reality);
