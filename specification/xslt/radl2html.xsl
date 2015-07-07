@@ -243,7 +243,7 @@
     <xsl:variable name="transition-name" select="@name"/>
     <xsl:variable name="result-state" select="@to"/>
     <xsl:variable name="link-relation" select="//radl:link-relation[radl:transitions/radl:transition/@ref=$transition-name]/@name"/>
-    <xsl:variable name="interface" select="//radl:method[radl:transitions/radl:transition[@ref=$transition-name and (if (@from) then @from=$from-state else true())]]"/>
+    <xsl:variable name="interfaces" select="//radl:method[radl:transitions/radl:transition[@ref=$transition-name and (if (@from) then @from=$from-state else true())]]"/>
 
       <tr>
         <td>
@@ -256,7 +256,7 @@
         <td>
           <xsl:choose>
             <xsl:when test="$link-relation">
-              <code>
+              <code>             
                 <xsl:call-template name="a-href">
                   <xsl:with-param name="prefix">linkrel</xsl:with-param>
                   <xsl:with-param name="name" select="$link-relation"/>
@@ -267,12 +267,22 @@
           </xsl:choose>
         </td>
         <td>
-          <xsl:for-each select="distinct-values($interface/@name)">
+          <xsl:for-each select="$interfaces">
+            <xsl:variable name="interface" select="."/>
+            <xsl:variable name="resource" select="ancestor::radl:resource/@name"/>            
+            <xsl:variable name="http-method" select="./@name"/>
             <span>
               <xsl:attribute name="class">
-                <xsl:text>http </xsl:text><xsl:value-of select="."/>
+                <xsl:text>http </xsl:text><xsl:value-of select="$http-method"/>
               </xsl:attribute>
-              <xsl:value-of select="."/>
+              <a>
+                <xsl:call-template name="href">
+                  <xsl:with-param name="prefix">method</xsl:with-param>
+                  <xsl:with-param name="scope" select="$resource"/>
+                  <xsl:with-param name="name" select="$http-method"/>
+                </xsl:call-template>
+                <xsl:value-of select="$http-method"/>
+              </a>
             </span>
           </xsl:for-each>
         </td>
@@ -318,16 +328,22 @@
         <xsl:for-each select="$interface">
           <xsl:variable name="method" select="."/>
           <dl>
+
             <dt>HTTP Method</dt>
             <dd>
-              <xsl:for-each select="$method/@name">
-                <span>
-                  <xsl:attribute name="class">
-                    <xsl:text>http </xsl:text><xsl:value-of select="."/>
-                  </xsl:attribute>
-                  <xsl:value-of select="."/>
-                </span>
-              </xsl:for-each>
+
+              <xsl:call-template name="id">
+                <xsl:with-param name="prefix">transition</xsl:with-param>
+                <xsl:with-param name="scope" select="$from-state"/>
+                <xsl:with-param name="name" select="concat($transition-name, '-', $method/@name)"/>
+              </xsl:call-template>
+
+              <span>
+                <xsl:attribute name="class">
+                  <xsl:text>http </xsl:text><xsl:value-of select="$method/@name"/>
+                </xsl:attribute>
+                <xsl:value-of select="$method/@name"/>
+              </span>
               <xsl:apply-templates select="radl:documentation"/>
             </dd>
             <dt>Link Relation</dt>
@@ -1345,6 +1361,20 @@
     <xsl:param name="scope" select="()"/>
     <xsl:param name="name"/>
     <a>
+      <xsl:call-template name="href">
+        <xsl:with-param name="prefix" select="$prefix"/>
+        <xsl:with-param name="scope" select="$scope"/>
+        <xsl:with-param name="name" select="$name"/>
+      </xsl:call-template>
+      <xsl:value-of select="$name"/>
+    </a>
+  </xsl:template>
+
+  <xsl:template name="href">
+    <xsl:param name="prefix"/>
+    <xsl:param name="scope" select="()"/>
+    <xsl:param name="name"/>
+
       <xsl:attribute name="href">
         <xsl:choose>
           <xsl:when test="$scope">
@@ -1356,8 +1386,6 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
-      <xsl:value-of select="$name"/>
-    </a>
   </xsl:template>
 
   <xsl:template name="id">
