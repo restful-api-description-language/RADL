@@ -1,5 +1,5 @@
 if [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then
-  for package in "core" "gradle"; do
+  for package in "core" "gradle" "maven"; do
     for path in java/$package/build/libs/*; do
       version=$(basename $path | awk -F- '{print $3}' | cut -d. -f1-3)
       echo Uploading radl-$package-$version to BinTray
