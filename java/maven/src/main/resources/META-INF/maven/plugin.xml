@@ -203,7 +203,7 @@ Call &lt;code&gt;mvn radl-maven:help -Ddetail=true -Dgoal=&amp;lt;goal-name&amp;
       </configuration>
     </mojo>
     <mojo>
-      <goal>generateDocumentationFromRadl</goal>
+      <goal>radl2docs</goal>
       <description>Maven plugin for generating HTML documentation from the RADL file.</description>
       <requiresDirectInvocation>false</requiresDirectInvocation>
       <requiresProject>true</requiresProject>
