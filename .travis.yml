@@ -31,6 +31,7 @@ deploy:
     - java/core/build/libs/*
     - java/eclipse/build/libs/*
     - java/gradle/build/libs/*
+    - java/maven/build/libs/*
   on:
     repo: restful-api-description-language/RADL
     tags: true
