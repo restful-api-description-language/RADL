@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) EMC Corporation. All rights reserved.
+ */
+
+apply plugin: 'maven'
+
+dependencies {
+  compile project(':java:core'),
+      'org.apache.maven:maven-plugin-api:2.0',
+      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.2',
+      'org.codehaus.plexus:plexus-utils:3.0.8'
+}
+
+def archiveBase = "radl-$project.name"
+
+task createPom4Plugin << {
+  pom {
+    project {
+      groupId 'radl'
+      artifactId archiveBase
+      version project.version
+
+      inceptionYear '2015'
+      licenses {
+        license {
+          name 'The Apache Software License, Version 2.0'
+          url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          distribution 'repo'
+        }
+      }
+    }
+    whenConfigured { pom ->
+      pom.dependencies.findAll { it.groupId == 'RADL.java' }.each { dep ->
+        dep.groupId = 'radl'
+        dep.artifactId = "radl-$dep.artifactId"
+      }
+    }
+  }.writeTo("$buildDir/resources/main/META-INF/maven/radl/radl-maven/pom.xml")
+}
+
+processResources {
+  filesMatching('**/plugin*.xml') {
+    filter {
+      it.replace('@radl-maven-version@', project.property('version'))
+    }
+    filter {
+      Properties coreProps = new Properties()
+      coreProps.load(new FileInputStream("$rootDir/java/core/gradle.properties"))
+      it.replace('@radl-core-version@', coreProps.getProperty('version'))
+    }
+  }
+}
+
+assemble.dependsOn createPom4Plugin, processResources

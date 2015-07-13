@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) EMC Corporation. All rights reserved.
+ */
+
 rootProject.name = 'RADL'
 
 include 'java:core'
 include 'java:gradle'
 include 'java:eclipse'
+include 'java:maven'
