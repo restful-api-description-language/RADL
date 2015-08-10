@@ -49,7 +49,7 @@ public class RadlValidationPlugin extends AbstractMojo implements MavenConfig {
 
   /**
    * Specifying whether to fail on receiving validation errors or ignore errors.
-   * Defaults to <pre>true</pre>, which means to fail on errors..
+   * Defaults to <pre>true</pre>, which means to fail on errors.
    */
   @Parameter(property = FAIL_ON_VALIDATION_ERRORS, defaultValue = FAIL_ON_VALIDATION_ERRORS_DEFAULT)
   private boolean failOnValidationErrors;

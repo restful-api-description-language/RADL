@@ -15,7 +15,7 @@
   <goalPrefix>radl-maven</goalPrefix>
   <mojos>
     <mojo>
-      <goal>generateDocumentationFromRadl</goal>
+      <goal>radl2docs</goal>
       <description>Maven plugin for generating HTML documentation from the RADL file.</description>
       <requiresDirectInvocation>false</requiresDirectInvocation>
       <requiresProject>true</requiresProject>

@@ -20,7 +20,7 @@ import radl.maven.util.RadlFileUtil;
 /**
  * Maven plugin for generating HTML documentation from the RADL file.
  */
-@Mojo(name = "generateDocumentationFromRadl", defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "radl2docs", defaultPhase = LifecyclePhase.PACKAGE)
 public class Radl2HtmlDocPlugin extends AbstractMojo implements MavenConfig {
 
   private static final String MSG = "HTML documentation is generated at: %s";
