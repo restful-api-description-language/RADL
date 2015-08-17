@@ -37,28 +37,28 @@
     </state>
 
     <state name="Deciding">
-      <properties name="menu"/>
+      <properties ref="menu"/>
       <transitions>
         <transition name="Place order" to="Ordered">
           <documentation>
             The customer composes an order from the items on the menu and places the order with the cashier.
           </documentation>
           <input>
-            <properties name="order"/>
+            <properties ref="order"/>
           </input>
         </transition>
       </transitions>
     </state>
 
     <state name="Ordered">
-      <properties name="order"/>
+      <properties ref="order"/>
       <transitions>
         <transition name="Change" to="Ordered">
           <documentation>
             As long as the customer hasn't paid, she can change her order.
           </documentation>
           <input>
-            <properties name="order"/>
+            <properties ref="order"/>
           </input>
         </transition>
         <transition name="Cancel" to="Canceled">
@@ -71,7 +71,7 @@
             The customer pays for the order.
           </documentation>
           <input>
-            <properties name="payment"/>
+            <properties ref="payment"/>
           </input>
         </transition>
       </transitions>
@@ -80,7 +80,7 @@
     <state name="Canceled"/>
 
     <state name="Paid">
-      <properties name="receipt"/>
+      <properties ref="receipt"/>
       <transitions>
         <transition name="Take receipt" to="Waiting">
           <documentation>
@@ -106,7 +106,7 @@
     </state>
 
     <state name="Served">
-      <properties name="serving"/>
+      <properties ref="serving"/>
       <transitions>
         <transition name="Take serving" to="Happy">
           <documentation>
@@ -159,23 +159,23 @@
     </link-relation>
   </link-relations>
 
-  <data-models>
-    <data-model name="menu">
+  <named-properties>
+    <properties name="menu">
       <!-- TODO: Describe semantics and data types -->
-    </data-model>
+    </properties>
 
-    <data-model name="order">
+    <properties name="order">
       <!-- TODO: Describe semantics and data types -->
-    </data-model>
+    </properties>
 
-    <data-model name="payment">
+    <properties name="payment">
       <!-- TODO: Describe semantics and data types -->
-    </data-model>
+    </properties>
 
-    <data-model name="receipt">
+    <properties name="receipt">
       <!-- TODO: Describe semantics and data types -->
-    </data-model>
-  </data-models>
+    </properties>
+  </named-properties>
 
   <media-types>
     <media-type name="application/ld+json">

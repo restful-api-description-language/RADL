@@ -12,9 +12,9 @@ service =
   element service {
     name,
     documentation*,
-    states?,    
+    states?,
     link-relations?,
-    data-models?,
+    named-properties?,
     media-types?,
     service-conventions?,
     resources?,
@@ -48,7 +48,7 @@ states = element states { start-state?, state* }
 
 start-state = element start-state {
     documentation*,
-    properties?,
+    named-properties-ref?,
     state-transitions?
 }
 
@@ -57,19 +57,11 @@ state =
     extends?,
     name,
     documentation*,
-    properties?,
+    named-properties-ref?,
     state-transitions?
   }
 
 state-ref = attribute state { xsd:string }
-
-#
-# Properties
-#
-
-properties = element properties { documentation*, name, property* }
-property = element property { name, occurs?, documentation*, (properties* | text?) }
-properties-ref = attribute properties { text }
 
 #
 #  Link relations, Links
@@ -79,7 +71,7 @@ link-relations =
   element link-relations { documentation*, link-relation* }
 link-relation =
   element link-relation {
-    documentation*, status?, name, href?, linkrel-transitions? 
+    documentation*, status?, name, href?, linkrel-transitions?
   }
 link-relation-name = attribute link-relation { xsd:anyURI }
 
@@ -98,12 +90,12 @@ transition =
     transition-input?
   }
 
-from = attribute from { xsd:string }   
-to = attribute to { xsd:string }  
-transition-input = element input { properties }
+from = attribute from { xsd:string }
+to = attribute to { xsd:string }
+transition-input = element input { named-properties-ref }
 
 transition-ref =  attribute ref { xsd:string }
-transition-ref-element = 
+transition-ref-element =
   element transition {
     transition-ref,
     from?,
@@ -114,16 +106,25 @@ method-transitions = element transitions { transition-ref-element* }
 linkrel-transitions  = element transitions { transition-ref-element* }
 
 #
-# Data models
+# Properties
 #
 
-data-models = element data-models { data-model* }
-data-model = element data-model {
-    name?,
-    documentation*,
-    schema?,
-    examples?
+named-properties = element named-properties {
+  top-level-properties*
 }
+
+top-level-properties = element properties {
+  name,
+  uri?,
+  documentation*,
+  schema?,
+  examples?,
+  (nested-properties | property | named-properties-ref )*
+}
+
+nested-properties = element properties { name, documentation*, (nested-properties | property | named-properties-ref )* }
+property = element property { name, uri?, occurs?, documentation*, text? }
+named-properties-ref = element properties { attribute ref {xsd:string} }
 
 #
 # Media Types
@@ -131,15 +132,14 @@ data-model = element data-model {
 # A media type describes the concrete representation of a state
 # as a sequence of bytes.
 
-media-types = element media-types { media-type* }
+media-types = element media-types { default-media-type?, media-type* }
 
 media-type = element media-type {
-    name,  
-    default-media-type?, 
+    name,
     documentation*,
     specification*,
     media-type-schema*,
-    representation* 
+    representation*
 }
 
 default-media-type = attribute default { xsd:string }
@@ -149,14 +149,14 @@ media-type-ref = attribute media-type { xsd:string }
 
 type =
   attribute type {
-    "rnc" | "rng" | "xsd" | "dtd" | "JSONSchema" 
+    "rnc" | "rng" | "xsd" | "dtd" | "JSONSchema"
   }
 
 #  You can inline a schema in RELAX-NG's XML notation.
 #  Other schema languages can be used via href.
 
 schema = element schema { href?, relax-ng? }
-relax-ng = element rng:* { any-attribute*, (relax-ng* | text)* } 
+relax-ng = element rng:* { any-attribute*, (relax-ng* | text)* }
 
 # Service Conventions
 #
@@ -202,7 +202,7 @@ http-method =
 #  "from" attribute must be used.
 
 request =
-  element request {  
+  element request {
     documentation*, request-uri-parameters?, header-refs?, representation-refs?
   }
 request-uri-parameters =
@@ -214,10 +214,10 @@ header-ref = element header { attribute ref { xsd:string}, required? }
 representations = element representations { representation* }
 
 # Examples are now in representations. A representation can be associated with a properties-ref.
-representation = element representation { name, documentation*, properties?, description*, examples? }
+representation = element representation { name, documentation*, named-properties-ref?, description*, examples? }
 representation-refs = element representations { representation-ref* }
 representation-ref = element representation { media-type-name, documentation* }
-description = element description { (type, href, documentation*) | ( documentation*, schema ) } 
+description = element description { (type, href, documentation*) | ( documentation*, schema ) }
 examples = element examples { example* }
 example = element example { documentation*, text }
 value = attribute value { text }
@@ -324,7 +324,7 @@ resource-ref = attribute resource { xsd:string }
 extends = attribute extends { xsd:string }
 
 # URI templates in locations specify variables that can be used in URI parameters
-# in the user interface. 
+# in the user interface.
 #
 # If they are not also specified as URI parameters, they are not part of the interface.
 
