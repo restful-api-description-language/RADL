@@ -26,7 +26,7 @@ RADL can be used to:
 * Generate Spring Framework Java controller classes from an API description (for design-first environments)
 * Generate the resource model for a RESTful API from Spring Framework of JAX-RS Java controller classes (for code-first environments)
 
-> *NOTE* - RADL does not yet support non-Java environments like Node.js, and we have not yet defined a timeline for doing so. If you need support for a particular environment in RADL, please contact the authors - we welcome contributed code to support such environments.
+> *NOTE* - RADL can be used to design RESTful APIs, validate them for consistency, or generate documentation for any environment.  It cannot currently generate controllers for non-Java environments like Node.js or generate resource models from source code in these environments, and we have not yet defined a timeline for doing so. If you need support for a particular environment in RADL, please contact the authors - we welcome contributed code to support such environments.
 
 RADL describes both the hypermedia client API and the resource model, which describes the implementation and should not be exposed to the client.
 The client API is defined in terms of client states, link relations, media types, URI parameters, and any custom headers or status codes that need to be documented.
