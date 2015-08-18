@@ -122,7 +122,7 @@ top-level-properties = element properties {
   (nested-properties | property | named-properties-ref )*
 }
 
-nested-properties = element properties { name, documentation*, (nested-properties | property | named-properties-ref )* }
+nested-properties = element properties { name, documentation*, ((nested-properties | property )*  | named-properties-ref ) }
 property = element property { name, uri?, occurs?, documentation*, text? }
 named-properties-ref = element properties { attribute ref {xsd:string} }
 
