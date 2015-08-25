@@ -183,6 +183,75 @@
     </media-type>
   </media-types>
 
+  <errors>
+    <error name="http://errors.restbucks.com/missing-item">
+      <documentation>
+        The order you provided doesn't contain any menu item.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/unknown-item">
+      <documentation>
+         The menu item you requested is unknown to the server. 
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/invalid-item">
+      <documentation>
+         The attributes you provided are invalid for the requested menu item.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/item-out-of-stock">
+      <documentation>
+         The menu item you requested is temporarily out of stock.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/missing-customer">
+      <documentation>
+         The order you provided doesn't contain a customer name.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/invalid-payment">
+      <documentation>
+         The payment details you provided contain invalid values.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/overpaid">
+      <documentation>
+         The amount of money you paid is more than what the order costs.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/payment-not-processed">
+      <documentation>
+         The payment you provided could not be processed.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/not-found">
+      <documentation>
+         The URI you requested doesn't exists or is not accessible by you.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/method-not-allowed">
+      <documentation>
+         The method you used is not supported on this URI.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/not-acceptible">
+      <documentation>
+         The media type you requested in the Accept header is not supported for this method on this URI.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/server-error">
+      <documentation>
+         Something went wrong on our side. We have logged the problem so our staff can look into it.
+         We're sorry for the inconvenience.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/service-unavailable">
+      <documentation>
+         The server is temporarily not able to handle the request.
+      </documentation>
+    </error>
+  </errors>
+  
   <conventions>
     <status-codes>
       <status-code name="200"/>

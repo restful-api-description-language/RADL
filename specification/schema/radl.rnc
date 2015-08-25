@@ -16,6 +16,7 @@ service =
     link-relations?,
     named-properties?,
     media-types?,
+    errors?,
     service-conventions?,
     resources?,
     authentication?
@@ -157,6 +158,14 @@ type =
 
 schema = element schema { href?, relax-ng? }
 relax-ng = element rng:* { any-attribute*, (relax-ng* | text)* }
+
+
+# Errors
+#
+
+errors = element errors { documentation*, error* }
+error = element error { name, documentation* }
+
 
 # Service Conventions
 #
