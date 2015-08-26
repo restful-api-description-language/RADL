@@ -177,7 +177,7 @@
     </properties>
   </named-properties>
 
-  <media-types>
+  <media-types default="application/ld+json">
     <media-type name="application/ld+json">
       <specification href="http://www.w3.org/TR/json-ld/"/>
     </media-type>
@@ -253,16 +253,6 @@
   </errors>
   
   <conventions>
-    <status-codes>
-      <status-code name="200"/>
-      <status-code name="202">
-        <documentation>
-          This status is returned while the barista is preparing the serving. The customer has to wait and
-          periodically poll for status changes. When the serving is prepared, the response status will be 
-          <ref status-code="200"/>.
-        </documentation>
-      </status-code>
-    </status-codes>
     <uri-template-variables>
       <uri-template-variable name="order-id">
         <documentation>
@@ -280,11 +270,7 @@
           <transitions>
             <transition ref="Arrive"/>
           </transitions>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
       </methods>
     </resource>
@@ -296,11 +282,7 @@
           <transitions>
             <transition ref="Read menu"/>
           </transitions>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
       </methods>
     </resource>
@@ -312,16 +294,8 @@
           <transitions>
             <transition ref="Place order"/>
           </transitions>
-          <request>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </request>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <request/>
+          <response/>
         </method>
       </methods>
     </resource>
@@ -338,26 +312,14 @@
           <transitions>
             <transition ref="Change"/>
           </transitions>
-          <request>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </request>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <request/>
+          <response/>
         </method>
         <method name="GET">
           <transitions>
             <transition ref="Take receipt"/>
           </transitions>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
       </methods>
     </resource>
@@ -369,16 +331,8 @@
           <transitions>
             <transition ref="Pay"/>
           </transitions>
-          <request>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </request>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <request/>
+          <response/>
         </method>
       </methods>
     </resource>
@@ -391,15 +345,7 @@
             <transition ref="Wait"/>
             <transition ref="Receive notification"/>
           </transitions>
-          <response>
-            <status-codes>
-              <status-code ref="200"/>
-              <status-code ref="202"/>
-            </status-codes>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
         <method name="DELETE">
           <transitions>

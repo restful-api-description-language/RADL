@@ -81,9 +81,15 @@ public class RadlComparer implements Application {
       }
     }
     if (actual.hasNext()) {
-      assertItem(type, null, actual.next());
+      assertNoItem(type, actual.next());
     }
     return original;
+  }
+
+  private void assertNoItem(String type, String actual) {
+    if (actual != null) {
+      differences.add(String.format("%s: expected <null> but got <%s>", type, actual));
+    }
   }
 
   private void assertResources(RadlCode original, RadlCode revised) {
