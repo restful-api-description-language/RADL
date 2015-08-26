@@ -211,13 +211,22 @@ request-uri-parameter-ref =
   element uri-parameter {  attribute ref { xsd:string }, required?  }
 header-refs = element headers { documentation*, header-ref* }
 header-ref = element header { attribute ref { xsd:string}, required? }
-representations = element representations { representation* }
 
 # Examples are now in representations. A representation can be associated with a properties-ref.
-representation = element representation { name, documentation*, named-properties-ref?, description*, examples? }
+representations = element representations { representation* }
+representation = element representation { 
+  name, 
+  documentation*, 
+  named-properties-ref?, 
+  description*, 
+  examples? 
+}
+description = element description { 
+  (type, href, documentation*) | ( documentation*, schema ) 
+}
 representation-refs = element representations { representation-ref* }
 representation-ref = element representation { media-type-name, documentation* }
-description = element description { (type, href, documentation*) | ( documentation*, schema ) }
+
 examples = element examples { example* }
 example = element example { documentation*, text }
 value = attribute value { text }
