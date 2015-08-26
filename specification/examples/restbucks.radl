@@ -120,41 +120,47 @@
   </states>
 
   <link-relations>
-    <link-relation name="http://api.restbucks.com/linkrel/menu">
+    <link-relation name="self">
+      <specification href="http://tools.ietf.org/html/rfc4287"/>
       <transitions>
-        <transition ref="Read menu"/>
+        <transition ref="Receive notification"/>
       </transitions>
     </link-relation>
-    <link-relation name="http://api.restbucks.com/linkrel/orders">
-      <transitions>
-        <transition ref="Place order"/>
-      </transitions>
-    </link-relation>
+  
     <link-relation name="edit">
+      <specification href="http://tools.ietf.org/html/rfc5023"/>
       <transitions>
-        <transition ref="Change"/>
+        <transition ref="Change order"/>
         <transition ref="Cancel"/>
+        <transition ref="Take serving"/>
       </transitions>
     </link-relation>
+  
     <link-relation name="payment">
+      <specification href="http://tools.ietf.org/html/rfc5988"/>
       <transitions>
         <transition ref="Pay"/>
       </transitions>
     </link-relation>
-    <link-relation name="http://api.restbucks.com/linkrel/accept">
+  
+    <link-relation name="http://schema.org/menu">
+      <specification href="http://schema.org/menu"/>
+      <transitions>
+        <transition ref="Read menu"/>
+      </transitions>
+    </link-relation>
+  
+    <link-relation name="http://schema.org/OrderAction">
+      <specification href="http://schema.org/OrderAction"/>
+      <transitions>
+        <transition ref="Place order"/>
+      </transitions>
+    </link-relation>
+  
+    <link-relation name="http://schema.org/Order">
+      <specification href="http://schema.org/Order"/>
       <transitions>
         <transition ref="Take receipt"/>
-        <transition ref="Take serving"/>
-      </transitions>
-    </link-relation>
-    <link-relation name="self">
-      <transitions>
-        <transition ref="Wait"/>
-      </transitions>
-    </link-relation>
-    <link-relation name="http://api.restbucks.com/linkrel/serving">
-      <transitions>
-        <transition ref="Receive notification"/>
       </transitions>
     </link-relation>
   </link-relations>

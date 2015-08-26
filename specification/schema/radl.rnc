@@ -71,10 +71,13 @@ state-ref = attribute state { xsd:string }
 link-relations =
   element link-relations { documentation*, link-relation* }
 link-relation =
-  element link-relation {
-    documentation*, status?, name, href?, linkrel-transitions?
+  element link-relation { 
+    status?, 
+    name,
+    documentation*,
+    specification*,
+    linkrel-transitions?
   }
-link-relation-name = attribute link-relation { xsd:anyURI }
 
 
 #
