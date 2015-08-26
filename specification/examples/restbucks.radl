@@ -230,6 +230,11 @@
          The payment you provided could not be processed.
       </documentation>
     </error>
+    <error name="http://errors.restbucks.com/already-paid">
+      <documentation>
+         The order is already paid and cannot be changed anymore.
+      </documentation>
+    </error>
     <error name="http://errors.restbucks.com/not-found">
       <documentation>
          The URI you requested doesn't exists or is not accessible by you.
