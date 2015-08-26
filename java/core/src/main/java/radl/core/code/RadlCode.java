@@ -115,8 +115,24 @@ public class RadlCode extends XmlCode {
   }
 
   private Iterable<String> methodRepresentations(String resource, String method, String type) {
-    String xpath = "//radl:resource[@name='%s']//radl:method[@name='%s']/radl:" + type + "//radl:representation";
-    return getElementsAttribute("media-type", xpath, resource, method);
+    String xpath = String.format("//radl:resource[@name='%s']//radl:method[@name='%s']/radl:%s", resource, method, type);
+    if (!multiple(xpath, Element.class).iterator().hasNext()) {
+      // No representations of this type
+      return Collections.emptyList();
+    }
+    Iterable<String> result = getElementsAttribute("media-type", xpath + "//radl:representation");
+    if (result.iterator().hasNext()) {
+      // Explicit representations
+      return result;
+    }
+    // Implicit representation of default media type
+    String mediaType = defaultMediaType();
+    return mediaType == null ? Collections.<String>emptyList() : Collections.singletonList(mediaType);
+  }
+
+  public String defaultMediaType() {
+    Iterator<String> result = getElementsAttribute("default", "//radl:media-types").iterator();
+    return result.hasNext() ? result.next() : null;
   }
 
   public Iterable<String> methodResponseRepresentations(String resource, String method) {

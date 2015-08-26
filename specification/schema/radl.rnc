@@ -16,6 +16,7 @@ service =
     link-relations?,
     named-properties?,
     media-types?,
+    errors?,
     service-conventions?,
     resources?,
     authentication?
@@ -70,10 +71,13 @@ state-ref = attribute state { xsd:string }
 link-relations =
   element link-relations { documentation*, link-relation* }
 link-relation =
-  element link-relation {
-    documentation*, status?, name, href?, linkrel-transitions?
+  element link-relation { 
+    status?, 
+    name,
+    documentation*,
+    specification*,
+    linkrel-transitions?
   }
-link-relation-name = attribute link-relation { xsd:anyURI }
 
 
 #
@@ -158,12 +162,23 @@ type =
 schema = element schema { href?, relax-ng? }
 relax-ng = element rng:* { any-attribute*, (relax-ng* | text)* }
 
+
+# Errors
+#
+
+errors = element errors { documentation*, error* }
+error = element error { name, documentation* }
+
+
 # Service Conventions
 #
 # service-conventions are used by both resources and media types when
 # conventions are shared by more than one media type.
 
-service-conventions = element conventions { documentation*, headers?, uri-parameters?, status-codes? }
+service-conventions = element conventions { documentation*, headers?, uri-parameters?, status-codes?, uri-template-variables? }
+
+uri-template-variables = element uri-template-variables { documentation*, uri-template-variable* }
+uri-template-variable = element uri-template-variable { name, documentation* }
 
 uri-parameters =
   element uri-parameters { documentation*, uri-parameter* }
@@ -337,8 +352,7 @@ extends = attribute extends { xsd:string }
 #
 # If they are not also specified as URI parameters, they are not part of the interface.
 
-location = element location { documentation*, (uri | uri-template), location-var* }
-location-var = element var { name, documentation* }
+location = element location { documentation*, (uri | uri-template) }
 uri-template = attribute uri-template { text }
 
 authentication =

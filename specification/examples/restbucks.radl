@@ -120,41 +120,47 @@
   </states>
 
   <link-relations>
-    <link-relation name="http://api.restbucks.com/linkrel/menu">
+    <link-relation name="self">
+      <specification href="http://tools.ietf.org/html/rfc4287"/>
       <transitions>
-        <transition ref="Read menu"/>
+        <transition ref="Receive notification"/>
       </transitions>
     </link-relation>
-    <link-relation name="http://api.restbucks.com/linkrel/orders">
-      <transitions>
-        <transition ref="Place order"/>
-      </transitions>
-    </link-relation>
+  
     <link-relation name="edit">
+      <specification href="http://tools.ietf.org/html/rfc5023"/>
       <transitions>
-        <transition ref="Change"/>
+        <transition ref="Change order"/>
         <transition ref="Cancel"/>
+        <transition ref="Take serving"/>
       </transitions>
     </link-relation>
+  
     <link-relation name="payment">
+      <specification href="http://tools.ietf.org/html/rfc5988"/>
       <transitions>
         <transition ref="Pay"/>
       </transitions>
     </link-relation>
-    <link-relation name="http://api.restbucks.com/linkrel/accept">
+  
+    <link-relation name="http://schema.org/menu">
+      <specification href="http://schema.org/menu"/>
+      <transitions>
+        <transition ref="Read menu"/>
+      </transitions>
+    </link-relation>
+  
+    <link-relation name="http://schema.org/OrderAction">
+      <specification href="http://schema.org/OrderAction"/>
+      <transitions>
+        <transition ref="Place order"/>
+      </transitions>
+    </link-relation>
+  
+    <link-relation name="http://schema.org/Order">
+      <specification href="http://schema.org/Order"/>
       <transitions>
         <transition ref="Take receipt"/>
-        <transition ref="Take serving"/>
-      </transitions>
-    </link-relation>
-    <link-relation name="self">
-      <transitions>
-        <transition ref="Wait"/>
-      </transitions>
-    </link-relation>
-    <link-relation name="http://api.restbucks.com/linkrel/serving">
-      <transitions>
-        <transition ref="Receive notification"/>
       </transitions>
     </link-relation>
   </link-relations>
@@ -177,23 +183,94 @@
     </properties>
   </named-properties>
 
-  <media-types>
+  <media-types default="application/ld+json">
     <media-type name="application/ld+json">
       <specification href="http://www.w3.org/TR/json-ld/"/>
     </media-type>
   </media-types>
 
+  <errors>
+    <error name="http://errors.restbucks.com/missing-item">
+      <documentation>
+        The order you provided doesn't contain any menu item.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/unknown-item">
+      <documentation>
+         The menu item you requested is unknown to the server. 
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/invalid-item">
+      <documentation>
+         The attributes you provided are invalid for the requested menu item.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/item-out-of-stock">
+      <documentation>
+         The menu item you requested is temporarily out of stock.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/missing-customer">
+      <documentation>
+         The order you provided doesn't contain a customer name.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/invalid-payment">
+      <documentation>
+         The payment details you provided contain invalid values.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/overpaid">
+      <documentation>
+         The amount of money you paid is more than what the order costs.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/payment-not-processed">
+      <documentation>
+         The payment you provided could not be processed.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/already-paid">
+      <documentation>
+         The order is already paid and cannot be changed anymore.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/not-found">
+      <documentation>
+         The URI you requested doesn't exists or is not accessible by you.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/method-not-allowed">
+      <documentation>
+         The method you used is not supported on this URI.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/not-acceptible">
+      <documentation>
+         The media type you requested in the Accept header is not supported for this method on this URI.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/server-error">
+      <documentation>
+         Something went wrong on our side. We have logged the problem so our staff can look into it.
+         We're sorry for the inconvenience.
+      </documentation>
+    </error>
+    <error name="http://errors.restbucks.com/service-unavailable">
+      <documentation>
+         The server is temporarily not able to handle the request.
+      </documentation>
+    </error>
+  </errors>
+  
   <conventions>
-    <status-codes>
-      <status-code name="200"/>
-      <status-code name="202">
+    <uri-template-variables>
+      <uri-template-variable name="order-id">
         <documentation>
-          This status is returned while the barista is preparing the serving. The customer has to wait and
-          periodically poll for status changes. When the serving is prepared, the response status will be 
-          <ref status-code="200"/>.
+          A unique server-generated ID for an order. The client should treat this as an opaque identifier.
         </documentation>
-      </status-code>
-    </status-codes>
+      </uri-template-variable>
+    </uri-template-variables>
   </conventions>
 
   <resources>
@@ -204,11 +281,7 @@
           <transitions>
             <transition ref="Arrive"/>
           </transitions>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
       </methods>
     </resource>
@@ -220,11 +293,7 @@
           <transitions>
             <transition ref="Read menu"/>
           </transitions>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
       </methods>
     </resource>
@@ -236,22 +305,14 @@
           <transitions>
             <transition ref="Place order"/>
           </transitions>
-          <request>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </request>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <request/>
+          <response/>
         </method>
       </methods>
     </resource>
     
     <resource name="Order">
-      <location uri-template="/orders/{id}/"/>
+      <location uri-template="/orders/{order-id}/"/>
       <methods>
         <method name="DELETE">
           <transitions>
@@ -262,68 +323,40 @@
           <transitions>
             <transition ref="Change"/>
           </transitions>
-          <request>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </request>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <request/>
+          <response/>
         </method>
         <method name="GET">
           <transitions>
             <transition ref="Take receipt"/>
           </transitions>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
       </methods>
     </resource>
     
     <resource name="Payments">
-      <location uri-template="/orders/{id}/payments/"/>
+      <location uri-template="/orders/{order-id}/payments/"/>
       <methods>
         <method name="POST">
           <transitions>
             <transition ref="Pay"/>
           </transitions>
-          <request>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </request>
-          <response>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <request/>
+          <response/>
         </method>
       </methods>
     </resource>
     
     <resource name="Serving">
-      <location uri-template="/orders/{id}/serving/"/>
+      <location uri-template="/orders/{order-id}/serving/"/>
       <methods>
         <method name="GET">
           <transitions>
             <transition ref="Wait"/>
             <transition ref="Receive notification"/>
           </transitions>
-          <response>
-            <status-codes>
-              <status-code ref="200"/>
-              <status-code ref="202"/>
-            </status-codes>
-            <representations>
-              <representation media-type="application/ld+json"/>
-            </representations>
-          </response>
+          <response/>
         </method>
         <method name="DELETE">
           <transitions>

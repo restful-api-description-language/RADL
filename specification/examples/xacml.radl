@@ -29,11 +29,7 @@
   </states>
   <link-relations>
     <link-relation name="http://docs.oasis-open.org/ns/xacml/relation/pdp">
-      <documentation>
-        <ref uri="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/cs02/xacml-rest-v1.0-cs02.pdf">
-          XACML REST Profile
-        </ref>
-      </documentation>
+      <specification href="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/cs02/xacml-rest-v1.0-cs02.pdf"/>
       <transitions>
         <transition ref="Decide access"/>
       </transitions>
