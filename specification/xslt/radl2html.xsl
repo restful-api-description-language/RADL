@@ -434,6 +434,10 @@
               <xsl:with-param name="prefix">header</xsl:with-param>
               <xsl:with-param name="name" select="@ref"/>
             </xsl:call-template>
+            <xsl:choose>
+              <xsl:when test="@required='true'">(required)</xsl:when>
+              <xsl:otherwise>(optional)</xsl:otherwise>
+            </xsl:choose>
           </li>
         </xsl:for-each>
       </ul>
