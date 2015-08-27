@@ -21,6 +21,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import radl.common.io.IO;
 import radl.core.cli.Application;
 import radl.core.cli.Arguments;
 import radl.core.code.SourceFile;
@@ -72,6 +73,7 @@ public class GenerateAndExtractTest {
     radlFile = new File(TESTS_DIR, example + RADL_FILE_EXTENSION);
     outputDir = new File(String.format("build/integration-tests/%s/%s/%s", getClass().getSimpleName(), example,
         testName));
+    IO.delete(outputDir);
     outputDir.mkdirs();
     ResourceModelHolder.setInstance(null);
   }

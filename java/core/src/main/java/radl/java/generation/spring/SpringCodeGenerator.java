@@ -36,6 +36,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String NAME_ATTRIBUTE = "name";
   private static final String REF_ATTRIBUTE = "ref";
   private static final String MEDIA_TYPES_ELEMENT = "media-types";
+  private static final String DEFAULT_ATTRIBUTE = "default";
   private static final String MEDIA_TYPE_ELEMENT = "media-type";
   private static final String MEDIA_TYPE_REF_ATTRIBUTE = "media-type";
   private static final String RESOURCE_ELEMENT = "resource";
@@ -465,7 +466,8 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private String getMediaTypes(final Element methodElement, String messageType, String prefix) throws Exception {
     final Collection<String> mediaTypes = new ArrayList<String>();
-    Xml.processNestedElements(methodElement, new ElementProcessor() {
+    Element messageElement = Xml.getFirstChildElement(methodElement, messageType);
+    Xml.processNestedElements(messageElement, new ElementProcessor() {
       @Override
       public void process(Element representationElement) throws Exception {
         String mediaTypeName = representationElement.getAttributeNS(null, MEDIA_TYPE_REF_ATTRIBUTE);
@@ -476,7 +478,16 @@ public class SpringCodeGenerator implements CodeGenerator {
           }
         }
       }
-    }, messageType, REPRESENTATIONS_ELEMENT, REPRESENTATION_ELEMENT);
+    }, REPRESENTATIONS_ELEMENT, REPRESENTATION_ELEMENT);
+    if (mediaTypes.isEmpty() && messageElement != null) {
+      // No explicit representations defined, look for default media type
+      Element mediaTypesElement = Xml.getFirstChildElement(methodElement.getOwnerDocument().getDocumentElement(),
+          MEDIA_TYPES_ELEMENT);
+      String defaultMediaType = mediaTypesElement.getAttributeNS(null, DEFAULT_ATTRIBUTE);
+      if (!defaultMediaType.isEmpty()) {
+        mediaTypes.add(getMediaTypeConstant(defaultMediaType));
+      }
+    }
     if (mediaTypes.isEmpty()) {
       return "";
     }
