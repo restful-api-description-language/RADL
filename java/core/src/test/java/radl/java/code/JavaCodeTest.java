@@ -274,9 +274,13 @@ public class JavaCodeTest {
     String value5 = '"' + someValue() + '"';
     String value6 = '"' + someValue() + '"';
     String annotation1 = '@' + someValue();
+    String comment = someValue();
     code.add("public class %s {", someValue());
     code.add("  %s", annotation1);
     code.add("  private %s %s;", type1, field1);
+    code.add("  /**");
+    code.add("   * %s", comment);
+    code.add("   */");
     code.add("  private static final %s %s = %s;", type2, field2, value2);
     code.add("  %s %s;", type3, field3);
     code.add("  %s %s = %s;", type4, field4, value4);
@@ -296,6 +300,8 @@ public class JavaCodeTest {
     assertEquals("Field annotations #2", Collections.emptyList(), code.fieldAnnotations(field2));
     assertEquals("Field annotations #3", Collections.emptyList(), code.fieldAnnotations(field3));
     assertEquals("Field annotations #4", Collections.emptyList(), code.fieldAnnotations(field4));
+    assertEquals("Field annotations #5", Collections.emptyList(), code.fieldAnnotations(field5));
+    assertEquals("Field annotations #6", Collections.emptyList(), code.fieldAnnotations(field6));
     assertNull("Field value #1", code.fieldValue(field1));
     assertNull("Field value #3", code.fieldValue(field3));
     assertEquals("Field value #2", value2, code.fieldValue(field2));
@@ -307,6 +313,12 @@ public class JavaCodeTest {
     assertFalse("Is constant #3", code.fieldIsContant(field3));
     assertFalse("Is constant #4", code.fieldIsContant(field4));
     assertTrue("Is constant #5", code.fieldIsContant(field5));
+    assertEquals("Field comments #1", Collections.emptyList(), code.fieldComments(field1));
+    assertEquals("Field comments #2", Arrays.asList(comment), code.fieldComments(field2));
+    assertEquals("Field comments #3", Collections.emptyList(), code.fieldComments(field3));
+    assertEquals("Field comments #4", Collections.emptyList(), code.fieldComments(field4));
+    assertEquals("Field comments #5", Collections.emptyList(), code.fieldComments(field5));
+    assertEquals("Field comments #6", Collections.emptyList(), code.fieldComments(field6));
   }
 
   @Test

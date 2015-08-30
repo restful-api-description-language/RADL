@@ -420,5 +420,27 @@ public class SpringCodeGeneratorTest {
       }
     }
   }
+  
+  // #39 - Add error conditions to generated API
+  @Test
+  public void addsErrorConditionsToApi() {
+    String name1 = 'a' + RANDOM.string(7);
+    String name2 = 'z' + RANDOM.string(3) + ':' + RANDOM.string(7);
+    String documentation = RANDOM.string(12);
+    Document radl = RadlBuilder.aRadlDocument()
+        .withErrors()
+            .error(name1, documentation)
+            .error(name2, null)
+        .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+
+    JavaCode api = getJavaCode(sources, TYPE_API);
+    assertNotNull("Missing API", api);
+    
+    String error1 = "ERROR_" + name1.toUpperCase(Locale.getDefault());
+    assertTrue("Missing field for error #1", api.fieldNames().contains(error1));
+    assertEquals("JavaDoc for error #1", Arrays.asList(documentation), api.fieldComments(error1));
+  }
 
 }

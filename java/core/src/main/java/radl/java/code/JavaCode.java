@@ -385,4 +385,71 @@ public class JavaCode extends Code {
     return "static final".equals(getPatternPart(FIELD_PATTERN, 4, fieldName, 2).trim());
   }
 
+  public Iterable<String> fieldComments(String fieldName) {
+    return getComments(FIELD_PATTERN, 4, fieldName);
+  }
+
+  private Collection<String> getComments(Pattern pattern, int namePart, String name) {
+    List<String> result = new ArrayList<String>();
+    if (isSingleLinePattern(pattern)) {
+      getCommentsByLine(pattern, namePart, name, result);
+    } else {
+      getCommentsByText(pattern, namePart, name, result);
+    }
+    return result;
+  }
+
+  private void getCommentsByLine(Pattern pattern, int namePart, String name, List<String> comments) {
+    boolean inComment = false;
+    for (String line : this) {
+      String trimmedLine = line.trim();
+      if (inComment) {
+        inComment = !"*/".equals(trimmedLine);
+        if (inComment) {
+          comments.add(trimmedLine.substring(trimmedLine.indexOf(' ') + 1));
+        }
+      } else if (trimmedLine.startsWith("/**")) {
+        int index = trimmedLine.indexOf(' ');
+        if (index > 0) {
+          comments.add(trimmedLine.substring(index + 1));
+        }
+        inComment = !trimmedLine.contains("*/");
+      } else {
+        Matcher matcher = pattern.matcher(trimmedLine);
+        if (matcher.matches() && name.equals(matcher.group(namePart))) {
+          break;
+        } else {
+          comments.clear();
+        }
+      }
+    }
+  }
+
+  private void getCommentsByText(Pattern pattern, int namePart, String name, List<String> comments) {
+    Matcher matcher = pattern.matcher(text());
+    int start = 0;
+    while (matcher.find()) {
+      String actual = matcher.group(namePart);
+      if (name.equals(actual)) {
+        boolean inComment = false;
+        for (String line : text().substring(start, matcher.start()).split("\\n")) {
+          String trimmedLine = line.trim();
+          if (inComment) {
+            comments.set(comments.size() - 1,
+                comments.get(comments.size() - 1) + ' ' + trimmedLine.substring(trimmedLine.indexOf(' ') + 1));
+            inComment = !trimmedLine.contains("*/");
+          } else if (trimmedLine.startsWith("/**")) {
+            comments.add(trimmedLine.substring(trimmedLine.indexOf(' ') + 1));
+            inComment = !trimmedLine.contains("*/");
+          } else {
+            comments.clear();
+          }
+        }
+        break;
+      } else {
+        start = matcher.end();
+      }
+    }
+  }
+
 }

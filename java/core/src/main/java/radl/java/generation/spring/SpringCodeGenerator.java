@@ -19,11 +19,12 @@ import radl.common.xml.ElementProcessor;
 import radl.common.xml.Xml;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
+import radl.java.code.Java;
 import radl.java.code.JavaCode;
 
 
 /**
- * * Generates Java code for the Spring framework from a RADL document.
+ * Generates Java code for the Spring framework from a RADL document.
  */
 public class SpringCodeGenerator implements CodeGenerator {
 
@@ -56,6 +57,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String URIS_TYPE = "Uris";
   private static final String TRANSITIONS_ELEMENT = "transitions";
   private static final String TRANSITION_ELEMENT = "transition";
+  private static final String ERROR_ELEMENT = "error";
 
   private final String packagePrefix;
   private final Map<String, String> mediaTypeConstants = new TreeMap<String, String>();
@@ -128,9 +130,43 @@ public class SpringCodeGenerator implements CodeGenerator {
     addLinkRelations(radl, result);
     addMediaTypes(result);
     addBillboardUri(result);
+    addErrors(radl, result);
     result.add("");
     result.add("}");
     return result;
+  }
+
+  private void addErrors(Document radl, Code code) throws Exception {
+    Map<String, String> errors = new TreeMap<String, String>();
+    addErrors(radl, errors);
+    if (!errors.isEmpty()) {
+      code.add("");
+      code.add("  // Error conditions");
+      code.add("");
+      for (Entry<String, String> entry : errors.entrySet()) {
+        if (entry.getValue() != null) {
+          code.add("  /** ");
+          for (String line : entry.getValue().split("\n")) {
+            code.add("   * %s", line);
+          }
+          code.add("   */");
+        }
+        code.add("  String ERROR_%s = \"%s\";", Java.toIdentifier(entry.getKey()).toUpperCase(Locale.getDefault()),
+            entry.getKey());
+      }
+    }
+  }
+
+  private void addErrors(Document radl, final Map<String, String> errors) throws Exception {
+    Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
+      @Override
+      public void process(Element errorElement) throws Exception {
+        String name = errorElement.getAttributeNS(null, "name");
+        Element documentationElement = Xml.getFirstChildElement(errorElement, "documentation");
+        String documentation = documentationElement == null ? null : documentationElement.getTextContent();
+        errors.put(name, documentation);
+      }
+    }, ERROR_ELEMENT);
   }
 
   private void addBillboardUri(Code code) {
@@ -147,7 +183,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result;
   }
 
-  private void addLinkRelations(Document radl, final Code code) throws Exception {
+  private void addLinkRelations(Document radl, Code code) throws Exception {
     Map<String, String> linkRelationConstants = new TreeMap<String, String>();
     addLinkRelationConstants(radl, linkRelationConstants);
     addConstants(linkRelationConstants, "Link relations", code);

@@ -3,6 +3,9 @@
  */
 package radl.test;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.w3c.dom.Document;
 
 import radl.common.xml.DocumentBuilder;
@@ -74,6 +77,23 @@ public class RadlBuilder {
         .end()
     .end();
     return this;
+  }
+
+  public ErrorBuilder withErrors() {
+    return new ErrorBuilder(this);
+  }
+
+  void setErrors(Map<String, String> errors) {
+    builder.element("errors");
+    for (Entry<String, String> entry : errors.entrySet()) {
+      builder.element("error")
+          .attribute("name", entry.getKey());
+      if (entry.getValue() != null) {
+        builder.element("documentation", entry.getValue());
+      }
+      builder.end();
+    }
+    builder.end();
   }
 
 }
