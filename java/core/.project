@@ -1,27 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>core</name>
-	<comment/>
-	<projects/>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-	</natures>
+	<comment></comment>
+	<projects>
+	</projects>
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments/>
+			<arguments>
+			</arguments>
 		</buildCommand>
 	</buildSpec>
-	<linkedResources>
-		<link>
-			<name>specification</name>
-			<type>2</type>
-			<location>C:/Views/git/RADL/specification</location>
-		</link>
-		<link>
-			<name>specification</name>
-			<type>2</type>
-			<location>/home/remon/workspace/github/RADL/specification</location>
-		</link>
-	</linkedResources>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
 </projectDescription>
