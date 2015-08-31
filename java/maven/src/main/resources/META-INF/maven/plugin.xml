@@ -170,7 +170,9 @@ Defaults to &lt;pre&gt;true&lt;/pre&gt;, which means to fail on errors.</descrip
           <type>java.io.File</type>
           <required>false</required>
           <editable>true</editable>
-          <description></description>
+          <description>The argument file containing argument properties for the RADL extraction. If it is not specified,
+the plugin will create a temporary argument file with the minimal configuration. If it is specified,
+other parameters in this plugin will be merged into the argument file.</description>
         </parameter>
         <parameter>
           <name>classpathScope</name>
@@ -186,7 +188,7 @@ Defaults to &lt;pre&gt;runtime&lt;/pre&gt;.</description>
           <type>java.io.File</type>
           <required>false</required>
           <editable>true</editable>
-          <description></description>
+          <description>The additional configuration file containing configuration properties for the RADL extraction.</description>
         </parameter>
         <parameter>
           <name>docsDir</name>
@@ -222,7 +224,7 @@ Defaults to &lt;pre&gt;target/radl&lt;/pre&gt;.</description>
           <type>java.io.File</type>
           <required>false</required>
           <editable>true</editable>
-          <description></description>
+          <description>The source code file directory to scan for RADL extraction. Defaults to the project&apos;s java src dir.</description>
         </parameter>
       </parameters>
       <configuration>

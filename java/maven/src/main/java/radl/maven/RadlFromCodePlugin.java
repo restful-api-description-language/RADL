@@ -67,14 +67,27 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
   @Parameter(property = SERVICE_NAME, defaultValue = SERVICE_NAME_DEFAULT)
   private String serviceName;
 
+  /**
+   * The source code file directory to scan for RADL extraction. Defaults to the project's java src dir.
+   */
   @Parameter(property = SRC_SET_DIR, defaultValue = SRC_SET_DIR_DEFAULT)
   private File srcDir;
 
+  /**
+   * The argument file containing argument properties for the RADL extraction. If it is not specified,
+   * the plugin will create a temporary argument file with the minimal configuration. If it is specified,
+   * other parameters in this plugin will be merged into the argument file.
+   */
+  @Parameter(property = "argumentFile")
+  private File argumentFile;
+
+  /**
+   * The additional configuration file containing configuration properties for the RADL extraction.
+   */
   @Parameter(property = "configurationFile")
   private File configurationFile;
 
-  @Parameter(property = "argumentFile")
-  private File argumentFile;
+
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     FromJavaRadlExtractor radlFromJavaExtractor = new FromJavaRadlExtractor();
