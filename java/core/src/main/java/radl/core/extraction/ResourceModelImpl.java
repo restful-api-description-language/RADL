@@ -1,8 +1,9 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.extraction;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,7 +29,7 @@ import radl.core.Log;
 /**
  * Default implementation of {@linkplain ResourceModel}.
  */
-public class ResourceModelImpl implements ResourceModel {
+public class ResourceModelImpl implements ResourceModel, Serializable {
 
   private static final String NAME_SEPARATOR = ".";
   private static final String PATH_SEPARATOR = "/";
@@ -50,6 +51,15 @@ public class ResourceModelImpl implements ResourceModel {
   private final Collection<String> resourcesToLog = new HashSet<String>();
   private final AtomicInteger counter = new AtomicInteger();
   private boolean shouldSimplifyResourceNames;
+  private boolean completed;
+
+  @Override public void markComplete() {
+    this.completed = true;
+  }
+
+  @Override public boolean isCompleted() {
+    return this.completed;
+  }
 
   @Override
   public void addResource(String resourceName, String documentation) {

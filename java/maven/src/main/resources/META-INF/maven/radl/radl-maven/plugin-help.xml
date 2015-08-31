@@ -15,54 +15,6 @@
   <goalPrefix>radl-maven</goalPrefix>
   <mojos>
     <mojo>
-      <goal>radl2docs</goal>
-      <description>Maven plugin for generating HTML documentation from the RADL file.</description>
-      <requiresDirectInvocation>false</requiresDirectInvocation>
-      <requiresProject>true</requiresProject>
-      <requiresReports>false</requiresReports>
-      <aggregator>false</aggregator>
-      <requiresOnline>false</requiresOnline>
-      <inheritedByDefault>true</inheritedByDefault>
-      <phase>package</phase>
-      <implementation>radl.maven.Radl2HtmlDocPlugin</implementation>
-      <language>java</language>
-      <instantiationStrategy>per-lookup</instantiationStrategy>
-      <executionStrategy>once-per-session</executionStrategy>
-      <threadSafe>false</threadSafe>
-      <parameters>
-        <parameter>
-          <name>docsDir</name>
-          <type>java.io.File</type>
-          <required>false</required>
-          <editable>true</editable>
-          <description>The sub-directory of the project build directory into which documentation is generated. Defaults to
-target/radl
-.</description>
-        </parameter>
-        <parameter>
-          <name>radlDirName</name>
-          <type>java.io.File</type>
-          <required>false</required>
-          <editable>true</editable>
-          <description>Location of RADL files. Defaults to
-src/main/radl
-.</description>
-        </parameter>
-        <parameter>
-          <name>serviceName</name>
-          <type>java.lang.String</type>
-          <required>false</required>
-          <editable>true</editable>
-          <description>The name of the service that the RADL files describe. Defaults to the project&apos;s name.</description>
-        </parameter>
-      </parameters>
-      <configuration>
-        <docsDir implementation="java.io.File" default-value="${project.build.directory}/radl">${docsDir}</docsDir>
-        <radlDirName implementation="java.io.File" default-value="src/main/radl">${radlDirName}</radlDirName>
-        <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
-      </configuration>
-    </mojo>
-    <mojo>
       <goal>help</goal>
       <description>Display help information on radl-maven.
 Call mvn radl-maven:help -Ddetail=true -Dgoal=&lt;goal-name&gt; to display parameter details.</description>
@@ -112,6 +64,54 @@ Call mvn radl-maven:help -Ddetail=true -Dgoal=&lt;goal-name&gt; to display param
         <goal implementation="java.lang.String">${goal}</goal>
         <indentSize implementation="int" default-value="2">${indentSize}</indentSize>
         <lineLength implementation="int" default-value="80">${lineLength}</lineLength>
+      </configuration>
+    </mojo>
+    <mojo>
+      <goal>radl2docs</goal>
+      <description>Maven plugin for generating HTML documentation from the RADL file.</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <phase>package</phase>
+      <implementation>radl.maven.Radl2HtmlDocPlugin</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <threadSafe>false</threadSafe>
+      <parameters>
+        <parameter>
+          <name>docsDir</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The sub-directory of the project build directory into which documentation is generated. Defaults to
+target/radl
+.</description>
+        </parameter>
+        <parameter>
+          <name>radlDirName</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Location of RADL files. Defaults to
+src/main/radl
+.</description>
+        </parameter>
+        <parameter>
+          <name>serviceName</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The name of the service that the RADL files describe. Defaults to the project&apos;s name.</description>
+        </parameter>
+      </parameters>
+      <configuration>
+        <docsDir implementation="java.io.File" default-value="${project.build.directory}/radl">${docsDir}</docsDir>
+        <radlDirName implementation="java.io.File" default-value="${project.basedir}/src/main/radl">${radlDirName}</radlDirName>
+        <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
       </configuration>
     </mojo>
     <mojo>
@@ -190,13 +190,93 @@ for Perforce.</description>
       </parameters>
       <configuration>
         <baseDir implementation="java.io.File" default-value="${project.basedir}">${baseDir}</baseDir>
-        <packagePrefix implementation="java.lang.String"
-                       default-value="radl.sample.rest.server">${packagePrefix}</packagePrefix>
-        <radlDirName implementation="java.io.File" default-value="src/main/radl">${radlDirName}</radlDirName>
-        <relativeGeneratedManualSourceDir implementation="java.lang.String" default-value="target/generated-src/manual">${relativeGeneratedManualSourceDir}</relativeGeneratedManualSourceDir>
-        <relativeGeneratedSourceDir implementation="java.lang.String" default-value="target/generated-src/java">${relativeGeneratedSourceDir}</relativeGeneratedSourceDir>
+        <packagePrefix implementation="java.lang.String" default-value="radl.sample.rest.server">${packagePrefix}</packagePrefix>
+        <radlDirName implementation="java.io.File" default-value="${project.basedir}/src/main/radl">${radlDirName}</radlDirName>
+        <relativeGeneratedManualSourceDir implementation="java.lang.String" default-value="${project.build.directory}/generated-src/manual">${relativeGeneratedManualSourceDir}</relativeGeneratedManualSourceDir>
+        <relativeGeneratedSourceDir implementation="java.lang.String" default-value="${project.build.directory}/generated-src/java">${relativeGeneratedSourceDir}</relativeGeneratedSourceDir>
         <scm implementation="java.lang.String" default-value="default">${scm}</scm>
         <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
+      </configuration>
+    </mojo>
+    <mojo>
+      <goal>radlFromCode</goal>
+      <description>Maven plugin for extracting RADL file from the Java server code.</description>
+      <requiresDependencyResolution>compile</requiresDependencyResolution>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <phase>compile</phase>
+      <implementation>radl.maven.RadlFromCodePlugin</implementation>
+      <language>java</language>
+      <instantiationStrategy>keep-alive</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <threadSafe>false</threadSafe>
+      <parameters>
+        <parameter>
+          <name>argumentFile</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description></description>
+        </parameter>
+        <parameter>
+          <name>classpathScope</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The classpath scope which is used for the compilation of the RADL extraction from code. Available values are:
+runtime
+,
+compile
+,
+test
+and
+system
+. Defaults to
+runtime
+.</description>
+        </parameter>
+        <parameter>
+          <name>configurationFile</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description></description>
+        </parameter>
+        <parameter>
+          <name>docsDir</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The sub-directory of the project build directory into which RADL is generated. Defaults to
+target/radl
+.</description>
+        </parameter>
+        <parameter>
+          <name>serviceName</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The name of the service that the RADL files describe. Defaults to the project&apos;s name.</description>
+        </parameter>
+        <parameter>
+          <name>srcDir</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description></description>
+        </parameter>
+      </parameters>
+      <configuration>
+        <argumentFile implementation="java.io.File">${argumentFile}</argumentFile>
+        <classpathScope implementation="java.lang.String" default-value="runtime">${classpathScope}</classpathScope>
+        <configurationFile implementation="java.io.File">${configurationFile}</configurationFile>
+        <docsDir implementation="java.io.File" default-value="${project.build.directory}/radl">${docsDir}</docsDir>
+        <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
+        <srcDir implementation="java.io.File" default-value="${project.basedir}/src/main/java">${srcDir}</srcDir>
       </configuration>
     </mojo>
     <mojo>
@@ -222,7 +302,7 @@ for Perforce.</description>
           <editable>true</editable>
           <description>Specifying whether to fail on receiving validation errors or ignore errors. Defaults to
 true
-, which means to fail on errors..</description>
+, which means to fail on errors.</description>
         </parameter>
         <parameter>
           <name>issueFile</name>
@@ -251,10 +331,9 @@ src/main/radl
         </parameter>
       </parameters>
       <configuration>
-        <failOnValidationErrors implementation="boolean"
-                                default-value="true">${failOnValidationErrors}</failOnValidationErrors>
+        <failOnValidationErrors implementation="boolean" default-value="true">${failOnValidationErrors}</failOnValidationErrors>
         <issueFile implementation="java.io.File" default-value="${project.build.directory}/radl/radl-issues.xml">${issueFile}</issueFile>
-        <radlDirName implementation="java.io.File" default-value="src/main/radl">${radlDirName}</radlDirName>
+        <radlDirName implementation="java.io.File" default-value="${project.basedir}/src/main/radl">${radlDirName}</radlDirName>
         <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
       </configuration>
     </mojo>

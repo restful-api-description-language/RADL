@@ -1,13 +1,14 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.extraction;
 
+import java.io.Serializable;
 
 /**
  * A variable in a URI template, as defined by RFC 6570.
  */
-public class UriTemplateVar {
+public class UriTemplateVar implements Serializable {
 
   private final String name;
   private final String documentation;

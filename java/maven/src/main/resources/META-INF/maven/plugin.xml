@@ -87,11 +87,10 @@ The only other valid value is &lt;pre&gt;p4&lt;/pre&gt; for Perforce.</descripti
       </parameters>
       <configuration>
         <baseDir implementation="java.io.File" default-value="${project.basedir}">${baseDir}</baseDir>
-        <packagePrefix implementation="java.lang.String"
-                       default-value="radl.sample.rest.server">${packagePrefix}</packagePrefix>
-        <radlDirName implementation="java.io.File" default-value="src/main/radl">${radlDirName}</radlDirName>
-        <relativeGeneratedManualSourceDir implementation="java.lang.String" default-value="target/generated-src/manual">${relativeGeneratedManualSourceDir}</relativeGeneratedManualSourceDir>
-        <relativeGeneratedSourceDir implementation="java.lang.String" default-value="target/generated-src/java">${relativeGeneratedSourceDir}</relativeGeneratedSourceDir>
+        <packagePrefix implementation="java.lang.String" default-value="radl.sample.rest.server">${packagePrefix}</packagePrefix>
+        <radlDirName implementation="java.io.File" default-value="${project.basedir}/src/main/radl">${radlDirName}</radlDirName>
+        <relativeGeneratedManualSourceDir implementation="java.lang.String" default-value="${project.build.directory}/generated-src/manual">${relativeGeneratedManualSourceDir}</relativeGeneratedManualSourceDir>
+        <relativeGeneratedSourceDir implementation="java.lang.String" default-value="${project.build.directory}/generated-src/java">${relativeGeneratedSourceDir}</relativeGeneratedSourceDir>
         <scm implementation="java.lang.String" default-value="default">${scm}</scm>
         <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
       </configuration>
@@ -118,7 +117,7 @@ The only other valid value is &lt;pre&gt;p4&lt;/pre&gt; for Perforce.</descripti
           <required>false</required>
           <editable>true</editable>
           <description>Specifying whether to fail on receiving validation errors or ignore errors.
-Defaults to &lt;pre&gt;true&lt;/pre&gt;, which means to fail on errors..</description>
+Defaults to &lt;pre&gt;true&lt;/pre&gt;, which means to fail on errors.</description>
         </parameter>
         <parameter>
           <name>issueFile</name>
@@ -143,11 +142,98 @@ Defaults to &lt;pre&gt;true&lt;/pre&gt;, which means to fail on errors..</descri
         </parameter>
       </parameters>
       <configuration>
-        <failOnValidationErrors implementation="boolean"
-                                default-value="true">${failOnValidationErrors}</failOnValidationErrors>
+        <failOnValidationErrors implementation="boolean" default-value="true">${failOnValidationErrors}</failOnValidationErrors>
         <issueFile implementation="java.io.File" default-value="${project.build.directory}/radl/radl-issues.xml">${issueFile}</issueFile>
-        <radlDirName implementation="java.io.File" default-value="src/main/radl">${radlDirName}</radlDirName>
+        <radlDirName implementation="java.io.File" default-value="${project.basedir}/src/main/radl">${radlDirName}</radlDirName>
         <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
+      </configuration>
+    </mojo>
+    <mojo>
+      <goal>radlFromCode</goal>
+      <description>Maven plugin for extracting RADL file from the Java server code.</description>
+      <requiresDependencyResolution>compile</requiresDependencyResolution>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <phase>compile</phase>
+      <implementation>radl.maven.RadlFromCodePlugin</implementation>
+      <language>java</language>
+      <instantiationStrategy>keep-alive</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <threadSafe>false</threadSafe>
+      <parameters>
+        <parameter>
+          <name>argumentFile</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description></description>
+        </parameter>
+        <parameter>
+          <name>classpathScope</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The classpath scope which is used for the compilation of the RADL extraction from code.
+Available values are: &lt;pre&gt;runtime&lt;/pre&gt;, &lt;pre&gt;compile&lt;/pre&gt;, &lt;pre&gt;test&lt;/pre&gt; and &lt;pre&gt;system&lt;/pre&gt;.
+Defaults to &lt;pre&gt;runtime&lt;/pre&gt;.</description>
+        </parameter>
+        <parameter>
+          <name>configurationFile</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description></description>
+        </parameter>
+        <parameter>
+          <name>docsDir</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The sub-directory of the project build directory into which RADL is generated.
+Defaults to &lt;pre&gt;target/radl&lt;/pre&gt;.</description>
+        </parameter>
+        <parameter>
+          <name>pluginDependencies</name>
+          <type>java.util.List</type>
+          <required>false</required>
+          <editable>false</editable>
+          <description>The enclosing plugin dependencies.</description>
+        </parameter>
+        <parameter>
+          <name>project</name>
+          <type>org.apache.maven.project.MavenProject</type>
+          <required>false</required>
+          <editable>false</editable>
+          <description>The enclosing project.</description>
+        </parameter>
+        <parameter>
+          <name>serviceName</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>The name of the service that the RADL files describe. Defaults to the project&apos;s name.</description>
+        </parameter>
+        <parameter>
+          <name>srcDir</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description></description>
+        </parameter>
+      </parameters>
+      <configuration>
+        <argumentFile implementation="java.io.File">${argumentFile}</argumentFile>
+        <classpathScope implementation="java.lang.String" default-value="runtime">${classpathScope}</classpathScope>
+        <configurationFile implementation="java.io.File">${configurationFile}</configurationFile>
+        <docsDir implementation="java.io.File" default-value="${project.build.directory}/radl">${docsDir}</docsDir>
+        <pluginDependencies implementation="java.util.List" default-value="${plugin.artifacts}"/>
+        <project implementation="org.apache.maven.project.MavenProject" default-value="${project}"/>
+        <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
+        <srcDir implementation="java.io.File" default-value="${project.basedir}/src/main/java">${srcDir}</srcDir>
       </configuration>
     </mojo>
     <mojo>
@@ -243,7 +329,7 @@ Defaults to &lt;pre&gt;target/radl&lt;/pre&gt;.</description>
       </parameters>
       <configuration>
         <docsDir implementation="java.io.File" default-value="${project.build.directory}/radl">${docsDir}</docsDir>
-        <radlDirName implementation="java.io.File" default-value="src/main/radl">${radlDirName}</radlDirName>
+        <radlDirName implementation="java.io.File" default-value="${project.basedir}/src/main/radl">${radlDirName}</radlDirName>
         <serviceName implementation="java.lang.String" default-value="${project.name}">${serviceName}</serviceName>
       </configuration>
     </mojo>
@@ -316,10 +402,16 @@ Defaults to &lt;pre&gt;target/radl&lt;/pre&gt;.</description>
       <version>2.0</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-tools-api</artifactId>
       <type>jar</type>
-      <version>3.0</version>
+      <version>3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-descriptor</artifactId>
+      <type>jar</type>
+      <version>2.2.1</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -332,6 +424,66 @@ Defaults to &lt;pre&gt;target/radl&lt;/pre&gt;.</description>
       <artifactId>classworlds</artifactId>
       <type>jar</type>
       <version>1.1-alpha-2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-tools-generators</artifactId>
+      <type>jar</type>
+      <version>3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.reporting</groupId>
+      <artifactId>maven-reporting-api</artifactId>
+      <type>jar</type>
+      <version>3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.doxia</groupId>
+      <artifactId>doxia-sink-api</artifactId>
+      <type>jar</type>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-velocity</artifactId>
+      <type>jar</type>
+      <version>1.1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <type>jar</type>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity</artifactId>
+      <type>jar</type>
+      <version>1.7</version>
+    </dependency>
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm</artifactId>
+      <type>jar</type>
+      <version>3.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <type>jar</type>
+      <version>3.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm-tree</artifactId>
+      <type>jar</type>
+      <version>3.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jtidy</groupId>
+      <artifactId>jtidy</artifactId>
+      <type>jar</type>
+      <version>r938</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -392,6 +544,12 @@ Defaults to &lt;pre&gt;target/radl&lt;/pre&gt;.</description>
       <artifactId>plexus-interpolation</artifactId>
       <type>jar</type>
       <version>1.11</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <type>jar</type>
+      <version>2.2.1</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
