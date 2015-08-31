@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.java.extraction;
 
@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -19,6 +20,7 @@ import javax.lang.model.element.TypeElement;
  * JAX-RS has no support for PATCH. Projects that implement their own PATCH method should set the
  * {@value #PATCH_OPTION} annotation processor option to the fully qualified name of their PATCH annotation.
  */
+@SupportedOptions(ProcessorOptions.RESOURCE_MODEL_FILE)
 public class JaxrsProcessor extends AbstractRestAnnotationProcessor {
 
   public static final String PATCH_OPTION = "jaxrs.patch";

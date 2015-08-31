@@ -1,17 +1,17 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.java.extraction;
 
 import java.util.Collection;
-
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-
 
 /**
  * Annotation processor for Spring REST annotations.
  */
+@SupportedOptions(ProcessorOptions.RESOURCE_MODEL_FILE)
 public class SpringProcessor extends AbstractRestAnnotationProcessor {
 
   private static final String ANN_MAPPING = "RequestMapping";

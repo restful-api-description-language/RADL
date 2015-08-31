@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.extraction;
 
@@ -44,5 +44,9 @@ public interface ResourceModel {
   void build();
 
   String getDocumentation(String resourceName);
+
+  void markComplete();
+
+  boolean isCompleted();
 
 }

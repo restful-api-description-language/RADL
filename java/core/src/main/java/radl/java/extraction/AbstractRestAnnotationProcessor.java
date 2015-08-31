@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.java.extraction;
 
@@ -132,7 +132,8 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
     while (classElement.getKind() != ElementKind.CLASS) {
       classElement = classElement.getEnclosingElement();
     }
-    for (Element concreteSubClassElement : getConcreteSubClassesOf(allElements, classElement)) {
+    Collection<Element> conreteSubClasses = getConcreteSubClassesOf(allElements, classElement);
+    for (Element concreteSubClassElement : conreteSubClasses) {
       processElement(allElements, element, concreteSubClassElement, uris, method, consumes, produces, parameters);
     }
   }

@@ -1,6 +1,8 @@
-package radl.core.integration;
+/*
+ * Copyright (c) EMC Corporation. All rights reserved.
+ */
 
-import static org.junit.Assert.assertEquals;
+package radl.core.integration;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -26,11 +28,14 @@ import radl.core.cli.Application;
 import radl.core.cli.Arguments;
 import radl.core.code.SourceFile;
 import radl.core.extraction.ResourceModelHolder;
+import radl.core.extraction.ResourceModelImpl;
 import radl.java.code.Java;
 import radl.java.code.JavaCode;
 import radl.java.extraction.FromJavaRadlExtractor;
 import radl.java.generation.spring.RadlToSpringServer;
 import radl.test.TestUtil;
+
+import static org.junit.Assert.assertEquals;
 
 
 @RunWith(Parameterized.class)
@@ -75,7 +80,7 @@ public class GenerateAndExtractTest {
         testName));
     IO.delete(outputDir);
     outputDir.mkdirs();
-    ResourceModelHolder.setInstance(null);
+    ResourceModelHolder.INSTANCE.set(new ResourceModelImpl());
   }
 
   @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.java.extraction;
 
@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +19,6 @@ import java.util.Properties;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 import javax.tools.JavaCompiler;
 
 import org.w3c.dom.Document;
@@ -57,14 +57,14 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   private static final String WORKSPACE_LOCATION_MARKER = "${workspace_loc:";
 
   private final ResourceModelMerger merger;
-  private final ResourceModel resourceModel;
+  private ResourceModel resourceModel;
 
   public static void main(String[] args) {
     Cli.run(FromJavaRadlExtractor.class, args);
   }
 
   public FromJavaRadlExtractor() {
-    this(new RadlMerger(), ResourceModelHolder.getInstance());
+    this(new RadlMerger(), ResourceModelHolder.INSTANCE.get());
   }
 
   public FromJavaRadlExtractor(ResourceModelMerger merger, ResourceModel resourceModel) {
@@ -284,10 +284,20 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
       return;
     }
     File compilerOptions = new File("options");
+    if (compilerOptions.exists()) {
+      compilerOptions.delete();
+    }
+    File resourceModelFile = new File("resourceModel");
+    if (resourceModelFile.exists()) {
+      resourceModelFile.delete();
+    }
+    String resourceModelFileArg = String.format("-A%s=%s",
+        ProcessorOptions.RESOURCE_MODEL_FILE, resourceModelFile.getAbsolutePath());
     try {
       try {
         PrintWriter writer = new PrintWriter(compilerOptions, "UTF8");
         try {
+          writer.println(resourceModelFileArg);
           writeOptions(extractOptions, writer);
           writeSources(javaFiles, writer);
           writeClasses(javaFiles, writer);
@@ -298,11 +308,28 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
         throw new RuntimeException(e);
       }
       System.setProperty("radl.base.dir", baseDir.getAbsolutePath());
-      if (compiler.run(null, null, null, String.format("@%s", compilerOptions.getName())) != 0) {
+      if (compiler.run(null, null, null, String.format("@%s", compilerOptions.getAbsoluteFile())) != 0) {
         throw new IllegalArgumentException("Compilation failed");
       }
+
+      if (!resourceModel.isCompleted()) {
+        readResourceModelFromFile(resourceModelFile);
+      }
+
     } finally {
       IO.delete(compilerOptions);
+      IO.delete(resourceModelFile);
+    }
+  }
+
+  private void readResourceModelFromFile(File resourceModelFile) {
+    Log.info("Loading resource model from file: " + resourceModelFile);
+    try {
+      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(resourceModelFile));
+      resourceModel = (ResourceModel) ois.readObject();
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Failed to load resource model from file", e);
     }
   }
 

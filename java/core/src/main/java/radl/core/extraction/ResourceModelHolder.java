@@ -1,29 +1,22 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.extraction;
-
 
 /**
  * Singleton pattern for {@linkplain ResourceModel}.
  */
-public final class ResourceModelHolder {
+public enum ResourceModelHolder {
 
-  private static ResourceModel instance;
+  INSTANCE;
 
-  private ResourceModelHolder() {
-    // Singleton
+  private ResourceModel resourceModel= new ResourceModelImpl();
+
+  public ResourceModel get() {
+    return this.resourceModel;
   }
 
-  public static synchronized ResourceModel getInstance() {
-    if (instance == null) {
-      instance = new ResourceModelImpl();
-    }
-    return instance;
+  public void set(ResourceModel given) {
+    this.resourceModel = given;
   }
-
-  public static void setInstance(ResourceModel instance) {
-    ResourceModelHolder.instance = instance;
-  }
-
 }

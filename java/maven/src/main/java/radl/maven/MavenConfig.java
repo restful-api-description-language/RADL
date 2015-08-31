@@ -10,7 +10,7 @@ package radl.maven;
 public interface MavenConfig {
 
   String RADL_DIR_NAME = "radlDirName";
-  String RADL_DIR_NAME_DEFAULT = "src/main/radl";
+  String RADL_DIR_NAME_DEFAULT = "${project.basedir}/src/main/radl";
 
   String DOCS_DIR = "docsDir";
   String DOCS_DIR_DEFAULT = "${project.build.directory}/radl";
@@ -28,19 +28,22 @@ public interface MavenConfig {
   String FAIL_ON_VALIDATION_ERRORS_DEFAULT = "true";
 
   String SRC_SET_DIR = "srcDir";
-  String SRC_SET_DIR_DEFAULT = "src/main/java";
+  String SRC_SET_DIR_DEFAULT = "${project.basedir}/src/main/java";
 
   String REL_GEN_SRC_DIR = "relativeGeneratedSourceDir";
-  String REL_GEN_SRC_DIR_DEFAULT = "target/generated-src/java";
+  String REL_GEN_SRC_DIR_DEFAULT = "${project.build.directory}/generated-src/java";
 
   String REL_GEN_MAN_SRC_DIR = "relativeGeneratedManualSourceDir";
-  String REL_GEN_MAN_SRC_DIR_DEFAULT = "target/generated-src/manual";
+  String REL_GEN_MAN_SRC_DIR_DEFAULT = "${project.build.directory}/generated-src/manual";
 
   String SERVICE_NAME = "serviceName";
   String SERVICE_NAME_DEFAULT = "${project.name}";
 
   String SCM = "scm";
   String SCM_DEFAULT = "default";
+
+  String CLASSPATH_SCOPE = "classpathScope";
+  String CLASSPATH_SCOPE_DEFAULT = "runtime";
 
   String EX_CLASSPATH = "extraClasspath";
   String EX_CLASSPATH_DEFAULT = "";

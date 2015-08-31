@@ -1,22 +1,11 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.java.extraction;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static radl.java.extraction.test.ProjectBuilder.project;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
-
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -30,6 +19,16 @@ import radl.java.extraction.test.Project;
 import radl.java.extraction.test.ProjectBuilder;
 import radl.test.TestUtil;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static radl.java.extraction.test.ProjectBuilder.project;
+
 
 public class JaxrsProcessorTest extends AbstractRestAnnotationProcessorTest {
 
@@ -40,7 +39,7 @@ public class JaxrsProcessorTest extends AbstractRestAnnotationProcessorTest {
 
   @Before
   public void init() {
-    ResourceModelHolder.setInstance(resourceModel);
+    ResourceModelHolder.INSTANCE.set(resourceModel);
   }
 
   @Test

@@ -1,8 +1,9 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.extraction;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +12,7 @@ import java.util.Collections;
 /**
  * Information about a method in RADL.
  */
-public class Method implements Comparable<Method> {
+public class Method implements Comparable<Method>, Serializable {
 
   private final String name;
   private final String consumes;
