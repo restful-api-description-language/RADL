@@ -19,7 +19,6 @@ import radl.common.xml.ElementProcessor;
 import radl.common.xml.Xml;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
-import radl.java.code.Java;
 import radl.java.code.JavaCode;
 
 
@@ -60,8 +59,8 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String ERROR_ELEMENT = "error";
 
   private final String packagePrefix;
-  private final Map<String, String> mediaTypeConstants = new TreeMap<String, String>();
-  private final Map<String, String> uriConstants = new TreeMap<String, String>();
+  private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
+  private final Map<String, Constant> uriConstants = new TreeMap<String, Constant>();
   private final String header;
 
   public SpringCodeGenerator(String packagePrefix) {
@@ -137,46 +136,42 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void addErrors(Document radl, Code code) throws Exception {
-    Map<String, String> errors = new TreeMap<String, String>();
-    addErrors(radl, errors);
-    if (!errors.isEmpty()) {
-      code.add("");
-      code.add("  // Error conditions");
-      code.add("");
-      for (Entry<String, String> entry : errors.entrySet()) {
-        if (entry.getValue() != null) {
-          code.add("  /** ");
-          for (String line : entry.getValue().split("\n")) {
-            code.add("   * %s", line);
-          }
-          code.add("   */");
-        }
-        code.add("  String ERROR_%s = \"%s\";", Java.toIdentifier(entry.getKey()).toUpperCase(Locale.getDefault()),
-            entry.getKey());
-      }
-    }
+    Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
+    addErrorConstants(radl, errorConstants);
+    addConstants(errorConstants, "Error conditions", code);
   }
 
-  private void addErrors(Document radl, final Map<String, String> errors) throws Exception {
+  private void addErrorConstants(Document radl, final Map<String, Constant> errorConstants) throws Exception {
     Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
       @Override
       public void process(Element errorElement) throws Exception {
-        String name = errorElement.getAttributeNS(null, "name");
-        Element documentationElement = Xml.getFirstChildElement(errorElement, "documentation");
-        String documentation = documentationElement == null ? null : documentationElement.getTextContent();
-        errors.put(name, documentation);
+        String value = errorElement.getAttributeNS(null, "name");
+        String documentation = getDocumentation(errorElement);
+        errorConstants.put(value, ensureConstant("ERROR_", value, value, documentation, errorConstants));
       }
     }, ERROR_ELEMENT);
+  }
+
+  private String getDocumentation(Element errorElement) {
+    Element documentationElement = Xml.getFirstChildElement(errorElement, "documentation");
+    if (documentationElement == null) {
+      Element specificationElement = Xml.getFirstChildElement(errorElement, "specification");
+      if (specificationElement == null) {
+        return null;
+      }
+      return "See " + specificationElement.getAttributeNS(null, "href");
+    }
+    return documentationElement.getTextContent();
   }
 
   private void addBillboardUri(Code code) {
     addConstants(filter(uriConstants, CONSTANT_PREFIX_URL + BILLBOARD_URL, true), "Entry point", code);
   }
 
-  private Map<String, String> filter(Map<String, String> values, String value, boolean include) {
-    Map<String, String> result = new HashMap<String, String>();
-    for (Entry<String, String> entry : values.entrySet()) {
-      if (value.equals(entry.getValue()) == include) {
+  private Map<String, Constant> filter(Map<String, Constant> values, String value, boolean include) {
+    Map<String, Constant> result = new HashMap<String, Constant>();
+    for (Entry<String, Constant> entry : values.entrySet()) {
+      if (value.equals(entry.getValue().getName()) == include) {
         result.put(entry.getKey(), entry.getValue());
       }
     }
@@ -184,19 +179,20 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void addLinkRelations(Document radl, Code code) throws Exception {
-    Map<String, String> linkRelationConstants = new TreeMap<String, String>();
+    Map<String, Constant> linkRelationConstants = new TreeMap<String, Constant>();
     addLinkRelationConstants(radl, linkRelationConstants);
     addConstants(linkRelationConstants, "Link relations", code);
   }
 
-  private void addLinkRelationConstants(Document radl, final Map<String, String> linkRelationConstants)
+  private void addLinkRelationConstants(Document radl, final Map<String, Constant> linkRelationConstants)
       throws Exception {
     Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
       @Override
       public void process(Element linkRelationElement) throws Exception {
         String value = linkRelationElement.getAttributeNS(null, "name");
         String name = value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value;
-        ensureConstant("LINK_", name, value, linkRelationConstants);
+        String documentation = getDocumentation(linkRelationElement);
+        ensureConstant("LINK_", name, value, documentation, linkRelationConstants);
       }
     }, LINK_RELATION_ELEMENT);
   }
@@ -205,12 +201,21 @@ public class SpringCodeGenerator implements CodeGenerator {
     addConstants(mediaTypeConstants, "Media types", code);
   }
 
-  private void addConstants(Map<String, String> constants, String heading, Code code) {
+  private void addConstants(Map<String, Constant> constants, String heading, Code code) {
     if (!constants.isEmpty()) {
       code.add("");
       code.add("  // %s", heading);
-      for (Entry<String, String> entry : constants.entrySet()) {
-        code.add("  String %s = \"%s\";", entry.getValue(), entry.getKey());
+      code.add("");
+      for (Entry<String, Constant> entry : constants.entrySet()) {
+        Constant constant = entry.getValue();
+        if (constant.getComments().length > 0) {
+          code.add("  /**");
+          for (String comment : constant.getComments()) {
+            code.add("   * %s", comment);
+          }
+          code.add("   */");
+        }
+        code.add("  String %s = \"%s\";", constant.getName(), entry.getKey());
       }
     }
   }
@@ -285,8 +290,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     addControllerImports(resourceElement, addUris, result);
     result.add("@Controller");
     if (uri != null) {
-      String constant = ensureConstant(namePrefix, constantName, uri, uriConstants);
-      result.add(String.format("@RequestMapping(%s.%s)", type,  constant));
+      Constant constant = ensureConstant(namePrefix, constantName, uri, null, uriConstants);
+      result.add(String.format("@RequestMapping(%s.%s)", type,  constant.getName()));
     }
     result.add("public class %s {", getControllerClassName(resourceElement));
     result.add("");
@@ -351,13 +356,15 @@ public class SpringCodeGenerator implements CodeGenerator {
   private String getMediaTypeConstant(String mediaType) {
     String name = mediaType.startsWith(DEFAULT_MEDIA_TYPE) ? mediaType.substring(DEFAULT_MEDIA_TYPE.length())
         : mediaType;
-    return API_TYPE + '.' + ensureConstant("MEDIA_", name, mediaType, mediaTypeConstants);
+    return API_TYPE + '.' + ensureConstant("MEDIA_", name, mediaType, null, mediaTypeConstants).getName();
   }
 
-  private String ensureConstant(String namePrefix, String name, String value, Map<String, String> constants) {
-    String result = constants.get(value);
+  private Constant ensureConstant(String namePrefix, String name, String value, String documentation,
+      Map<String, Constant> constants) {
+    Constant result = constants.get(value);
     if (result == null) {
-      result = namePrefix + toJava(name.replace('/', '_').toUpperCase(Locale.getDefault()));
+      String contantName = namePrefix + toJava(name.replace('/', '_').toUpperCase(Locale.getDefault()));
+      result = new Constant(contantName, documentation);
       constants.put(value, result);
     }
     return result;
@@ -600,5 +607,27 @@ public class SpringCodeGenerator implements CodeGenerator {
     void addMethod(Element methodElement) throws Exception;
 
   }
+
+
+  private static class Constant {
+
+    private final String name;
+    private final String comments;
+
+    public Constant(String name, String comments) {
+      this.name = name;
+      this.comments = comments;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String[] getComments() {
+      return comments == null ? new String[0] : comments.split("\n");
+    }
+
+  }
+
 
 }

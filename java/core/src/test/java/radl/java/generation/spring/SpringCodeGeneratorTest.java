@@ -310,7 +310,11 @@ public class SpringCodeGeneratorTest {
   }
 
   private String aUri() {
-    return "http://example.com:8181" + aLocalUri();
+    return String.format("http://%s.com:%d%s", someValue(), somePort(), aLocalUri());
+  }
+
+  private int somePort() {
+    return RANDOM.integer(1025, 65535);
   }
 
   @Test
@@ -420,7 +424,7 @@ public class SpringCodeGeneratorTest {
       }
     }
   }
-  
+
   // #39 - Add error conditions to generated API
   @Test
   public void addsErrorConditionsToApi() {
@@ -437,10 +441,28 @@ public class SpringCodeGeneratorTest {
 
     JavaCode api = getJavaCode(sources, TYPE_API);
     assertNotNull("Missing API", api);
-    
+
     String error1 = "ERROR_" + name1.toUpperCase(Locale.getDefault());
     assertTrue("Missing field for error #1", api.fieldNames().contains(error1));
     assertEquals("JavaDoc for error #1", Arrays.asList(documentation), api.fieldComments(error1));
+  }
+
+  // #40 Generate JavaDoc for <specification> in link relations
+  @Test
+  public void generateJavaDocForLinkRelationSpecification() {
+    String linkRelationName = "foo-bar";
+    String linkRelation = aUri() + linkRelationName;
+    String linkRelationSpecificationUri = aUri();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withLinkRelations()
+            .linkRelation(linkRelation, linkRelationSpecificationUri)
+        .build();
+
+    JavaCode api = generateApiClass(radl);
+
+    String field = "LINK_FOO_BAR";
+    TestUtil.assertCollectionEquals("Fields", Arrays.asList(field), api.fieldNames());
+    assertEquals("Field comment", Arrays.asList("See " + linkRelationSpecificationUri), api.fieldComments(field));
   }
 
 }

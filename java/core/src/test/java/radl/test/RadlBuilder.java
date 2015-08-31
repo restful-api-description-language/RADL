@@ -59,8 +59,16 @@ public class RadlBuilder {
     return new RadlBuilder();
   }
 
+  public LinkRelationsBuilder withLinkRelations() {
+    return new LinkRelationsBuilder(this);
+  }
+
   public RadlBuilder withLinkRelations(String... names) {
-    return withCollection("link-relations", "link-relation", names);
+    LinkRelationsBuilder linkBuilder = withLinkRelations();
+    for (String name : names) {
+      linkBuilder = linkBuilder.linkRelation(name, null);
+    }
+    return linkBuilder.end();
   }
 
   public RadlBuilder startingAt(String state) {
@@ -90,6 +98,21 @@ public class RadlBuilder {
           .attribute("name", entry.getKey());
       if (entry.getValue() != null) {
         builder.element("documentation", entry.getValue());
+      }
+      builder.end();
+    }
+    builder.end();
+  }
+
+  public void addLinkRelations(Map<String, String> linkRelations) {
+    builder.element("link-relations");
+    for (Entry<String, String> entry : linkRelations.entrySet()) {
+      builder.element("link-relation")
+          .attribute("name", entry.getKey());
+      if (entry.getValue() != null) {
+        builder.element("specification")
+            .attribute("href", entry.getValue())
+        .end();
       }
       builder.end();
     }
