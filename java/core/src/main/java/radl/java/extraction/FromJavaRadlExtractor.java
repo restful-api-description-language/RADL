@@ -1,6 +1,7 @@
 /*
  * Copyright (c) EMC Corporation. All rights reserved.
  */
+
 package radl.java.extraction;
 
 import java.io.File;
@@ -8,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.tools.JavaCompiler;
@@ -38,6 +39,7 @@ import radl.core.extraction.RadlMerger;
 import radl.core.extraction.ResourceModel;
 import radl.core.extraction.ResourceModelHolder;
 import radl.core.extraction.ResourceModelMerger;
+import radl.core.extraction.ResourceModelSerializer;
 import radl.core.scm.ScmFactory;
 import radl.core.scm.SourceCodeManagementSystem;
 import radl.core.xml.DocumentProcessor;
@@ -287,10 +289,12 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     if (compilerOptions.exists()) {
       compilerOptions.delete();
     }
-    File resourceModelFile = new File("resourceModel");
+    File resourceModelFile = new File("resourceModel-" + UUID.randomUUID().toString());
     if (resourceModelFile.exists()) {
       resourceModelFile.delete();
     }
+    ResourceModelSerializer.serializeModelToFile(resourceModel, resourceModelFile);
+
     String resourceModelFileArg = String.format("-A%s=%s",
         ProcessorOptions.RESOURCE_MODEL_FILE, resourceModelFile.getAbsolutePath());
     try {
@@ -313,23 +317,12 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
       }
 
       if (!resourceModel.isCompleted()) {
-        readResourceModelFromFile(resourceModelFile);
+        resourceModel = ResourceModelSerializer.deserializeModelFromFile(resourceModelFile);
       }
 
     } finally {
       IO.delete(compilerOptions);
       IO.delete(resourceModelFile);
-    }
-  }
-
-  private void readResourceModelFromFile(File resourceModelFile) {
-    Log.info("Loading resource model from file: " + resourceModelFile);
-    try {
-      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(resourceModelFile));
-      resourceModel = (ResourceModel) ois.readObject();
-    }
-    catch (Exception e) {
-      throw new RuntimeException("Failed to load resource model from file", e);
     }
   }
 

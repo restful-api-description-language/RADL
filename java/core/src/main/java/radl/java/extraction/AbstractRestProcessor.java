@@ -1,10 +1,10 @@
 /*
  * Copyright (c) EMC Corporation. All rights reserved.
  */
+
 package radl.java.extraction;
 
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
+import java.io.File;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -17,10 +17,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import radl.core.Log;
 import radl.core.extraction.ResourceModel;
 import radl.core.extraction.ResourceModelHolder;
-
+import radl.core.extraction.ResourceModelSerializer;
 
 /**
  * Base class for processing annotations.
@@ -28,9 +27,10 @@ import radl.core.extraction.ResourceModelHolder;
 public abstract class AbstractRestProcessor extends AbstractProcessor {
 
   private static final String CONSTRUCTOR_NAME = "<init>";
+  private ResourceModel resourceModel;
 
   protected ResourceModel getResourceModel() {
-    return ResourceModelHolder.INSTANCE.get();
+    return resourceModel;
   }
 
   @Override
@@ -40,6 +40,7 @@ public abstract class AbstractRestProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    initResourceModel();
     doProcess(annotations, roundEnv);
     writeResourceModelToFile();
     return false;
@@ -147,20 +148,18 @@ public abstract class AbstractRestProcessor extends AbstractProcessor {
     return result.isEmpty() ? null : result;
   }
 
-  private void writeResourceModelToFile() {
-    try {
-      getResourceModel().markComplete();
-      String resourceModelFile = processingEnv.getOptions().get(ProcessorOptions.RESOURCE_MODEL_FILE);
-      Log.info("Obtained resource model file from Javac options: " + resourceModelFile);
-      if (resourceModelFile != null && !resourceModelFile.isEmpty()) {
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(resourceModelFile));
-        Log.info("Write resource model to file: " + resourceModelFile);
-        oos.writeObject(getResourceModel());
-        oos.close();
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to write resource model to file.", e);
-    }
+  private void initResourceModel() {
+    String resourceModelFile = processingEnv.getOptions().get(ProcessorOptions.RESOURCE_MODEL_FILE);
+    resourceModel = resourceModelFile == null ? ResourceModelHolder.INSTANCE.get() :
+        ResourceModelSerializer.deserializeModelFromFile(new File(resourceModelFile));
   }
 
+
+  private void writeResourceModelToFile() {
+    resourceModel.markComplete();
+    String resourceModelFile = processingEnv.getOptions().get(ProcessorOptions.RESOURCE_MODEL_FILE);
+    if (resourceModelFile != null) {
+      ResourceModelSerializer.serializeModelToFile(resourceModel, new File(resourceModelFile));
+    }
+  }
 }

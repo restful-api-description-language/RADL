@@ -5,6 +5,8 @@
 package radl.maven;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+import radl.common.io.IO;
 import radl.core.cli.Arguments;
 import radl.java.extraction.FromJavaRadlExtractor;
 
@@ -91,28 +94,39 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     FromJavaRadlExtractor radlFromJavaExtractor = new FromJavaRadlExtractor();
+    File tempArgumentsFile = null;
     try {
-      generateProjectArgumentsFile();
+      tempArgumentsFile = generateProjectArgumentsFile();
       radlFromJavaExtractor.run(
-          new Arguments(new String[] { "@" + argumentFile.getAbsolutePath() }));
+          new Arguments(new String[] { "@" + tempArgumentsFile.getAbsolutePath() }));
       getLog().info(String.format(MSG, docsDir));
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
     }
+    finally {
+      IO.delete(tempArgumentsFile);
+    }
   }
 
-  private void generateProjectArgumentsFile() throws IOException {
+  private File generateProjectArgumentsFile() throws IOException {
 
     if (!docsDir.exists()) {
       docsDir.mkdir();
     }
-    // validate argumentFile name
-    if (argumentFile == null || !argumentFile.exists()) {
-      argumentFile = new File(docsDir, "extract-radl.properties");
-      if (argumentFile.exists()) {
-        argumentFile.delete();
-      }
-      argumentFile.createNewFile();
+    // create temp arguments file
+    File tempArgumentsFile = new File(docsDir, "extract-radl.properties");
+    if (tempArgumentsFile.exists()) {
+      tempArgumentsFile.delete();
+    }
+    tempArgumentsFile.createNewFile();
+
+    // copy from origin
+    if (argumentFile != null && argumentFile.exists()) {
+      FileInputStream source = new FileInputStream(argumentFile);
+      FileOutputStream target = new FileOutputStream(tempArgumentsFile);
+      IO.copy(source, target);
+      source.close();
+      target.close();
     }
 
     // set radl file
@@ -122,8 +136,14 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
     }
     String radlFilePath = radlFile.getAbsolutePath();
 
-    // set properties
+    // init properties
     Properties properties = new Properties();
+    // load from origin
+    if (argumentFile != null && argumentFile.exists()) {
+      FileInputStream source = new FileInputStream(argumentFile);
+      properties.load(source);
+      source.close();
+    }
     getLog().info("[RADL Extraction - Service Name] " + serviceName);
     properties.setProperty("service.name", serviceName);
     getLog().info("[RADL Extraction - SRC Dir] " + srcDir);
@@ -140,13 +160,14 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
     }
 
     // write configuration file
-    PrintWriter writer = new PrintWriter(argumentFile, "UTF8");
+    PrintWriter writer = new PrintWriter(tempArgumentsFile, "UTF8");
     try {
       properties.store(writer, "");
     } finally {
       writer.close();
     }
-    getLog().info("RADL generation argument file: " + argumentFile);
+    getLog().info("RADL generation argument file: " + tempArgumentsFile);
+    return tempArgumentsFile;
   }
 
   @SuppressWarnings("unchecked")
