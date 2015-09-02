@@ -14,7 +14,7 @@ service =
     documentation*,
     states?,
     link-relations?,
-    named-properties?,
+    property-groups?,
     media-types?,
     errors?,
     service-conventions?,
@@ -49,7 +49,7 @@ states = element states { start-state?, state* }
 
 start-state = element start-state {
     documentation*,
-    named-properties-ref?,
+    property-ref?,
     state-transitions?
 }
 
@@ -58,7 +58,7 @@ state =
     extends?,
     name,
     documentation*,
-    named-properties-ref?,
+    property-ref?,
     state-transitions?
   }
 
@@ -96,7 +96,7 @@ transition =
 
 from = attribute from { xsd:string }
 to = attribute to { xsd:string }
-transition-input = element input { named-properties-ref }
+transition-input = element input { property-ref }
 
 transition-ref =  attribute ref { xsd:string }
 transition-ref-element =
@@ -110,25 +110,18 @@ method-transitions = element transitions { transition-ref-element* }
 linkrel-transitions  = element transitions { transition-ref-element* }
 
 #
-# Properties
+# Properties / data-models  / classes
 #
 
-named-properties = element named-properties {
-  top-level-properties*
-}
-
-top-level-properties = element properties {
-  name,
-  uri?,
-  documentation*,
-  schema?,
-  examples?,
-  (nested-properties | property | named-properties-ref )*
-}
-
-nested-properties = element properties { name, documentation*, ((nested-properties | property )*  | named-properties-ref ) }
-property = element property { name, uri?, occurs?, documentation*, text? }
-named-properties-ref = element properties { attribute ref {xsd:string} }
+property-groups = element property-groups { property-group* }
+property-group = element property-group { name, (property| property-ref)* }
+property-ref = element properties { attribute ref { string } }
+property = element property { name, property-type?, uri?, optional?, repeats?, (property| property-ref)* }
+property-type = attribute type { ptype }
+ptype = "string" | "number" | "boolean" | string
+optional = attribute optional { "true" | "false" }
+repeats = attribute repeats { cardinality }
+cardinality = "*"| "+" 
 
 #
 # Media Types
@@ -232,7 +225,7 @@ representations = element representations { representation* }
 representation = element representation { 
   name, 
   documentation*, 
-  named-properties-ref?, 
+  property-ref?, 
   description*, 
   examples? 
 }

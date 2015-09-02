@@ -165,23 +165,33 @@
     </link-relation>
   </link-relations>
 
-  <named-properties>
-    <properties name="menu">
-      <!-- TODO: Describe semantics and data types -->
-    </properties>
+  <property-groups>
+    <property-group name="items">
+      <property name="items">
+        <property name="item" repeats="+">
+          <property name="name" type="string"/>
+          <property name="quantity" type="number"/>
+          <property name="price" type="number"/>
+        </property>
+      </property>      
+    </property-group>
+    
+    <property-group name="menu">
+      <properties ref="items"/>
+    </property-group>
 
-    <properties name="order">
-      <!-- TODO: Describe semantics and data types -->
-    </properties>
+    <property-group name="order">
+      <properties ref="items"/>
+    </property-group>
 
-    <properties name="payment">
+    <property-group name="receipt">
+      <properties ref="items"/>
+    </property-group>
+        
+    <property-group name="payment">
       <!-- TODO: Describe semantics and data types -->
-    </properties>
-
-    <properties name="receipt">
-      <!-- TODO: Describe semantics and data types -->
-    </properties>
-  </named-properties>
+    </property-group>    
+  </property-groups>
 
   <media-types default="application/ld+json">
     <media-type name="application/ld+json">
