@@ -436,7 +436,7 @@
             </xsl:call-template>
             <xsl:choose>
               <xsl:when test="@required='true'">(required)</xsl:when>
-              <xsl:otherwise>(optional)</xsl:otherwise>
+              <xsl:otherwise> (optional)</xsl:otherwise>
             </xsl:choose>
           </li>
         </xsl:for-each>
