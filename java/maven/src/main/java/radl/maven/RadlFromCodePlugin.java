@@ -6,7 +6,6 @@ package radl.maven;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -109,41 +108,27 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
   }
 
   private File generateProjectArgumentsFile() throws IOException {
+    String radlFilePath = getRadlFile();
+    Properties properties = initArgumentProperties();
+    mergeMavenPluginProperties(radlFilePath, properties);
+    File tempArgumentsFile = writePropertiesToFile(properties);
 
-    if (!docsDir.exists()) {
-      docsDir.mkdir();
-    }
-    // create temp arguments file
-    File tempArgumentsFile = new File(docsDir, "extract-radl.properties");
-    if (tempArgumentsFile.exists()) {
-      tempArgumentsFile.delete();
-    }
-    tempArgumentsFile.createNewFile();
+    return tempArgumentsFile;
+  }
 
-    // copy from origin
-    if (argumentFile != null && argumentFile.exists()) {
-      FileInputStream source = new FileInputStream(argumentFile);
-      FileOutputStream target = new FileOutputStream(tempArgumentsFile);
-      IO.copy(source, target);
-      source.close();
-      target.close();
+  private File writePropertiesToFile(Properties properties) throws IOException {
+    File tempArgumentsFile = createNewArgumentFile();
+    PrintWriter writer = new PrintWriter(tempArgumentsFile, "UTF8");
+    try {
+      properties.store(writer, "");
+    } finally {
+      writer.close();
     }
+    getLog().info("RADL generation argument file: " + tempArgumentsFile);
+    return tempArgumentsFile;
+  }
 
-    // set radl file
-    File radlFile = new File(docsDir, serviceName + ".radl");
-    if (radlFile.exists()) {
-      radlFile.delete();
-    }
-    String radlFilePath = radlFile.getAbsolutePath();
-
-    // init properties
-    Properties properties = new Properties();
-    // load from origin
-    if (argumentFile != null && argumentFile.exists()) {
-      FileInputStream source = new FileInputStream(argumentFile);
-      properties.load(source);
-      source.close();
-    }
+  private void mergeMavenPluginProperties(String radlFilePath, Properties properties) {
     getLog().info("[RADL Extraction - Service Name] " + serviceName);
     properties.setProperty("service.name", serviceName);
     getLog().info("[RADL Extraction - SRC Dir] " + srcDir);
@@ -158,15 +143,33 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
       getLog().info("[RADL Extraction - configuration] " + configurationFile);
       properties.setProperty("configuration.file", configurationFile.getAbsolutePath());
     }
+  }
 
-    // write configuration file
-    PrintWriter writer = new PrintWriter(tempArgumentsFile, "UTF8");
-    try {
-      properties.store(writer, "");
-    } finally {
-      writer.close();
+  private Properties initArgumentProperties() throws IOException {
+    Properties properties = new Properties();
+    // load from origin
+    if (argumentFile != null && argumentFile.exists()) {
+      FileInputStream source = new FileInputStream(argumentFile);
+      properties.load(source);
+      source.close();
     }
-    getLog().info("RADL generation argument file: " + tempArgumentsFile);
+    return properties;
+  }
+
+  private String getRadlFile() {
+    File radlFile = new File(getDocsDir(), serviceName + ".radl");
+    if (radlFile.exists()) {
+      radlFile.delete();
+    }
+    return radlFile.getAbsolutePath();
+  }
+
+  private File createNewArgumentFile() throws IOException {
+    File tempArgumentsFile = new File(getDocsDir(), "extract-radl.properties");
+    if (tempArgumentsFile.exists()) {
+      tempArgumentsFile.delete();
+    }
+    tempArgumentsFile.createNewFile();
     return tempArgumentsFile;
   }
 
@@ -215,5 +218,12 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
     }
 
     return paths.toString();
+  }
+
+  private File getDocsDir() {
+    if (!docsDir.exists()) {
+      docsDir.mkdir();
+    }
+    return docsDir;
   }
 }

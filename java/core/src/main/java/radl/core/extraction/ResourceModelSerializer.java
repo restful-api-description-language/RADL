@@ -12,7 +12,7 @@ import java.io.ObjectOutputStream;
 
 import radl.core.Log;
 
-public class ResourceModelSerializer {
+public final class ResourceModelSerializer {
   private ResourceModelSerializer () {}
 
   public static void serializeModelToFile(ResourceModel resourceModel, File file) {
