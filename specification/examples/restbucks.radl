@@ -6,21 +6,19 @@
 ## Copyright © EMC Corporation. All rights reserved.
 ##
 -->
-<service name="RESTBucks" xmlns="urn:radl:service" xmlns:radl="urn:radl:service" 
-    xmlns:html="http://www.w3.org/1999/xhtml">
-  <documentation>
-    This example service follows <html:a href="http://www.infoq.com/articles/webber-rest-workflow">RESTBucks</html:a>,
-    an online version of coffee shop Starbucks based on Gregor Hohpe's  
-    <html:a href="http://www.enterpriseintegrationpatterns.com/ramblings/18_starbucks.html">observation</html:a>
-    that it is an asynchronous processing pipeline.
-  </documentation>
+<service name="RESTBucks" xmlns="urn:radl:service" xmlns:radl="urn:radl:service"
+  xmlns:html="http://www.w3.org/1999/xhtml">
+  <documentation> This example service follows <html:a
+      href="http://www.infoq.com/articles/webber-rest-workflow">RESTBucks</html:a>, an online
+    version of coffee shop Starbucks based on Gregor Hohpe's <html:a
+      href="http://www.enterpriseintegrationpatterns.com/ramblings/18_starbucks.html"
+      >observation</html:a> that it is an asynchronous processing pipeline. </documentation>
 
   <states>
     <start-state>
       <transitions>
         <transition name="Arrive" to="Arrived">
-          <documentation>
-            The process starts when the customer walks into the store.
+          <documentation> The process starts when the customer walks into the store.
           </documentation>
         </transition>
       </transitions>
@@ -29,63 +27,45 @@
     <state name="Arrived">
       <transitions>
         <transition name="Read menu" to="Deciding">
-          <documentation>
-            Once the customer has arrived in the store, she reads the menu to see what the store offers.
-          </documentation>
+          <documentation> Once the customer has arrived in the store, she reads the menu to see what
+            the store offers. </documentation>
         </transition>
       </transitions>
     </state>
 
-    <state name="Deciding">
-      <properties ref="menu"/>
+    <state name="Deciding" property-group="menu">
       <transitions>
         <transition name="Place order" to="Ordered">
-          <documentation>
-            The customer composes an order from the items on the menu and places the order with the cashier.
-          </documentation>
-          <input>
-            <properties ref="order"/>
-          </input>
+          <documentation> The customer composes an order from the items on the menu and places the
+            order with the cashier. </documentation>
+          <input property-group="order"/>
         </transition>
       </transitions>
     </state>
 
-    <state name="Ordered">
-      <properties ref="order"/>
+    <state name="Ordered" property-group="order">
       <transitions>
         <transition name="Change" to="Ordered">
-          <documentation>
-            As long as the customer hasn't paid, she can change her order.
-          </documentation>
-          <input>
-            <properties ref="order"/>
-          </input>
+          <documentation> As long as the customer hasn't paid, she can change her order. </documentation>
+          <input property-group="order"/>
         </transition>
         <transition name="Cancel" to="Canceled">
-          <documentation>
-            The customer may decide she doesn't want anything after all and cancel the whole order.
-          </documentation>
+          <documentation> The customer may decide she doesn't want anything after all and cancel the
+            whole order. </documentation>
         </transition>
         <transition name="Pay" to="Paid">
-          <documentation>
-            The customer pays for the order.
-          </documentation>
-          <input>
-            <properties ref="payment"/>
-          </input>
+          <documentation> The customer pays for the order. </documentation>
+          <input property-group="paymen"/>
         </transition>
       </transitions>
     </state>
 
     <state name="Canceled"/>
 
-    <state name="Paid">
-      <properties ref="receipt"/>
+    <state name="Paid" property-group="receipt">
       <transitions>
         <transition name="Take receipt" to="Waiting">
-          <documentation>
-            The customer accepts the confirmation of her payment.
-          </documentation>
+          <documentation> The customer accepts the confirmation of her payment. </documentation>
         </transition>
       </transitions>
     </state>
@@ -93,25 +73,19 @@
     <state name="Waiting">
       <transitions>
         <transition name="Wait" to="Waiting">
-          <documentation>
-            The customer has to wait a while.
-          </documentation>
+          <documentation> The customer has to wait a while. </documentation>
         </transition>
         <transition name="Receive notification" to="Served">
-          <documentation>
-            The barista notifies the customer once he has prepared her serving.
+          <documentation> The barista notifies the customer once he has prepared her serving.
           </documentation>
         </transition>
       </transitions>
     </state>
 
-    <state name="Served">
-      <properties ref="serving"/>
+    <state name="Served" property-group="serving">
       <transitions>
         <transition name="Take serving" to="Happy">
-          <documentation>
-            The customer picks up her serving.
-          </documentation>
+          <documentation> The customer picks up her serving. </documentation>
         </transition>
       </transitions>
     </state>
@@ -126,7 +100,7 @@
         <transition ref="Receive notification"/>
       </transitions>
     </link-relation>
-  
+
     <link-relation name="edit">
       <specification href="http://tools.ietf.org/html/rfc5023"/>
       <transitions>
@@ -135,28 +109,28 @@
         <transition ref="Take serving"/>
       </transitions>
     </link-relation>
-  
+
     <link-relation name="payment">
       <specification href="http://tools.ietf.org/html/rfc5988"/>
       <transitions>
         <transition ref="Pay"/>
       </transitions>
     </link-relation>
-  
+
     <link-relation name="http://schema.org/menu">
       <specification href="http://schema.org/menu"/>
       <transitions>
         <transition ref="Read menu"/>
       </transitions>
     </link-relation>
-  
+
     <link-relation name="http://schema.org/OrderAction">
       <specification href="http://schema.org/OrderAction"/>
       <transitions>
         <transition ref="Place order"/>
       </transitions>
     </link-relation>
-  
+
     <link-relation name="http://schema.org/Order">
       <specification href="http://schema.org/Order"/>
       <transitions>
@@ -167,30 +141,28 @@
 
   <property-groups>
     <property-group name="items">
-      <property name="items">
-        <property name="item" repeats="+">
-          <property name="name" type="string"/>
-          <property name="quantity" type="number"/>
-          <property name="price" type="number"/>
-        </property>
-      </property>      
+      <property-group name="item" repeats="true">
+        <property name="name" type="string"/>
+        <property name="quantity" type="number"/>
+        <property name="price" type="number"/>
+      </property-group>
     </property-group>
-    
+
     <property-group name="menu">
-      <properties ref="items"/>
+      <property-group ref="items"/>
     </property-group>
 
     <property-group name="order">
-      <properties ref="items"/>
+      <property-group ref="items"/>
     </property-group>
 
     <property-group name="receipt">
-      <properties ref="items"/>
+      <property-group ref="items"/>
     </property-group>
-        
+
     <property-group name="payment">
       <!-- TODO: Describe semantics and data types -->
-    </property-group>    
+    </property-group>
   </property-groups>
 
   <media-types default="application/ld+json">
@@ -201,84 +173,59 @@
 
   <errors>
     <error name="http://errors.restbucks.com/missing-item">
-      <documentation>
-        The order you provided doesn't contain any menu item.
-      </documentation>
+      <documentation> The order you provided doesn't contain any menu item. </documentation>
     </error>
     <error name="http://errors.restbucks.com/unknown-item">
-      <documentation>
-         The menu item you requested is unknown to the server. 
-      </documentation>
+      <documentation> The menu item you requested is unknown to the server. </documentation>
     </error>
     <error name="http://errors.restbucks.com/invalid-item">
-      <documentation>
-         The attributes you provided are invalid for the requested menu item.
+      <documentation> The attributes you provided are invalid for the requested menu item.
       </documentation>
     </error>
     <error name="http://errors.restbucks.com/item-out-of-stock">
-      <documentation>
-         The menu item you requested is temporarily out of stock.
-      </documentation>
+      <documentation> The menu item you requested is temporarily out of stock. </documentation>
     </error>
     <error name="http://errors.restbucks.com/missing-customer">
-      <documentation>
-         The order you provided doesn't contain a customer name.
-      </documentation>
+      <documentation> The order you provided doesn't contain a customer name. </documentation>
     </error>
     <error name="http://errors.restbucks.com/invalid-payment">
-      <documentation>
-         The payment details you provided contain invalid values.
-      </documentation>
+      <documentation> The payment details you provided contain invalid values. </documentation>
     </error>
     <error name="http://errors.restbucks.com/overpaid">
-      <documentation>
-         The amount of money you paid is more than what the order costs.
+      <documentation> The amount of money you paid is more than what the order costs.
       </documentation>
     </error>
     <error name="http://errors.restbucks.com/payment-not-processed">
-      <documentation>
-         The payment you provided could not be processed.
-      </documentation>
+      <documentation> The payment you provided could not be processed. </documentation>
     </error>
     <error name="http://errors.restbucks.com/already-paid">
-      <documentation>
-         The order is already paid and cannot be changed anymore.
-      </documentation>
+      <documentation> The order is already paid and cannot be changed anymore. </documentation>
     </error>
     <error name="http://errors.restbucks.com/not-found">
-      <documentation>
-         The URI you requested doesn't exists or is not accessible by you.
+      <documentation> The URI you requested doesn't exists or is not accessible by you.
       </documentation>
     </error>
     <error name="http://errors.restbucks.com/method-not-allowed">
-      <documentation>
-         The method you used is not supported on this URI.
-      </documentation>
+      <documentation> The method you used is not supported on this URI. </documentation>
     </error>
     <error name="http://errors.restbucks.com/not-acceptible">
-      <documentation>
-         The media type you requested in the Accept header is not supported for this method on this URI.
-      </documentation>
+      <documentation> The media type you requested in the Accept header is not supported for this
+        method on this URI. </documentation>
     </error>
     <error name="http://errors.restbucks.com/server-error">
-      <documentation>
-         Something went wrong on our side. We have logged the problem so our staff can look into it.
-         We're sorry for the inconvenience.
-      </documentation>
+      <documentation> Something went wrong on our side. We have logged the problem so our staff can
+        look into it. We're sorry for the inconvenience. </documentation>
     </error>
     <error name="http://errors.restbucks.com/service-unavailable">
-      <documentation>
-         The server is temporarily not able to handle the request.
-      </documentation>
+      <documentation> The server is temporarily not able to handle the request. </documentation>
     </error>
   </errors>
-  
+
   <conventions>
     <uri-template-variables>
       <uri-template-variable name="order-id">
-        <documentation>
-          A unique server-generated ID for an order. The client should treat this as an opaque identifier.
-        </documentation>
+        <documentation> A unique server-generated ID for an order. The client should treat this as
+          an opaque identifier. </documentation>
       </uri-template-variable>
     </uri-template-variables>
   </conventions>
@@ -295,7 +242,7 @@
         </method>
       </methods>
     </resource>
-    
+
     <resource name="Menu">
       <location uri="/menu/"/>
       <methods>
@@ -307,7 +254,7 @@
         </method>
       </methods>
     </resource>
-    
+
     <resource name="Orders">
       <location uri="/orders/"/>
       <methods>
@@ -320,7 +267,7 @@
         </method>
       </methods>
     </resource>
-    
+
     <resource name="Order">
       <location uri-template="/orders/{order-id}/"/>
       <methods>
@@ -344,7 +291,7 @@
         </method>
       </methods>
     </resource>
-    
+
     <resource name="Payments">
       <location uri-template="/orders/{order-id}/payments/"/>
       <methods>
@@ -357,7 +304,7 @@
         </method>
       </methods>
     </resource>
-    
+
     <resource name="Serving">
       <location uri-template="/orders/{order-id}/serving/"/>
       <methods>

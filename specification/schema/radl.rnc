@@ -49,7 +49,7 @@ states = element states { start-state?, state* }
 
 start-state = element start-state {
     documentation*,
-    property-ref?,
+    property-group-ref?,
     state-transitions?
 }
 
@@ -58,7 +58,7 @@ state =
     extends?,
     name,
     documentation*,
-    property-ref?,
+    property-group-ref?,
     state-transitions?
   }
 
@@ -96,7 +96,7 @@ transition =
 
 from = attribute from { xsd:string }
 to = attribute to { xsd:string }
-transition-input = element input { property-ref }
+transition-input = element input { property-group-ref }
 
 transition-ref =  attribute ref { xsd:string }
 transition-ref-element =
@@ -113,15 +113,14 @@ linkrel-transitions  = element transitions { transition-ref-element* }
 # Properties / data-models  / classes
 #
 
-property-groups = element property-groups { property-group* }
-property-group = element property-group { name, (property| property-ref)* }
-property-ref = element properties { attribute ref { string } }
-property = element property { name, property-type?, uri?, optional?, repeats?, (property| property-ref)* }
-property-type = attribute type { ptype }
-ptype = "string" | "number" | "boolean" | string
+property-groups = element property-groups { property-group-top* }
+property-group-top = element property-group { attribute ref {string} | (name, (property | property-group )*) }
+property-group = element property-group { optional?, repeats?, (attribute ref {string} | (name, (property | property-group )*)) }
+property-group-ref = attribute property-group { string }
+property = element property { name, property-type?, uri?, optional?, repeats? }
+property-type = attribute type { "string" | "number" | "boolean" | string }
 optional = attribute optional { "true" | "false" }
-repeats = attribute repeats { cardinality }
-cardinality = "*"| "+" 
+repeats = attribute repeats { "true" | "false"  }
 
 #
 # Media Types
@@ -225,7 +224,7 @@ representations = element representations { representation* }
 representation = element representation { 
   name, 
   documentation*, 
-  property-ref?, 
+  property-group-ref?, 
   description*, 
   examples? 
 }
