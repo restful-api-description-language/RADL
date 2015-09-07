@@ -115,11 +115,10 @@ linkrel-transitions  = element transitions { transition-ref-element* }
 
 property-groups = element property-groups { property-group-top* }
 property-group-top = element property-group { attribute ref {string} | (name, (property | property-group )*) }
-property-group = element property-group { optional?, repeats?, (attribute ref {string} | (name, (property | property-group )*)) }
+property-group = element property-group { required?, repeats?, (attribute ref {string} | (name, (property | property-group )*)) }
 property-group-ref = attribute property-group { string }
-property = element property { name, property-type?, uri?, optional?, repeats? }
+property = element property { name, property-type?, uri?, required?, repeats? }
 property-type = attribute type { "string" | "number" | "boolean" | string }
-optional = attribute optional { "true" | "false" }
 repeats = attribute repeats { "true" | "false"  }
 
 #
