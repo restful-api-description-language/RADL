@@ -13,7 +13,9 @@ import java.io.ObjectOutputStream;
 import radl.core.Log;
 
 public final class ResourceModelSerializer {
-  private ResourceModelSerializer () {}
+
+  private ResourceModelSerializer() {
+  }
 
   public static void serializeModelToFile(ResourceModel resourceModel, File file) {
     Log.info("Saving resource model to file: " + file);
@@ -32,9 +34,12 @@ public final class ResourceModelSerializer {
     Log.info("Loading resource model from file: " + file);
     try {
       ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-      return (ResourceModel) ois.readObject();
-    }
-    catch (Exception e) {
+      try {
+        return (ResourceModel)ois.readObject();
+      } finally {
+        ois.close();
+      }
+    } catch (Exception e) {
       throw new RuntimeException("Failed to load resource model from file", e);
     }
   }
