@@ -158,7 +158,8 @@ relax-ng = element rng:* { any-attribute*, (relax-ng* | text)* }
 #
 
 errors = element errors { documentation*, error* }
-error = element error { name, documentation* }
+error = element error { name, error-status-code?, documentation* }
+error-status-code = attribute status-code { HTTP-status-enum }
 
 
 # Service Conventions
