@@ -214,7 +214,7 @@
     </error>
     <error name="http://errors.restbucks.com/server-error" status-code="500">
       <documentation>
-        Something went wrong on our side. We have logged the problem so our staff can look into it. We're sorry for the
+        Something went wrong on our side. We have logged the problem so our staff can look into it. We are sorry for the
         inconvenience.
       </documentation>
     </error>
