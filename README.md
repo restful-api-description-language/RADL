@@ -56,8 +56,6 @@ RADL is an open source project and is under active development. If you need help
 want to talk about the project with like-minded individuals, we have a number of open channels for communication:
 
 * To report bugs or file feature requests: please use the [issue tracker on Github](https://github.com/restful-api-description-language/RADL/issues).
-* To talk about the project please post a message to [RADL HipChat room](https://radl.hipchat.com/chat). This is also
-where you can find out what's going on with the project.
 * To contribute code or documentation changes: please submit a [pull request on Github](https://github.com/restful-api-description-language/RADL/pulls).
 
 
