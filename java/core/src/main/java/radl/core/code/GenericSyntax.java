@@ -21,12 +21,22 @@ public class GenericSyntax implements Syntax {
 
   @Override
   public boolean canSplitCommentOn(char c) {
-    return !Character.isLetter(c);
+    return !Character.isLetter(c) && c != '\'';
   }
 
   @Override
   public boolean canSplitOn(char c, boolean commentIsEmpty) {
     return Character.isWhitespace(c) && commentIsEmpty;
+  }
+
+  @Override
+  public boolean startsMultiLineComment(String line) {
+    return false;
+  }
+
+  @Override
+  public boolean endsMultiLineComment(String line) {
+    return false;
   }
 
 }

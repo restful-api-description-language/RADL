@@ -16,4 +16,14 @@ public class JavaSyntax extends GenericSyntax {
     return !Character.isJavaIdentifierPart(c) && commentIsEmpty;
   }
 
+  @Override
+  public boolean startsMultiLineComment(String line) {
+    return line.startsWith("/*");
+  }
+
+  @Override
+  public boolean endsMultiLineComment(String line) {
+    return line.endsWith("*/");
+  }
+
 }

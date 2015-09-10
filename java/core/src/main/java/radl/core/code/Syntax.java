@@ -15,4 +15,8 @@ public interface Syntax {
 
   boolean canSplitOn(char c, boolean commentIsEmpty);
 
+  boolean startsMultiLineComment(String line);
+
+  boolean endsMultiLineComment(String line);
+
 }

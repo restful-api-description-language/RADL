@@ -139,4 +139,30 @@ public class LinesTest {
     assertLines(line, line);
   }
 
+  @Test
+  public void handlesMultiLineComments() {
+    syntax = new TestSyntax();
+    init(5);
+    String line1 = "(";
+    String line2 = RANDOM.string(2) + '\'' + RANDOM.string(1);
+    String line3 = RANDOM.string(4);
+    String line4 = ")";
+    assertLines(line1 + '\n' + line2 + ' ' + line3 + '\n' + line4, line1, line2, line3, line4);
+  }
+
+
+  public class TestSyntax extends GenericSyntax {
+
+    @Override
+    public boolean startsMultiLineComment(String line) {
+      return "(".equals(line);
+    }
+
+    @Override
+    public boolean endsMultiLineComment(String line) {
+      return ")".equals(line);
+    }
+
+  }
+
 }

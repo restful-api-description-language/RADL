@@ -19,6 +19,7 @@ public class Lines {
 
   private final int maxLength;
   private final Syntax syntax;
+  private boolean inMultiLineComment;
 
   public Lines(int length, Syntax syntax) {
     this.maxLength = length;
@@ -32,7 +33,7 @@ public class Lines {
     String prefix = "";
     int index = splitPoint(remainder, indent.length());
     while (index > 0) {
-      String line = remainder.substring(0, index);
+      String line = rightTrim(remainder.substring(0, index));
       if (line.trim().endsWith(COMMENT_START)) {
         line = indent + line.substring(0, line.lastIndexOf(COMMENT_START)).trim();
         prefix = COMMENT_START + ' ';
@@ -47,6 +48,10 @@ public class Lines {
     return result;
   }
 
+  private String rightTrim(String text) {
+    return text.replaceAll("\\s+$", "");
+  }
+
   private String getIndent(String text) {
     int result = 0;
     while (text.length() > result && Character.isWhitespace(text.charAt(result))) {
@@ -56,14 +61,25 @@ public class Lines {
   }
 
   private int splitPoint(String text, int start) {
-    SplitPoint result = new RegularSplitPoint(text, start, start, maxLength, -1, false, syntax);
+    int index = text.indexOf('\n');
+    if (index > 0) {
+      String line = text.substring(0, index);
+      if (inMultiLineComment) {
+        if (syntax.endsMultiLineComment(line)) {
+          inMultiLineComment = false;
+          return index;
+        }
+      } else if (syntax.startsMultiLineComment(line)) {
+        inMultiLineComment = true;
+        return index;
+      }
+    }
+    SplitPoint result = new RegularSplitPoint(text, start, start, maxLength, -1, inMultiLineComment, syntax);
     while (result.canAdvance()) {
       result = result.advance();
     }
     return result.getIndex();
   }
-
-
 
   interface SplitPoint {
 
@@ -74,7 +90,6 @@ public class Lines {
     int getIndex();
 
   }
-
 
   private static class FinalSplitPoint implements SplitPoint {
 
@@ -100,7 +115,6 @@ public class Lines {
     }
 
   }
-
 
   private abstract static class IntermediateSplitPoint implements SplitPoint {
 
@@ -138,7 +152,7 @@ public class Lines {
 
     protected char currentChar() {
       if (current >= text.length()) {
-        throw new IllegalStateException("At end of text");
+        throw new IllegalStateException("At end of text: " + text);
       }
       return text.charAt(current);
     }
@@ -192,7 +206,6 @@ public class Lines {
     }
 
   }
-
 
   private static class RegularSplitPoint extends IntermediateSplitPoint {
 
@@ -253,14 +266,16 @@ public class Lines {
         return 3;
       }
       switch (c) {
-        case ' ': return 2;
-        case '.': return 0;
-        default: return 1;
+        case ' ':
+          return 2;
+        case '.':
+          return 0;
+        default:
+          return 1;
       }
     }
 
   }
-
 
   private static class InStringSplitPoint extends IntermediateSplitPoint {
 
