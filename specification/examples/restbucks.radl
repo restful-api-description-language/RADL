@@ -6,7 +6,8 @@
 ## Copyright © EMC Corporation. All rights reserved.
 ##
 -->
-<service name="RESTBucks" xmlns="urn:radl:service" xmlns:radl="urn:radl:service"
+<service name="RESTBucks" radl-version="1.0" 
+    xmlns="urn:radl:service" xmlns:radl="urn:radl:service"
     xmlns:html="http://www.w3.org/1999/xhtml">
   <documentation>
     This example service follows <html:a href="http://www.infoq.com/articles/webber-rest-workflow">RESTBucks</html:a>, 
@@ -58,7 +59,7 @@
         </transition>
         <transition name="Pay" to="Paid">
           <documentation>The customer pays for the order.</documentation>
-          <input property-group="paymen"/>
+          <input property-group="payment"/>
         </transition>
       </transitions>
     </state>

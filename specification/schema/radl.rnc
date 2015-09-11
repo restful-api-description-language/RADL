@@ -8,9 +8,11 @@ namespace rng = "http://relaxng.org/ns/structure/1.0"
 start = service
 include "ref.rnc"
 include "documentation.rnc"
+
 service =
   element service {
     name,
+    radl-version?,
     documentation*,
     states?,
     link-relations?,
@@ -21,6 +23,15 @@ service =
     resources?,
     authentication?
   }
+
+#  RADL version numbers.
+#  
+#  Format:  major.minor
+#
+#  All versions with the same major version number are compatible. Breaking 
+#  changes introduce a new major version number. 
+
+radl-version = attribute radl-version { "1.0" }
 
 #
 # Generic definitions
