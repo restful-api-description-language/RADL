@@ -76,7 +76,7 @@ class RadlPlugin implements Plugin<Project> {
     }
     project.configurations {
       spring
-      compile extendsFrom spring
+      compile { extendsFrom spring }
     }
     project.dependencies {
       spring "org.springframework:spring-webmvc:$project.radl.springVersion"
