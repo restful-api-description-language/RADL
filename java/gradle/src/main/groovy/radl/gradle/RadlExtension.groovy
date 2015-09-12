@@ -27,4 +27,7 @@ class RadlExtension {
     preExtracts += clos
   }
 
+  def generateSpring = false
+  def springVersion = '4.2.1.RELEASE'
+
 }

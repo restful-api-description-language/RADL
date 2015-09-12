@@ -71,20 +71,29 @@ class RadlPlugin implements Plugin<Project> {
   }
 
   def addRadlToSpringTask(project, radlFile) {
+    if (!project.radl.generateSpring || radlFile == null) {
+      return
+    }
+    project.configurations {
+      spring
+      compile extendsFrom spring
+    }
+    project.dependencies {
+      spring "org.springframework:spring-webmvc:$project.radl.springVersion"
+    }
+
     project.task('radl2spring', type: JavaExec) {
       // TODO: inputs & outputs
-      enabled radlFile != null
-      if (enabled) {
-        def name = radlFile.name.substring(0, radlFile.name.lastIndexOf('.'))
-        def prefix = project.radl.packagePrefix ? project.radl.packagePrefix : name
-        main = 'radl.java.generation.spring.RadlToSpringServer'
-        args = [radlFile.path, project.projectDir.path, "${prefix}.${name}.rest.server",
-            relative(project.projectDir, project.sourceSets.main.java.srcDirs[1]),
-            relative(project.projectDir, project.sourceSets.main.java.srcDirs[0]), project.radl.scm,
-            project.radl.header]
-        classpath project.configurations.radl
-      }
+      def name = radlFile.name.substring(0, radlFile.name.lastIndexOf('.'))
+      def prefix = project.radl.packagePrefix ? "${project.radl.packagePrefix}.$name" : name
+      main = 'radl.java.generation.spring.RadlToSpringServer'
+      args = [radlFile.path, project.projectDir.path, "${prefix}.rest.server",
+          relative(project.projectDir, project.sourceSets.main.java.srcDirs[1]),
+          relative(project.projectDir, project.sourceSets.main.java.srcDirs[0]), project.radl.scm,
+          project.radl.header]
+      classpath project.configurations.radl
     }
+    project.compileJava.dependsOn 'radl2spring'
   }
 
   def addJavaToRadlTask(project, radlFile, serviceName, extractionPropertiesFile) {
