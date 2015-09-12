@@ -489,7 +489,6 @@ public class SpringCodeGeneratorTest {
   // #39 Add error conditions to generated API
   @Test
   public void generatesExceptionsForErrors() {
-    String name1 = aUri();
     String name2 = 'i' + RANDOM.string(12);
     String documentation2 = RANDOM.string(42);
     String name3 = 'n' + RANDOM.string(12);
@@ -500,7 +499,6 @@ public class SpringCodeGeneratorTest {
     String documentation5 = RANDOM.string(42);
     Document radl = RadlBuilder.aRadlDocument()
         .withErrors()
-            .error(name1, "")
             .error(name2, documentation2, 400)
             .error(name3, documentation3, 503)
             .error(name4, documentation4)
@@ -511,7 +509,6 @@ public class SpringCodeGeneratorTest {
     Iterable<Code> sources = generator.generateFrom(radl);
     JavaCode identifiable = getType(sources, "Identifiable");
     
-    assertExceptionType(name1, name1, "IllegalArgumentException", identifiable, sources);
     assertExceptionType(name2, documentation2, "IllegalArgumentException", identifiable, sources);
     assertExceptionType(name3, documentation3, "RuntimeException", identifiable, sources);
     assertExceptionType(name4, documentation4, "IllegalArgumentException", identifiable, sources);
@@ -543,6 +540,22 @@ public class SpringCodeGeneratorTest {
         exceptionType.implementedInterfaces());
     assertEquals("ID", "return \"" + name + "\";", exceptionType.methodBody("getId"));
     assertEquals("Constructor", "super(\"" + documentation + "\");", exceptionType.constructorBody());
+  }
+  
+  // #39 Add error conditions to generated API
+  @Test
+  public void stripsCommonPrefixFromExceptionClasses() {
+    String prefix = aUri();
+    String name = 'a' + RANDOM.string(8);
+    Document radl = RadlBuilder.aRadlDocument()
+        .withErrors()
+            .error(prefix + name, "")
+        .end()
+    .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    getType(sources, Java.toIdentifier(name) + "Exception");
   }
   
 }

@@ -3,6 +3,8 @@
  */
 package radl.java.generation.spring;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -189,7 +191,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     addPackage(IMPL_PACKAGE, result);
     result.add("");
     result.add("");
-    String type = Java.toIdentifier(name + "Exception");
+    String type = getExceptionTypeName(name);
     result.add("public class %s extends %s implements %s {", type, getBaseException(statusCode), IDENTIFIABLE_TYPE);
     result.add("");
     result.add("  public %s() {", type);
@@ -202,6 +204,28 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("");
     result.add("}");
     return result;
+  }
+
+  private String getExceptionTypeName(String name) {
+    URI uri;
+    try {
+      uri = new URI(name);
+    } catch (URISyntaxException e) {
+      return toExceptionTypeName(name);
+    }
+    if (uri.getScheme() == null || !uri.getScheme().startsWith("http")) {
+      return toExceptionTypeName(name);
+    }
+    String path = uri.getPath();
+    if (path.endsWith("/")) {
+      path = path.substring(0,  path.length() - 1);
+    }
+    path = path.substring(path.lastIndexOf('/') + 1);
+    return toExceptionTypeName(path);
+  }
+
+  private String toExceptionTypeName(String name) {
+    return Java.toIdentifier(name + "Exception");
   }
 
   private String getMessage(String name, String documentation) {
