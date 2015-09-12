@@ -30,7 +30,7 @@ class RadlPlugin implements Plugin<Project> {
 
     project.afterEvaluate {
       project.dependencies {
-        radl ("radl:radl-core:$project.radl.radlCoreVersion") {
+        radl ("radl:radl-core:$project.radl.coreVersion") {
           transitive = true
         }
       }
@@ -147,7 +147,7 @@ class RadlPlugin implements Plugin<Project> {
   }
 
   def getRadlFile(project, serviceName) {
-    new File(project.file(project.radl.radlDirName), "${serviceName.toLowerCase()}.radl")
+    new File(project.file(project.radl.dirName), "${serviceName.toLowerCase()}.radl")
   }
 
   def relative(base, instance) {
