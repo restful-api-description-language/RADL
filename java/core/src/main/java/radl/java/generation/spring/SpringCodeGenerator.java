@@ -288,7 +288,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       addUris = true;
     }
     addControllerImports(resourceElement, addUris, result);
-    result.add("@Controller");
+    result.add("@RestController");
     if (uri != null) {
       Constant constant = ensureConstant(namePrefix, constantName, uri, null, uriConstants);
       result.add(String.format("@RequestMapping(%s.%s)", type,  constant.getName()));
@@ -328,9 +328,6 @@ public class SpringCodeGenerator implements CodeGenerator {
     String argName = parameterName(consumes);
     code.add("  @RequestMapping(method = RequestMethod.%s%s%s)", method.toUpperCase(Locale.getDefault()),
         consumes, produces);
-    if (!produces.isEmpty()) {
-      code.add("  @ResponseBody");
-    }
     code.add("  public %s %s(%s) {", returnValue(produces), method, parameters(consumes, argName));
     code.add("    %sservice.%s(%s);", returnStatement(produces), method, argName);
     code.add("  }");
@@ -397,7 +394,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       controllerClass.add("import %s;", urisType());
     }
     controllerClass.add("import org.springframework.beans.factory.annotation.Autowired;");
-    controllerClass.add("import org.springframework.stereotype.Controller;");
+    controllerClass.add("import org.springframework.web.bind.annotation.RestController;");
     boolean hasMethod = hasMethod(resourceElement);
     if (hasMethod && hasMethod(resourceElement, "request")) {
       controllerClass.add("import org.springframework.web.bind.annotation.RequestBody;");
@@ -407,9 +404,6 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
     if (hasMethod) {
       controllerClass.add("import org.springframework.web.bind.annotation.RequestMethod;");
-    }
-    if (hasMethod && hasMethod(resourceElement, "response")) {
-      controllerClass.add("import org.springframework.web.bind.annotation.ResponseBody;");
     }
     controllerClass.add("");
     controllerClass.add("");

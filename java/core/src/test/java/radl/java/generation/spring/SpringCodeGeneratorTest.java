@@ -11,6 +11,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -64,10 +65,10 @@ public class SpringCodeGeneratorTest {
 
     assertFileComments(javaSource);
     assertEquals("Class name", getControllerClassName(expectedClassName), javaSource.typeName());
-    assertEquals("Class annotations", Arrays.asList("@Controller"), javaSource.typeAnnotations());
+    assertEquals("Class annotations", Arrays.asList("@RestController"), javaSource.typeAnnotations());
     TestUtil.assertCollectionEquals("Imports", Arrays.asList(packagePrefix + ".api.Api", packagePrefix + ".impl.Uris",
         "org.springframework.beans.factory.annotation.Autowired",
-        "org.springframework.stereotype.Controller"), javaSource.imports());
+        "org.springframework.web.bind.annotation.RestController"), javaSource.imports());
     assertEquals("Package", packagePrefix + '.' + expectedClassName.replaceAll("\\-", ""),
         javaSource.packageName());
 
@@ -155,13 +156,12 @@ public class SpringCodeGeneratorTest {
 
     assertImports(Arrays.asList("org.springframework.web.bind.annotation.RequestBody",
         "org.springframework.web.bind.annotation.RequestMapping",
-        "org.springframework.web.bind.annotation.RequestMethod",
-        "org.springframework.web.bind.annotation.ResponseBody"), source);
+        "org.springframework.web.bind.annotation.RequestMethod"), source);
     TestUtil.assertCollectionEquals("Methods", Arrays.asList(method), source.methods());
     String methodAnnotation = String.format(
         "@RequestMapping(method = RequestMethod.%s, consumes = { %s }, produces = { %s })",
         httpMethod, mediaTypeToConstant(mediaType1, false), mediaTypeToConstant(mediaType2, false));
-    assertEquals("Method annotations", Arrays.asList(methodAnnotation, "@ResponseBody").toString(),
+    assertEquals("Method annotations", Collections.singleton(methodAnnotation).toString(),
         source.methodAnnotations(method).toString());
     assertEquals("Method arguments", "@RequestBody String input", source.methodArguments(method));
     assertEquals("Method return type", "Object", source.methodReturns(method));
