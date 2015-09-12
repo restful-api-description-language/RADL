@@ -43,13 +43,20 @@ task translateRncToXsd(type: JavaExec) {
   main = 'com.thaiopensource.relaxng.translate.Driver'
   args = ['-I', 'rnc', '-O', 'xsd', schemaRnc.path, schemaXsd.path]
   classpath configurations.rnc
+  ignoreExitValue = true
   
+  def outputFile = new File(buildDir, 'rnc2xsd.out')
   doFirst {
-    errorOutput = new FileOutputStream(new File(buildDir, 'rnc2xsd.out'))
+    errorOutput = new FileOutputStream(outputFile)
     schemaXsd.parentFile.mkdirs()
     new File(schemaXsd.parentFile, 'README.txt').withWriter { writer ->
       writer.println '''WARNING: These XML Schema files are automatically generated from the normative Relax NG schemas
 and may not in all cases be accurate. They are provided as a service only. Use at your own risk.'''
+    }
+  }
+  doLast {
+    if (outputFile.text.contains('syntax error')) {
+      throw new GradleException("Error parsing schema:\n$outputFile.text")
     }
   }
 }
