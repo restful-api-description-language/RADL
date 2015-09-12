@@ -51,7 +51,7 @@ public class JavaCode extends Code {
   private static final String END_COMMENT = "(?:\\s*//.*)?";
   static final Pattern METHOD_NAME_PATTERN = Pattern.compile(
       "\\s*" + COMMENT_PATTERN + SCOPE
-      + "(?:(" + TYPE_PATTERN + ")\\s+)()?(" + NAME_PATTERN + ")\\s*\\(\\s*("
+      + "(?:(" + TYPE_PATTERN + "(?:\\s*<" + TYPES_PATTERN + "\\s*>)?)\\s+)()?(" + NAME_PATTERN + ")\\s*\\(\\s*("
       + PARAMETER_PATTERN + "(,\\s+" + PARAMETER_PATTERN + ")*)?" + COMMENT_PATTERN + "\\s*\\)\\s*\\{" + END_COMMENT,
       Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNIX_LINES);
   private static final Pattern FIELD_PATTERN = Pattern.compile(
@@ -450,6 +450,31 @@ public class JavaCode extends Code {
         start = matcher.end();
       }
     }
+  }
+
+  public String constructorBody() {
+    String result = text();
+    int start = result.indexOf(typeName() + "(");
+    if (start < 0) {
+      return null;
+    }
+    start = result.indexOf('{', start) + 1;
+    int count = 1;
+    int len = result.length();
+    int end = start;
+    while (end < len) {
+      char c = result.charAt(end);
+      if (c == '{') {
+        count++;
+      } else if (c == '}') {
+        count--;
+        if (count == 0) {
+          break;
+        }
+      }
+      end++;
+    }
+    return result.substring(start, end).trim();
   }
 
 }

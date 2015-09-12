@@ -570,6 +570,7 @@ public class JavaCodeTest {
     assertMatchesMethod("public void tiger() { // unicorn");
     assertMatchesMethod("public Whale() {", false);
     assertMatchesMethod("/*public Yak() { }*/", false);
+    assertMatchesMethod("public A<B> c() {");
   }
 
   private void assertMatchesMethod(String input) {

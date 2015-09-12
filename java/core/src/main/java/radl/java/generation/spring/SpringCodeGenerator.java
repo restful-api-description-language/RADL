@@ -19,6 +19,7 @@ import radl.common.xml.ElementProcessor;
 import radl.common.xml.Xml;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
+import radl.java.code.Java;
 import radl.java.code.JavaCode;
 
 
@@ -56,7 +57,12 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String URIS_TYPE = "Uris";
   private static final String TRANSITIONS_ELEMENT = "transitions";
   private static final String TRANSITION_ELEMENT = "transition";
+  private static final String ERRORS_ELEMENT = "errors";
   private static final String ERROR_ELEMENT = "error";
+  private static final String STATUS_CODE_ATTRIBUTE = "status-code";
+  private static final String ERROR_DTO_TYPE = "ErrorDto";
+  private static final String IDENTIFIABLE_TYPE = "Identifiable";
+  private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
 
   private final String packagePrefix;
   private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
@@ -70,17 +76,195 @@ public class SpringCodeGenerator implements CodeGenerator {
   public SpringCodeGenerator(String packagePrefix, String header) {
     this.packagePrefix = packagePrefix;
     this.header = header == null || header.trim().isEmpty() ? DEFAULT_HEADER : header;
+    initHttpStatuses();
+  }
+
+  private void initHttpStatuses() {
+    HTTP_STATUSES.put("400", "BAD_REQUEST");
+    HTTP_STATUSES.put("401", "UNAUTHORIZED");
+    HTTP_STATUSES.put("402", "PAYMENT_REQUIRED");
+    HTTP_STATUSES.put("403", "FORBIDDEN");
+    HTTP_STATUSES.put("404", "NOT_FOUND");
+    HTTP_STATUSES.put("405", "METHOD_NOT_ALLOWED");
+    HTTP_STATUSES.put("406", "NOT_ACCEPTABLE");
+    HTTP_STATUSES.put("407", "PROXY_AUTHENTICATION_REQUIRED");
+    HTTP_STATUSES.put("408", "REQUEST_TIMEOUT");
+    HTTP_STATUSES.put("409", "CONFLICT");
+    HTTP_STATUSES.put("410", "GONE");
+    HTTP_STATUSES.put("411", "LENGTH_REQUIRED");
+    HTTP_STATUSES.put("412", "PRECONDITION_FAILED");
+    HTTP_STATUSES.put("413", "PAYLOAD_TOO_LARGE");
+    HTTP_STATUSES.put("414", "URI_TOO_LONG");
+    HTTP_STATUSES.put("415", "UNSUPPORTED_MEDIA_TYPE");
+    HTTP_STATUSES.put("416", "REQUESTED_RANGE_NOT_SATISFIABLE");
+    HTTP_STATUSES.put("417", "EXPECTATION_FAILED");
+    HTTP_STATUSES.put("422", "UNPROCESSABLE_ENTITY");
+    HTTP_STATUSES.put("423", "LOCKED");
+    HTTP_STATUSES.put("424", "FAILED_DEPENDENCY");
+    HTTP_STATUSES.put("426", "UPGRADE_REQUIRED");
+    HTTP_STATUSES.put("428", "PRECONDITION_REQUIRED");
+    HTTP_STATUSES.put("429", "TOO_MANY_REQUESTS");
+    HTTP_STATUSES.put("431", "REQUEST_HEADER_FIELDS_TOO_LARGE");
+    HTTP_STATUSES.put("500", "INTERNAL_SERVER_ERROR");
+    HTTP_STATUSES.put("501", "NOT_IMPLEMENTED");
+    HTTP_STATUSES.put("502", "BAD_GATEWAY");
+    HTTP_STATUSES.put("503", "SERVICE_UNAVAILABLE");
+    HTTP_STATUSES.put("504", "GATEWAY_TIMEOUT");
+    HTTP_STATUSES.put("505", "HTTP_VERSION_NOT_SUPPORTED");
+    HTTP_STATUSES.put("506", "VARIANT_ALSO_NEGOTIATES");
+    HTTP_STATUSES.put("507", "INSUFFICIENT_STORAGE");
+    HTTP_STATUSES.put("508", "LOOP_DETECTED");
+    HTTP_STATUSES.put("509", "BANDWIDTH_LIMIT_EXCEEDED");
+    HTTP_STATUSES.put("510", "NOT_EXTENDED");
+    HTTP_STATUSES.put("511", "NETWORK_AUTHENTICATION_REQUIRED");
   }
 
   @Override
   public Iterable<Code> generateFrom(Document radl) {
     Collection<Code> result = new ArrayList<Code>();
     try {
+      generateSourcesForErrors(radl, result);
       generateSourcesForResources(radl, result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return result;
+  }
+
+  private void generateSourcesForErrors(Document radl, final Collection<Code> sources) throws Exception {
+    Element errorsElement = Xml.getFirstChildElement(radl.getDocumentElement(), ERRORS_ELEMENT);
+    if (errorsElement == null) {
+      return;
+    }
+    sources.add(generateErrorDto());
+    sources.add(generateIdentifiable());
+    final JavaCode errorHandler = startErrorHandler();
+    final Collection<String> errorHandlingMethods = new ArrayList<String>();
+    Xml.processChildElements(errorsElement, new ElementProcessor() {
+      @Override
+      public void process(Element errorElement) throws Exception {
+        String name = errorElement.getAttributeNS(null, NAME_ATTRIBUTE);
+        String statusCode = errorElement.getAttributeNS(null, STATUS_CODE_ATTRIBUTE);
+        if (statusCode.isEmpty()) {
+          statusCode = "400";
+        }
+        String documentation = getDocumentation(errorElement);
+        JavaCode exceptionType = generateException(name, statusCode, documentation);
+        sources.add(exceptionType);
+        handleException(exceptionType, statusCode, errorHandlingMethods, errorHandler);
+      }
+    }, ERROR_ELEMENT);
+    sources.add(endErrorHandler(errorHandler));
+  }
+
+  private Code generateErrorDto() {
+    Code result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("");
+    result.add("public class %s {", ERROR_DTO_TYPE);
+    result.add("");
+    result.add("  public String title;");
+    result.add("  public String type;");
+    result.add("");
+    result.add("}");
+    return result;
+  }
+  
+  private Code generateIdentifiable() {
+    Code result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("");
+    result.add("public interface %s {", IDENTIFIABLE_TYPE);
+    result.add("");
+    result.add("  String getId();");
+    result.add("");
+    result.add("}");
+    return result;
+  }
+
+  protected JavaCode generateException(String name, String statusCode, String documentation) {
+    JavaCode result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("");
+    String type = Java.toIdentifier(name + "Exception");
+    result.add("public class %s extends %s implements %s {", type, getBaseException(statusCode), IDENTIFIABLE_TYPE);
+    result.add("");
+    result.add("  public %s() {", type);
+    result.add("    super(\"%s\");", getMessage(name, documentation));
+    result.add("  }");
+    result.add("");
+    result.add("  public String getId() {");
+    result.add("    return \"%s\";", name);
+    result.add("  }");
+    result.add("");
+    result.add("}");
+    return result;
+  }
+
+  private String getMessage(String name, String documentation) {
+    String result = documentation == null || documentation.isEmpty() ? name : documentation;
+    return Java.toString(result.trim());
+  }
+
+  private String getBaseException(String statusCode) {
+    return "400".equals(statusCode) ? "IllegalArgumentException" : "RuntimeException";
+  }
+
+  private JavaCode startErrorHandler() {
+    JavaCode result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("import org.springframework.http.HttpStatus;");
+    result.add("import org.springframework.http.ResponseEntity;");
+    result.add("import org.springframework.web.bind.annotation.ControllerAdvice;");
+    result.add("import org.springframework.web.bind.annotation.ExceptionHandler;");
+    result.add("");
+    result.add("");
+    result.add("@ControllerAdvice");
+    result.add("public class CentralErrorHandler {");
+    result.add("");
+    return result;
+  }
+  
+  private void handleException(JavaCode exceptionType, String statusCode, Collection<String> errorHandlingMethods,
+      JavaCode errorHandler) {
+    String handledType = handledExceptionType(exceptionType);
+    String method = exceptionTypeToMethod(handledType);
+    if (errorHandlingMethods.contains(method)) {
+      return;
+    }
+    errorHandlingMethods.add(method);
+    errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
+    errorHandler.add("  public ResponseEntity<ErrorDto> %s(%s e) {", method, handledType);
+    errorHandler.add("    ErrorDto error = new ErrorDto();");
+    errorHandler.add("    error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
+    errorHandler.add("    error.title = e.getMessage();");
+    errorHandler.add("    return new ResponseEntity<ErrorDto>(error, HttpStatus.%s);", HTTP_STATUSES.get(statusCode));
+    errorHandler.add("  }");
+    errorHandler.add("");
+  }
+
+  private String handledExceptionType(JavaCode exceptionType) {
+    String result = exceptionType.superTypeName();
+    if ("RuntimeException".equals(result)) {
+      result = exceptionType.typeName();
+    }
+    return result;
+  }
+
+  private String exceptionTypeToMethod(String exceptionType) {
+    StringBuilder result = new StringBuilder(exceptionType);
+    result.setLength(result.length() - "Exception".length());
+    result.setCharAt(0, Character.toLowerCase(result.charAt(0)));
+    return result.toString();
+  }
+  
+  private Code endErrorHandler(JavaCode errorHandler) {
+    errorHandler.add("}");
+    return errorHandler;
   }
 
   private void generateSourcesForResources(Document radl, final Collection<Code> sources) throws Exception {

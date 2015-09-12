@@ -116,4 +116,11 @@ public class SpringSourceFilesGeneratorTest {
     assertGeneratedSourceFile("Uris");
   }
 
+  @Test
+  public void generatesGeneratedSourceFilesForErrorTypes() throws Exception {
+    assertGeneratedSourceFile("ErrorDto");
+    assertGeneratedSourceFile("CentralErrorHandler");
+    assertGeneratedSourceFile("FooException");
+  }
+
 }

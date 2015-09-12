@@ -4,6 +4,8 @@
 
 package radl.core.integration;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,8 +37,6 @@ import radl.java.code.JavaCode;
 import radl.java.extraction.FromJavaRadlExtractor;
 import radl.java.generation.spring.RadlToSpringServer;
 import radl.test.TestUtil;
-
-import static org.junit.Assert.assertEquals;
 
 
 @RunWith(Parameterized.class)
@@ -86,7 +87,8 @@ public class GenerateAndExtractTest {
   @Test
   public void extractedRadlFromGeneratedCodeMatchesOriginalRadl() throws Exception {
     File generatedSpringCodeDir = new File(outputDir, "spring");
-    String generatedSpringCodePackagePrefix = String.format("radl.example.%s.rest", Java.toIdentifier(example));
+    String generatedSpringCodePackagePrefix = String.format("radl.example.%s.rest",
+        Java.toIdentifier(example).toLowerCase(Locale.getDefault()));
     File generatedRadlFile = new File(outputDir, radlFile.getName());
     File argumentsFile = extractionArgumentsFile(generatedSpringCodeDir, generatedRadlFile);
 

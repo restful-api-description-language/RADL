@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import org.w3c.dom.Document;
 
 import radl.common.xml.DocumentBuilder;
+import radl.test.ErrorBuilder.Error;
 
 
 /**
@@ -91,13 +92,16 @@ public class RadlBuilder {
     return new ErrorBuilder(this);
   }
 
-  void setErrors(Map<String, String> errors) {
+  void setErrors(Map<String, Error> errors) {
     builder.element("errors");
-    for (Entry<String, String> entry : errors.entrySet()) {
-      builder.element("error")
-          .attribute("name", entry.getKey());
-      if (entry.getValue() != null) {
-        builder.element("documentation", entry.getValue());
+    for (Entry<String, Error> entry : errors.entrySet()) {
+      builder.element("error").attribute("name", entry.getKey());
+      Error error = entry.getValue();
+      if (error.hasStatusCode()) {
+        builder.attribute("status-code", Integer.toString(error.getStatusCode()));
+      }
+      if (error.getDocumentation() != null) {
+        builder.element("documentation", error.getDocumentation());
       }
       builder.end();
     }

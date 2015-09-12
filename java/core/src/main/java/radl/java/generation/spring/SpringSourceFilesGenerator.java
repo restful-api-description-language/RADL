@@ -6,6 +6,7 @@ package radl.java.generation.spring;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.w3c.dom.Document;
@@ -23,6 +24,11 @@ import radl.java.code.JavaCode;
  */
 public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
+  private static final Collection<String> GENERATED_TYPES = Arrays.asList("Api", "Uris");
+  private static final Collection<String> GENERATED_TYPE_SUFFIXES = Arrays.asList(
+      "Controller", "Exception");
+  private static final Collection<String> GENERATED_TYPE_MARKERS = Arrays.asList("Error");
+  
   private final CodeGenerator codeGenerator;
   private final String generatedSourceSetDir;
   private final String mainSourceSetDir;
@@ -76,7 +82,20 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
   private boolean isGenerated(JavaCode code) {
     String type = code.typeName();
-    return type.endsWith("Controller") || "Api".equals(type) || "Uris".equals(type);
+    if (GENERATED_TYPES.contains(type)) {
+      return true;
+    }
+    for (String suffix : GENERATED_TYPE_SUFFIXES) {
+      if (type.endsWith(suffix)) {
+        return true;
+      }
+    }
+    for (String marker : GENERATED_TYPE_MARKERS) {
+      if (type.contains(marker)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private String fileFor(JavaCode code) {

@@ -33,6 +33,7 @@ public class SpringCodeGeneratorTest {
   private static final int NAME_LENGTH = RANDOM.integer(3, 7);
   private static final String TYPE_API = "Api";
   private static final String TYPE_URIS = "Uris";
+  private static final String TYPE_ERROR_DTO = "ErrorDto";
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
   private final CodeGenerator generator = new SpringCodeGenerator(packagePrefix);
@@ -272,7 +273,7 @@ public class SpringCodeGeneratorTest {
                 .producing(fullMediaType2)
         .build();
 
-    JavaCode api = generateApiClass(radl);
+    JavaCode api = generateType(radl, TYPE_API);
 
     String field1 = mediaTypeToConstant(mediaType1, true) + "_XML";
     String field2 = mediaTypeToConstant(mediaType2, true) + "_VERSION_3_0";
@@ -281,15 +282,18 @@ public class SpringCodeGeneratorTest {
     assertEquals("Field value #2", quote(fullMediaType2), api.fieldValue(field2));
   }
 
-  private JavaCode generateApiClass(Document radl) {
-    Iterable<Code> sources = generator.generateFrom(radl);
+  private JavaCode generateType(Document radl, String type) {
+    return getType(generator.generateFrom(radl), type);
+  }
+
+  private JavaCode getType(Iterable<Code> sources, String type) {
     for (Code source : sources) {
       JavaCode javaSource = (JavaCode)source;
-      if (TYPE_API.equals(javaSource.typeName())) {
+      if (type.equals(javaSource.typeName())) {
         return javaSource;
       }
     }
-    fail("Missing type: " + TYPE_API);
+    fail("Missing type: " + type);
     return null; // NOTREACHED
   }
 
@@ -301,7 +305,7 @@ public class SpringCodeGeneratorTest {
         .withLinkRelations(linkRelation)
         .build();
 
-    JavaCode api = generateApiClass(radl);
+    JavaCode api = generateType(radl, TYPE_API);
     assertFileComments(api);
 
     String field = "LINK_FOO_BAR";
@@ -409,7 +413,8 @@ public class SpringCodeGeneratorTest {
             .locatedAt(aLocalUri())
             .withMethod("GET")
                 .producing(aMediaType())
-        .build();
+            .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
@@ -435,7 +440,8 @@ public class SpringCodeGeneratorTest {
         .withErrors()
             .error(name1, documentation)
             .error(name2, null)
-        .build();
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
@@ -456,13 +462,87 @@ public class SpringCodeGeneratorTest {
     Document radl = RadlBuilder.aRadlDocument()
         .withLinkRelations()
             .linkRelation(linkRelation, linkRelationSpecificationUri)
-        .build();
+        .end()
+    .build();
 
-    JavaCode api = generateApiClass(radl);
+    JavaCode api = generateType(radl, TYPE_API);
 
     String field = "LINK_FOO_BAR";
     TestUtil.assertCollectionEquals("Fields", Arrays.asList(field), api.fieldNames());
     assertEquals("Field comment", Arrays.asList("See " + linkRelationSpecificationUri), api.fieldComments(field));
   }
 
+  // #39 Add error conditions to generated API
+  @Test
+  public void generatesErrorDtoWhenErrors() {
+    Document radl = RadlBuilder.aRadlDocument()
+        .withErrors()
+            .error(RANDOM.string(12), RANDOM.string(42))
+        .end()
+    .build();
+
+    JavaCode errorDto = generateType(radl, TYPE_ERROR_DTO);
+    
+    TestUtil.assertCollectionEquals("Fields", Arrays.asList("title", "type"), errorDto.fieldNames());
+  }
+  
+  // #39 Add error conditions to generated API
+  @Test
+  public void generatesExceptionsForErrors() {
+    String name1 = aUri();
+    String name2 = 'i' + RANDOM.string(12);
+    String documentation2 = RANDOM.string(42);
+    String name3 = 'n' + RANDOM.string(12);
+    String documentation3 = RANDOM.string(42);
+    String name4 = 's' + RANDOM.string(12);
+    String documentation4 = RANDOM.string(42);
+    String name5 = 'z' + RANDOM.string(12);
+    String documentation5 = RANDOM.string(42);
+    Document radl = RadlBuilder.aRadlDocument()
+        .withErrors()
+            .error(name1, "")
+            .error(name2, documentation2, 400)
+            .error(name3, documentation3, 503)
+            .error(name4, documentation4)
+            .error(name5, '\n' + documentation5 + '\n')
+        .end()
+    .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    JavaCode identifiable = getType(sources, "Identifiable");
+    
+    assertExceptionType(name1, name1, "IllegalArgumentException", identifiable, sources);
+    assertExceptionType(name2, documentation2, "IllegalArgumentException", identifiable, sources);
+    assertExceptionType(name3, documentation3, "RuntimeException", identifiable, sources);
+    assertExceptionType(name4, documentation4, "IllegalArgumentException", identifiable, sources);
+    assertExceptionType(name5, documentation5, "IllegalArgumentException", identifiable, sources);
+    
+    JavaCode errorHandler = getType(sources, "CentralErrorHandler");
+    TestUtil.assertCollectionEquals("Error handler annotations", Collections.singleton("@ControllerAdvice"),
+        errorHandler.typeAnnotations());
+    TestUtil.assertCollectionEquals("Error handler imports", Arrays.asList(
+        "org.springframework.http.HttpStatus",
+        "org.springframework.http.ResponseEntity",
+        "org.springframework.web.bind.annotation.ControllerAdvice",
+        "org.springframework.web.bind.annotation.ExceptionHandler"), errorHandler.imports());
+    TestUtil.assertCollectionEquals("Error handler methods", Arrays.asList("illegalArgument", name3),
+        errorHandler.methods());
+    TestUtil.assertCollectionEquals("Error handler annotations",
+        Collections.<String>singleton("@ExceptionHandler({ IllegalArgumentException.class })"),
+        errorHandler.methodAnnotations("illegalArgument"));
+    TestUtil.assertCollectionEquals("Error handler annotations",
+        Collections.<String>singleton("@ExceptionHandler({ " + Java.toIdentifier(name3) + "Exception.class })"),
+        errorHandler.methodAnnotations(name3));
+  }
+
+  private void assertExceptionType(String name, String documentation, String baseType,
+      JavaCode implementedInterface, Iterable<Code> sources) {
+    JavaCode exceptionType = getType(sources, Java.toIdentifier(name) + "Exception");
+    assertEquals("Base type", baseType, exceptionType.superTypeName());
+    TestUtil.assertCollectionEquals("Implements", Collections.singleton(implementedInterface.typeName()),
+        exceptionType.implementedInterfaces());
+    assertEquals("ID", "return \"" + name + "\";", exceptionType.methodBody("getId"));
+    assertEquals("Constructor", "super(\"" + documentation + "\");", exceptionType.constructorBody());
+  }
+  
 }
