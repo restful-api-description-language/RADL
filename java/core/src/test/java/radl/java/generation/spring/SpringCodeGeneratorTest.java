@@ -548,6 +548,7 @@ public class SpringCodeGeneratorTest {
     assertEquals("ID", "return Api.ERROR_" + name.toUpperCase(Locale.getDefault()) + ";",
         exceptionType.methodBody("getId"));
     assertEquals("Constructor", "super(\"" + documentation + "\");", exceptionType.constructorBody());
+    assertEquals("Imports", Collections.<String>singleton(packagePrefix + ".api.Api"), exceptionType.imports());
   }
   
   // #39 Add error conditions to generated API

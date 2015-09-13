@@ -191,6 +191,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     JavaCode result = new JavaCode();
     addPackage(IMPL_PACKAGE, result);
     result.add("");
+    result.add("import %s;", apiType());
+    result.add("");
     result.add("");
     String type = toExceptionTypeName(getErrorName(name));
     result.add("public class %s extends %s implements %s {", type, getBaseException(statusCode), IDENTIFIABLE_TYPE);
