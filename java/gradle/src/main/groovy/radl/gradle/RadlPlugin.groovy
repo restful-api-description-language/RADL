@@ -81,6 +81,15 @@ class RadlPlugin implements Plugin<Project> {
     project.dependencies {
       spring "org.springframework:spring-webmvc:$project.radl.springVersion"
     }
+    def sourceSetDir = project.radl.generateDirName == null ? 
+        "$project.buildDir/src/java" : project.radl.generateDirName
+    project.sourceSet {
+      radl {
+        java {
+          srcDirs = [sourceSetDir]
+        }
+      }
+    }
 
     project.task('radl2spring', type: JavaExec) {
       // TODO: inputs & outputs
