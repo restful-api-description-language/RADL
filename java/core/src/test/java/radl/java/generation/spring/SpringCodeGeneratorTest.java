@@ -174,7 +174,7 @@ public class SpringCodeGeneratorTest {
   }
 
   private String mediaTypeToConstant(String mediaType, boolean local) {
-    String result = String.format("MEDIA_%s", mediaType.replace('/', '_').toUpperCase(Locale.getDefault()));
+    String result = String.format("MEDIA_TYPE_%s", mediaType.replace('/', '_').toUpperCase(Locale.getDefault()));
     return local ? result : "Api." + result;
   }
 
@@ -573,5 +573,34 @@ public class SpringCodeGeneratorTest {
     
     getType(sources, Java.toIdentifier(name) + "Exception");
   }
-  
+
+  @Test
+  public void generatesAndUsesApiConstantForDefaultMediaType() {
+    String mediaType = aName();
+    String fullMediaType = "application/" + mediaType;
+    String resource = aName();
+    String method = aMethod();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withMediaTypes(true, fullMediaType)
+        .withResource()
+            .named(resource)
+            .withMethod(method)
+                .consuming(fullMediaType)
+                .producing(fullMediaType)
+        .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode api = getType(sources, TYPE_API);
+    String defaultMediaTypeConstant = "MEDIA_TYPE_DEFAULT";
+    String mediaTypeToConstant = mediaTypeToConstant(mediaType, true);
+    assertEquals("Default media type", mediaTypeToConstant, api.fieldValue(defaultMediaTypeConstant));
+    
+    JavaCode controller = getType(sources, Java.toIdentifier(resource) + "Controller");
+    TestUtil.assertCollectionEquals("Method annotations", Collections.<String>singleton(
+        "@RequestMapping(method = RequestMethod." + method + ", consumes = { Api." + defaultMediaTypeConstant
+        + " }, produces = { Api." + defaultMediaTypeConstant + " })"),
+        controller.methodAnnotations(method.toLowerCase(Locale.getDefault())));
+  }
+
 }

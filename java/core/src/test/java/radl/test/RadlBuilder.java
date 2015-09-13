@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import radl.common.xml.DocumentBuilder;
+import radl.common.xml.Xml;
 import radl.test.ErrorBuilder.Error;
 
 
@@ -38,7 +40,16 @@ public class RadlBuilder {
   }
 
   public RadlBuilder withMediaTypes(String... names) {
-    return withCollection("media-types", "media-type", names);
+    return withMediaTypes(false, names);
+  }
+  
+  public RadlBuilder withMediaTypes(boolean firstIsDefault, String... names) {
+    withCollection("media-types", "media-type", names);
+    if (firstIsDefault) {
+      builder.setCurrent(Xml.getFirstChildElement((Element)builder.getCurrent(), "media-types"));
+      builder.attribute("default", names[0]);
+    }
+    return this;
   }
 
   private RadlBuilder withCollection(String collectionTag, String itemTag, String... names) {

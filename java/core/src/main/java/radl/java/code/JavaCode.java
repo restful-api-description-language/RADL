@@ -56,7 +56,7 @@ public class JavaCode extends Code {
       Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNIX_LINES);
   private static final Pattern FIELD_PATTERN = Pattern.compile(
       SCOPE + "((?:static\\s+)?+(?:final\\s+)?+)(" + TYPE_PATTERN
-      + ")\\s+(" + NAME_PATTERN + ")(?:\\s*=\\s*(.+))?;" + END_COMMENT + "$");
+      + "(?:\\[\\])?)\\s+(" + NAME_PATTERN + ")(?:\\s*=\\s*(.+))?;" + END_COMMENT + "$");
 
 
   public JavaCode() {
