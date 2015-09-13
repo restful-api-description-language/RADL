@@ -434,12 +434,15 @@ public class SpringCodeGeneratorTest {
   @Test
   public void addsErrorConditionsToApi() {
     String name1 = 'a' + RANDOM.string(7);
-    String name2 = 'z' + RANDOM.string(3) + ':' + RANDOM.string(7);
+    String name2 = 'm' + RANDOM.string(3) + ':' + RANDOM.string(7);
+    String name3 = 'z' + RANDOM.string(7);
     String documentation = RANDOM.string(12);
+    String uri = aUri() + name3;
     Document radl = RadlBuilder.aRadlDocument()
         .withErrors()
             .error(name1, documentation)
             .error(name2, null)
+            .error(uri, null)
         .end()
     .build();
 
@@ -449,8 +452,12 @@ public class SpringCodeGeneratorTest {
     assertNotNull("Missing API", api);
 
     String error1 = "ERROR_" + name1.toUpperCase(Locale.getDefault());
-    assertTrue("Missing field for error #1", api.fieldNames().contains(error1));
+    assertTrue("Missing field " + error1, api.fieldNames().contains(error1));
     assertEquals("JavaDoc for error #1", Arrays.asList(documentation), api.fieldComments(error1));
+
+    String error3 = "ERROR_" + name3.toUpperCase(Locale.getDefault());
+    assertTrue("Missing field " + error3, api.fieldNames().contains(error3));
+    assertEquals("Error #3", '"' + uri + '"', api.fieldValue(error3));
   }
 
   // #40 Generate JavaDoc for <specification> in link relations
@@ -538,7 +545,8 @@ public class SpringCodeGeneratorTest {
     assertEquals("Base type", baseType, exceptionType.superTypeName());
     TestUtil.assertCollectionEquals("Implements", Collections.singleton(implementedInterface.typeName()),
         exceptionType.implementedInterfaces());
-    assertEquals("ID", "return \"" + name + "\";", exceptionType.methodBody("getId"));
+    assertEquals("ID", "return Api.ERROR_" + name.toUpperCase(Locale.getDefault()) + ";",
+        exceptionType.methodBody("getId"));
     assertEquals("Constructor", "super(\"" + documentation + "\");", exceptionType.constructorBody());
   }
   

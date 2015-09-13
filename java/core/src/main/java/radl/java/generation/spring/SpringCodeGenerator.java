@@ -67,6 +67,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
 
   private final String packagePrefix;
+  private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> uriConstants = new TreeMap<String, Constant>();
   private final String header;
@@ -125,8 +126,8 @@ public class SpringCodeGenerator implements CodeGenerator {
   public Iterable<Code> generateFrom(Document radl) {
     Collection<Code> result = new ArrayList<Code>();
     try {
-      generateSourcesForErrors(radl, result);
       generateSourcesForResources(radl, result);
+      generateSourcesForErrors(radl, result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -191,7 +192,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     addPackage(IMPL_PACKAGE, result);
     result.add("");
     result.add("");
-    String type = getExceptionTypeName(name);
+    String type = toExceptionTypeName(getErrorName(name));
     result.add("public class %s extends %s implements %s {", type, getBaseException(statusCode), IDENTIFIABLE_TYPE);
     result.add("");
     result.add("  public %s() {", type);
@@ -199,29 +200,28 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("  }");
     result.add("");
     result.add("  public String getId() {");
-    result.add("    return \"%s\";", name);
+    result.add("    return %s.%s;", API_TYPE, errorConstants.get(name).getName());
     result.add("  }");
     result.add("");
     result.add("}");
     return result;
   }
 
-  private String getExceptionTypeName(String name) {
+  private String getErrorName(String name) {
     URI uri;
     try {
       uri = new URI(name);
     } catch (URISyntaxException e) {
-      return toExceptionTypeName(name);
+      return name;
     }
     if (uri.getScheme() == null || !uri.getScheme().startsWith("http")) {
-      return toExceptionTypeName(name);
+      return name;
     }
     String path = uri.getPath();
     if (path.endsWith("/")) {
       path = path.substring(0,  path.length() - 1);
     }
-    path = path.substring(path.lastIndexOf('/') + 1);
-    return toExceptionTypeName(path);
+    return path.substring(path.lastIndexOf('/') + 1);
   }
 
   private String toExceptionTypeName(String name) {
@@ -229,8 +229,10 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getMessage(String name, String documentation) {
-    String result = documentation == null || documentation.isEmpty() ? name : documentation;
-    return Java.toString(result.trim());
+    if (documentation == null || documentation.trim().isEmpty()) {
+      return errorConstants.get(name).getName();
+    }
+    return Java.toString(documentation.trim());
   }
 
   private String getBaseException(String statusCode) {
@@ -344,7 +346,6 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void addErrors(Document radl, Code code) throws Exception {
-    Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
     addErrorConstants(radl, errorConstants);
     addConstants(errorConstants, "Error conditions", code);
   }
@@ -355,7 +356,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       public void process(Element errorElement) throws Exception {
         String value = errorElement.getAttributeNS(null, "name");
         String documentation = getDocumentation(errorElement);
-        errorConstants.put(value, ensureConstant("ERROR_", value, value, documentation, errorConstants));
+        errorConstants.put(value, ensureConstant("ERROR_", getErrorName(value), value, documentation, errorConstants));
       }
     }, ERROR_ELEMENT);
   }

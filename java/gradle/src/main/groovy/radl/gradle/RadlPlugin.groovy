@@ -101,6 +101,9 @@ class RadlPlugin implements Plugin<Project> {
           relative(project.projectDir, project.sourceSets.main.java.srcDirs[0]), project.radl.scm,
           project.radl.header]
       classpath project.configurations.radl
+      doFirst {
+        println "-> Generating Spring classes from $radlFile.name"
+      }
     }
     project.compileJava.dependsOn 'radl2spring'
   }
