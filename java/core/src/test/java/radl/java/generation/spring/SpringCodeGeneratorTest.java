@@ -603,4 +603,20 @@ public class SpringCodeGeneratorTest {
         controller.methodAnnotations(method.toLowerCase(Locale.getDefault())));
   }
 
+  @Test
+  public void generatesControllersInPackageWithSingularName() {
+    String resource1 = aName() + 'l';
+    String resource2 = resource1 + 's';
+    Document radl = RadlBuilder.aRadlDocument()
+        .withResource().named(resource1).and()
+        .withResource().named(resource2)
+        .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+
+    JavaCode controller1 = getType(sources, Java.toIdentifier(resource1) + "Controller");
+    JavaCode controller2 = getType(sources, Java.toIdentifier(resource2) + "Controller");
+    assertEquals("Package", controller1.packageName(), controller2.packageName());
+  }
+
 }

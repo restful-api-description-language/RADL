@@ -490,6 +490,9 @@ public class SpringCodeGenerator implements CodeGenerator {
       }
       i++;
     }
+    if (result.charAt(result.length() - 1) == 's') {
+      result.setLength(result.length() - 1);
+    }
     return result.toString();
   }
 
