@@ -83,7 +83,7 @@ class RadlPlugin implements Plugin<Project> {
     }
     def sourceSetDir = project.radl.generateDirName == null ? 
         "$project.buildDir/src/java" : project.radl.generateDirName
-    project.sourceSet {
+    project.sourceSets {
       radl {
         java {
           srcDirs = [sourceSetDir]
