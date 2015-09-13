@@ -6,6 +6,7 @@ package radl.java.generation.spring;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
@@ -62,9 +63,11 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String ERRORS_ELEMENT = "errors";
   private static final String ERROR_ELEMENT = "error";
   private static final String STATUS_CODE_ATTRIBUTE = "status-code";
+  private static final String DEFAULT_STATUS_CODE = "400";
   private static final String ERROR_DTO_TYPE = "ErrorDto";
   private static final String IDENTIFIABLE_TYPE = "Identifiable";
   private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
+  private static final Collection<String> FRAMEWORK_HANDLED_STATUSES = Arrays.asList("405", "406");
 
   private final String packagePrefix;
   private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
@@ -149,7 +152,7 @@ public class SpringCodeGenerator implements CodeGenerator {
         String name = errorElement.getAttributeNS(null, NAME_ATTRIBUTE);
         String statusCode = errorElement.getAttributeNS(null, STATUS_CODE_ATTRIBUTE);
         if (statusCode.isEmpty()) {
-          statusCode = "400";
+          statusCode = DEFAULT_STATUS_CODE;
         }
         String documentation = getDocumentation(errorElement);
         JavaCode exceptionType = generateException(name, statusCode, documentation);
@@ -238,7 +241,13 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getBaseException(String statusCode) {
-    return "400".equals(statusCode) ? "IllegalArgumentException" : "RuntimeException";
+    if ("400".equals(statusCode)) {
+      return IllegalArgumentException.class.getSimpleName();
+    }
+    if ("500".equals(statusCode)) {
+      return IllegalStateException.class.getSimpleName();
+    }
+    return RuntimeException.class.getSimpleName();
   }
 
   private JavaCode startErrorHandler() {
@@ -259,6 +268,9 @@ public class SpringCodeGenerator implements CodeGenerator {
   
   private void handleException(JavaCode exceptionType, String statusCode, Collection<String> errorHandlingMethods,
       JavaCode errorHandler) {
+    if (FRAMEWORK_HANDLED_STATUSES.contains(statusCode)) {
+      return;
+    }
     String handledType = handledExceptionType(exceptionType);
     String method = exceptionTypeToMethod(handledType);
     if (errorHandlingMethods.contains(method)) {
@@ -267,10 +279,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     errorHandlingMethods.add(method);
     errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
     errorHandler.add("  public ResponseEntity<ErrorDto> %s(%s e) {", method, handledType);
-    errorHandler.add("    ErrorDto error = new ErrorDto();");
-    errorHandler.add("    error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
-    errorHandler.add("    error.title = e.getMessage();");
-    errorHandler.add("    return new ResponseEntity<ErrorDto>(error, HttpStatus.%s);", HTTP_STATUSES.get(statusCode));
+    errorHandler.add("    return error(e, HttpStatus.%s);", HTTP_STATUSES.get(statusCode));
     errorHandler.add("  }");
     errorHandler.add("");
   }
@@ -291,6 +300,13 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
   
   private Code endErrorHandler(JavaCode errorHandler) {
+    errorHandler.add("  private ResponseEntity<ErrorDto> error(Exception e, HttpStatus statusCode) {");
+    errorHandler.add("    ErrorDto error = new ErrorDto();");
+    errorHandler.add("    error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
+    errorHandler.add("    error.title = e.getMessage();");
+    errorHandler.add("    return new ResponseEntity<ErrorDto>(error, statusCode);");
+    errorHandler.add("  }");
+    errorHandler.add("");
     errorHandler.add("}");
     return errorHandler;
   }
@@ -338,9 +354,9 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("");
     result.add("");
     result.add("public interface %s {", API_TYPE);
-    addLinkRelations(radl, result);
-    addMediaTypes(result);
     addBillboardUri(result);
+    addMediaTypes(result);
+    addLinkRelations(radl, result);
     addErrors(radl, result);
     result.add("");
     result.add("}");
@@ -372,7 +388,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       }
       return "See " + specificationElement.getAttributeNS(null, "href");
     }
-    return documentationElement.getTextContent();
+    return documentationElement.getTextContent().replaceAll("\\s+", " ");
   }
 
   private void addBillboardUri(Code code) {
@@ -414,6 +430,7 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private void addConstants(Map<String, Constant> constants, String heading, Code code) {
     if (!constants.isEmpty()) {
+      code.add("");
       code.add("");
       code.add("  // %s", heading);
       code.add("");
