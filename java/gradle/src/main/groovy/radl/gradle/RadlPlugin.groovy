@@ -94,9 +94,9 @@ class RadlPlugin implements Plugin<Project> {
     project.task('radl2spring', type: JavaExec) {
       // TODO: inputs & outputs
       def name = radlFile.name.substring(0, radlFile.name.lastIndexOf('.'))
-      def prefix = project.radl.packagePrefix ? "${project.radl.packagePrefix}.$name" : name
+      def packagePrefix = project.radl.packagePrefix ? project.radl.packagePrefix : name
       main = 'radl.java.generation.spring.RadlToSpringServer'
-      args = [radlFile.path, project.projectDir.path, "${prefix}.rest.server",
+      args = [radlFile.path, project.projectDir.path, packagePrefix,
           relative(project.projectDir, project.sourceSets.main.java.srcDirs[1]),
           relative(project.projectDir, project.sourceSets.main.java.srcDirs[0]), project.radl.scm,
           project.radl.header]
