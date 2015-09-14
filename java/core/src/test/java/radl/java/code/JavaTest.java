@@ -58,4 +58,15 @@ public class JavaTest {
     return result.getAbsolutePath();
   }
 
+  @Test
+  public void toJavaString() {
+    assertJavaString("ape", "ape");
+    assertJavaString("bear\ncheetah", "bear\\ncheetah");
+    assertJavaString("dingo\"elephant", "dingo\\\"elephant");
+  }
+
+  private void assertJavaString(String input, String expected) {
+    assertEquals("toString(" + input + ")", expected, Java.toString(input));
+  }
+  
 }

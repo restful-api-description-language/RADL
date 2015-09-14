@@ -8,9 +8,11 @@ namespace rng = "http://relaxng.org/ns/structure/1.0"
 start = service
 include "ref.rnc"
 include "documentation.rnc"
+
 service =
   element service {
     name,
+    radl-version?,
     documentation*,
     states?,
     link-relations?,
@@ -21,6 +23,15 @@ service =
     resources?,
     authentication?
   }
+
+#  RADL version numbers.
+#  
+#  Format:  major.minor
+#
+#  All versions with the same major version number are compatible. Breaking 
+#  changes introduce a new major version number. 
+
+radl-version = attribute radl-version { "1.0" }
 
 #
 # Generic definitions
@@ -114,8 +125,18 @@ linkrel-transitions  = element transitions { transition-ref-element* }
 #
 
 property-groups = element property-groups { property-group-top* }
-property-group-top = element property-group { attribute ref {string} | (name, (property | property-group )*) }
-property-group = element property-group { required?, repeats?, (attribute ref {string} | (name, (property | property-group )*)) }
+property-group-top = element property-group {
+  uri?,
+  (property-group-internal-ref | (name, (property | property-group )*))
+}
+property-group-internal-ref =  attribute ref { xsd:string }
+property-group = element property-group {
+  name,
+  required?,
+  repeats?,
+  uri?,
+  (property-group-internal-ref | (property | property-group)*)
+}
 property-group-ref = attribute property-group { string }
 property = element property { name, property-type?, uri?, required?, repeats? }
 property-type = attribute type { "string" | "number" | "boolean" | string }

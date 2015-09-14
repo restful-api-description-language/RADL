@@ -9,8 +9,8 @@ package radl.gradle
  */
 class RadlExtension {
 
-  def radlCoreVersion = '1.0.10'
-  def radlDirName = 'src/main/radl'
+  def coreVersion = '1.0.22'
+  def dirName = 'src/main/radl'
   def serviceName
   def packagePrefix
   def docsDir = 'docs/rest'
@@ -26,5 +26,9 @@ class RadlExtension {
   def preExtract(clos) {
     preExtracts += clos
   }
+
+  def generateDirName
+  def generateSpring = false
+  def springVersion = '4.2.1.RELEASE'
 
 }

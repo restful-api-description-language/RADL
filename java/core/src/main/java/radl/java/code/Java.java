@@ -185,4 +185,8 @@ public final class Java {
     return "1." + result.toString().substring("RELEASE_".length());
   }
 
+  public static String toString(String value) {
+    return value.replaceAll("\n", "\\\\n").replaceAll("\"", "\\\\\"");
+  }
+
 }

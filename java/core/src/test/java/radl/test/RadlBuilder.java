@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import radl.common.xml.DocumentBuilder;
+import radl.common.xml.Xml;
+import radl.test.ErrorBuilder.Error;
 
 
 /**
@@ -37,7 +40,16 @@ public class RadlBuilder {
   }
 
   public RadlBuilder withMediaTypes(String... names) {
-    return withCollection("media-types", "media-type", names);
+    return withMediaTypes(false, names);
+  }
+  
+  public RadlBuilder withMediaTypes(boolean firstIsDefault, String... names) {
+    withCollection("media-types", "media-type", names);
+    if (firstIsDefault) {
+      builder.setCurrent(Xml.getFirstChildElement((Element)builder.getCurrent(), "media-types"));
+      builder.attribute("default", names[0]);
+    }
+    return this;
   }
 
   private RadlBuilder withCollection(String collectionTag, String itemTag, String... names) {
@@ -91,13 +103,16 @@ public class RadlBuilder {
     return new ErrorBuilder(this);
   }
 
-  void setErrors(Map<String, String> errors) {
+  void setErrors(Map<String, Error> errors) {
     builder.element("errors");
-    for (Entry<String, String> entry : errors.entrySet()) {
-      builder.element("error")
-          .attribute("name", entry.getKey());
-      if (entry.getValue() != null) {
-        builder.element("documentation", entry.getValue());
+    for (Entry<String, Error> entry : errors.entrySet()) {
+      builder.element("error").attribute("name", entry.getKey());
+      Error error = entry.getValue();
+      if (error.hasStatusCode()) {
+        builder.attribute("status-code", Integer.toString(error.getStatusCode()));
+      }
+      if (error.getDocumentation() != null) {
+        builder.element("documentation", error.getDocumentation());
       }
       builder.end();
     }

@@ -263,16 +263,19 @@ public class JavaCodeTest {
     String field4 = "MEDIA_HAG_RWT";
     String field5 = 'N' + someValue();
     String field6 = 'O' + someValue();
+    String field7 = 'Q' + someValue();
     String type1 = "Object";
     String type2 = "int";
     String type3 = "boolean";
     String type4 = "String";
     String type5 = "String";
     String type6 = "String";
+    String type7 = "double[]";
     String value2 = "42";
     String value4 = '"' + someValue() + '/' + someValue() + "; foo\"";
     String value5 = '"' + someValue() + '"';
     String value6 = '"' + someValue() + '"';
+    String value7 = "{ 3.14 }";
     String annotation1 = '@' + someValue();
     String comment = someValue();
     code.add("public class %s {", someValue());
@@ -286,28 +289,32 @@ public class JavaCodeTest {
     code.add("  %s %s = %s;", type4, field4, value4);
     code.add("  static final %s %s = %s;", type5, field5, value5);
     code.add("  %s %s = %s; // %s", type6, field6, value6, someValue());
+    code.add("  %s %s = %s;", type7, field7, value7);
     code.add("}");
 
-    TestUtil.assertCollectionEquals("Field names", Arrays.asList(field4, field5, field6, field2, field3, field1),
-        code.fieldNames());
+    TestUtil.assertCollectionEquals("Field names",
+        Arrays.asList(field4, field5, field6, field7, field2, field3, field1), code.fieldNames());
     assertEquals("Field type #1", type1, code.fieldType(field1));
     assertEquals("Field type #2", type2, code.fieldType(field2));
     assertEquals("Field type #3", type3, code.fieldType(field3));
     assertEquals("Field type #4", type4, code.fieldType(field4));
     assertEquals("Field type #5", type5, code.fieldType(field5));
     assertEquals("Field type #6", type6, code.fieldType(field6));
+    assertEquals("Field type #7", type7, code.fieldType(field7));
     assertEquals("Field annotations #1", Arrays.asList(annotation1), code.fieldAnnotations(field1));
     assertEquals("Field annotations #2", Collections.emptyList(), code.fieldAnnotations(field2));
     assertEquals("Field annotations #3", Collections.emptyList(), code.fieldAnnotations(field3));
     assertEquals("Field annotations #4", Collections.emptyList(), code.fieldAnnotations(field4));
     assertEquals("Field annotations #5", Collections.emptyList(), code.fieldAnnotations(field5));
     assertEquals("Field annotations #6", Collections.emptyList(), code.fieldAnnotations(field6));
+    assertEquals("Field annotations #7", Collections.emptyList(), code.fieldAnnotations(field7));
     assertNull("Field value #1", code.fieldValue(field1));
     assertNull("Field value #3", code.fieldValue(field3));
     assertEquals("Field value #2", value2, code.fieldValue(field2));
     assertEquals("Field value #4", value4, code.fieldValue(field4));
     assertEquals("Field value #5", value5, code.fieldValue(field5));
     assertEquals("Field value #6", value6, code.fieldValue(field6));
+    assertEquals("Field value #7", value7, code.fieldValue(field7));
     assertFalse("Is constant #1", code.fieldIsContant(field1));
     assertTrue("Is constant #2", code.fieldIsContant(field2));
     assertFalse("Is constant #3", code.fieldIsContant(field3));
@@ -570,6 +577,7 @@ public class JavaCodeTest {
     assertMatchesMethod("public void tiger() { // unicorn");
     assertMatchesMethod("public Whale() {", false);
     assertMatchesMethod("/*public Yak() { }*/", false);
+    assertMatchesMethod("public A<B> c() {");
   }
 
   private void assertMatchesMethod(String input) {

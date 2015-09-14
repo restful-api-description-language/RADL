@@ -108,12 +108,20 @@ public class SpringSourceFilesGeneratorTest {
 
     Iterable<SourceFile> actual = sourceFilesGenerator.generateFrom(radl, baseDir);
 
-    assertEquals("Generated source file", GeneratedSourceFile.class, actual.iterator().next().getClass());
+    assertEquals("Generated source file " + typeName, GeneratedSourceFile.class, actual.iterator().next().getClass());
   }
 
   @Test
   public void generatesGeneratedSourceFileForUris() throws Exception {
     assertGeneratedSourceFile("Uris");
+  }
+
+  @Test
+  public void generatesGeneratedSourceFilesForErrorTypes() throws Exception {
+    assertGeneratedSourceFile("ErrorDto");
+    assertGeneratedSourceFile("CentralErrorHandler");
+    assertGeneratedSourceFile("FooException");
+    assertGeneratedSourceFile("Identifiable");
   }
 
 }

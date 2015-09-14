@@ -3,9 +3,13 @@
  */
 package radl.java.generation.spring;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,6 +23,7 @@ import radl.common.xml.ElementProcessor;
 import radl.common.xml.Xml;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
+import radl.java.code.Java;
 import radl.java.code.JavaCode;
 
 
@@ -39,6 +44,8 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String DEFAULT_ATTRIBUTE = "default";
   private static final String MEDIA_TYPE_ELEMENT = "media-type";
   private static final String MEDIA_TYPE_REF_ATTRIBUTE = "media-type";
+  private static final String MEDIA_TYPE_CONSTANT_PREFIX = "MEDIA_TYPE_";
+  private static final String DEFAULT_MEDIA_TYPE_CONSTANT = MEDIA_TYPE_CONSTANT_PREFIX + "DEFAULT";
   private static final String RESOURCE_ELEMENT = "resource";
   private static final String LOCATION_ELEMENT = "location";
   private static final String LOCATION_URI_ATTRIBUTE = "uri";
@@ -56,12 +63,21 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String URIS_TYPE = "Uris";
   private static final String TRANSITIONS_ELEMENT = "transitions";
   private static final String TRANSITION_ELEMENT = "transition";
+  private static final String ERRORS_ELEMENT = "errors";
   private static final String ERROR_ELEMENT = "error";
+  private static final String STATUS_CODE_ATTRIBUTE = "status-code";
+  private static final String DEFAULT_STATUS_CODE = "400";
+  private static final String ERROR_DTO_TYPE = "ErrorDto";
+  private static final String IDENTIFIABLE_TYPE = "Identifiable";
+  private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
+  private static final Collection<String> FRAMEWORK_HANDLED_STATUSES = Arrays.asList("405", "406");
 
   private final String packagePrefix;
+  private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> uriConstants = new TreeMap<String, Constant>();
   private final String header;
+  private String defaultMediaType;
 
   public SpringCodeGenerator(String packagePrefix) {
     this(packagePrefix, null);
@@ -70,6 +86,47 @@ public class SpringCodeGenerator implements CodeGenerator {
   public SpringCodeGenerator(String packagePrefix, String header) {
     this.packagePrefix = packagePrefix;
     this.header = header == null || header.trim().isEmpty() ? DEFAULT_HEADER : header;
+    initHttpStatuses();
+  }
+
+  private void initHttpStatuses() {
+    HTTP_STATUSES.put("400", "BAD_REQUEST");
+    HTTP_STATUSES.put("401", "UNAUTHORIZED");
+    HTTP_STATUSES.put("402", "PAYMENT_REQUIRED");
+    HTTP_STATUSES.put("403", "FORBIDDEN");
+    HTTP_STATUSES.put("404", "NOT_FOUND");
+    HTTP_STATUSES.put("405", "METHOD_NOT_ALLOWED");
+    HTTP_STATUSES.put("406", "NOT_ACCEPTABLE");
+    HTTP_STATUSES.put("407", "PROXY_AUTHENTICATION_REQUIRED");
+    HTTP_STATUSES.put("408", "REQUEST_TIMEOUT");
+    HTTP_STATUSES.put("409", "CONFLICT");
+    HTTP_STATUSES.put("410", "GONE");
+    HTTP_STATUSES.put("411", "LENGTH_REQUIRED");
+    HTTP_STATUSES.put("412", "PRECONDITION_FAILED");
+    HTTP_STATUSES.put("413", "PAYLOAD_TOO_LARGE");
+    HTTP_STATUSES.put("414", "URI_TOO_LONG");
+    HTTP_STATUSES.put("415", "UNSUPPORTED_MEDIA_TYPE");
+    HTTP_STATUSES.put("416", "REQUESTED_RANGE_NOT_SATISFIABLE");
+    HTTP_STATUSES.put("417", "EXPECTATION_FAILED");
+    HTTP_STATUSES.put("422", "UNPROCESSABLE_ENTITY");
+    HTTP_STATUSES.put("423", "LOCKED");
+    HTTP_STATUSES.put("424", "FAILED_DEPENDENCY");
+    HTTP_STATUSES.put("426", "UPGRADE_REQUIRED");
+    HTTP_STATUSES.put("428", "PRECONDITION_REQUIRED");
+    HTTP_STATUSES.put("429", "TOO_MANY_REQUESTS");
+    HTTP_STATUSES.put("431", "REQUEST_HEADER_FIELDS_TOO_LARGE");
+    HTTP_STATUSES.put("500", "INTERNAL_SERVER_ERROR");
+    HTTP_STATUSES.put("501", "NOT_IMPLEMENTED");
+    HTTP_STATUSES.put("502", "BAD_GATEWAY");
+    HTTP_STATUSES.put("503", "SERVICE_UNAVAILABLE");
+    HTTP_STATUSES.put("504", "GATEWAY_TIMEOUT");
+    HTTP_STATUSES.put("505", "HTTP_VERSION_NOT_SUPPORTED");
+    HTTP_STATUSES.put("506", "VARIANT_ALSO_NEGOTIATES");
+    HTTP_STATUSES.put("507", "INSUFFICIENT_STORAGE");
+    HTTP_STATUSES.put("508", "LOOP_DETECTED");
+    HTTP_STATUSES.put("509", "BANDWIDTH_LIMIT_EXCEEDED");
+    HTTP_STATUSES.put("510", "NOT_EXTENDED");
+    HTTP_STATUSES.put("511", "NETWORK_AUTHENTICATION_REQUIRED");
   }
 
   @Override
@@ -77,13 +134,189 @@ public class SpringCodeGenerator implements CodeGenerator {
     Collection<Code> result = new ArrayList<Code>();
     try {
       generateSourcesForResources(radl, result);
+      generateSourcesForErrors(radl, result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return result;
   }
 
+  private void generateSourcesForErrors(Document radl, final Collection<Code> sources) throws Exception {
+    Element errorsElement = Xml.getFirstChildElement(radl.getDocumentElement(), ERRORS_ELEMENT);
+    if (errorsElement == null) {
+      return;
+    }
+    sources.add(generateErrorDto());
+    sources.add(generateIdentifiable());
+    final JavaCode errorHandler = startErrorHandler();
+    final Collection<String> errorHandlingMethods = new ArrayList<String>();
+    Xml.processChildElements(errorsElement, new ElementProcessor() {
+      @Override
+      public void process(Element errorElement) throws Exception {
+        String name = errorElement.getAttributeNS(null, NAME_ATTRIBUTE);
+        String statusCode = errorElement.getAttributeNS(null, STATUS_CODE_ATTRIBUTE);
+        if (statusCode.isEmpty()) {
+          statusCode = DEFAULT_STATUS_CODE;
+        }
+        String documentation = getDocumentation(errorElement);
+        JavaCode exceptionType = generateException(name, statusCode, documentation);
+        sources.add(exceptionType);
+        handleException(exceptionType, statusCode, errorHandlingMethods, errorHandler);
+      }
+    }, ERROR_ELEMENT);
+    sources.add(endErrorHandler(errorHandler));
+  }
+
+  private Code generateErrorDto() {
+    Code result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("");
+    result.add("public class %s {", ERROR_DTO_TYPE);
+    result.add("");
+    result.add("  public String title;");
+    result.add("  public String type;");
+    result.add("");
+    result.add("}");
+    return result;
+  }
+  
+  private Code generateIdentifiable() {
+    Code result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("");
+    result.add("public interface %s {", IDENTIFIABLE_TYPE);
+    result.add("");
+    result.add("  String getId();");
+    result.add("");
+    result.add("}");
+    return result;
+  }
+
+  protected JavaCode generateException(String name, String statusCode, String documentation) {
+    JavaCode result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("import %s;", apiType());
+    result.add("");
+    result.add("");
+    String type = toExceptionTypeName(getErrorName(name));
+    result.add("public class %s extends %s implements %s {", type, getBaseException(statusCode), IDENTIFIABLE_TYPE);
+    result.add("");
+    result.add("  public %s() {", type);
+    result.add("    super(\"%s\");", getMessage(name, documentation));
+    result.add("  }");
+    result.add("");
+    result.add("  public String getId() {");
+    result.add("    return %s.%s;", API_TYPE, errorConstants.get(name).getName());
+    result.add("  }");
+    result.add("");
+    result.add("}");
+    return result;
+  }
+
+  private String getErrorName(String name) {
+    URI uri;
+    try {
+      uri = new URI(name);
+    } catch (URISyntaxException e) {
+      return name;
+    }
+    if (uri.getScheme() == null || !uri.getScheme().startsWith("http")) {
+      return name;
+    }
+    String path = uri.getPath();
+    if (path.endsWith("/")) {
+      path = path.substring(0,  path.length() - 1);
+    }
+    return path.substring(path.lastIndexOf('/') + 1);
+  }
+
+  private String toExceptionTypeName(String name) {
+    return Java.toIdentifier(name + "Exception");
+  }
+
+  private String getMessage(String name, String documentation) {
+    if (documentation == null || documentation.trim().isEmpty()) {
+      return errorConstants.get(name).getName();
+    }
+    return Java.toString(documentation.trim());
+  }
+
+  private String getBaseException(String statusCode) {
+    if ("400".equals(statusCode)) {
+      return IllegalArgumentException.class.getSimpleName();
+    }
+    if ("500".equals(statusCode)) {
+      return IllegalStateException.class.getSimpleName();
+    }
+    return RuntimeException.class.getSimpleName();
+  }
+
+  private JavaCode startErrorHandler() {
+    JavaCode result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("import org.springframework.http.HttpStatus;");
+    result.add("import org.springframework.http.ResponseEntity;");
+    result.add("import org.springframework.web.bind.annotation.ControllerAdvice;");
+    result.add("import org.springframework.web.bind.annotation.ExceptionHandler;");
+    result.add("");
+    result.add("");
+    result.add("@ControllerAdvice");
+    result.add("public class CentralErrorHandler {");
+    result.add("");
+    return result;
+  }
+  
+  private void handleException(JavaCode exceptionType, String statusCode, Collection<String> errorHandlingMethods,
+      JavaCode errorHandler) {
+    if (FRAMEWORK_HANDLED_STATUSES.contains(statusCode)) {
+      return;
+    }
+    String handledType = handledExceptionType(exceptionType);
+    String method = exceptionTypeToMethod(handledType);
+    if (errorHandlingMethods.contains(method)) {
+      return;
+    }
+    errorHandlingMethods.add(method);
+    errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
+    errorHandler.add("  public ResponseEntity<ErrorDto> %s(%s e) {", method, handledType);
+    errorHandler.add("    return error(e, HttpStatus.%s);", HTTP_STATUSES.get(statusCode));
+    errorHandler.add("  }");
+    errorHandler.add("");
+  }
+
+  private String handledExceptionType(JavaCode exceptionType) {
+    String result = exceptionType.superTypeName();
+    if ("RuntimeException".equals(result)) {
+      result = exceptionType.typeName();
+    }
+    return result;
+  }
+
+  private String exceptionTypeToMethod(String exceptionType) {
+    StringBuilder result = new StringBuilder(exceptionType);
+    result.setLength(result.length() - "Exception".length());
+    result.setCharAt(0, Character.toLowerCase(result.charAt(0)));
+    return result.toString();
+  }
+  
+  private Code endErrorHandler(JavaCode errorHandler) {
+    errorHandler.add("  private ResponseEntity<ErrorDto> error(Exception e, HttpStatus statusCode) {");
+    errorHandler.add("    ErrorDto error = new ErrorDto();");
+    errorHandler.add("    error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
+    errorHandler.add("    error.title = e.getMessage();");
+    errorHandler.add("    return new ResponseEntity<ErrorDto>(error, statusCode);");
+    errorHandler.add("  }");
+    errorHandler.add("");
+    errorHandler.add("}");
+    return errorHandler;
+  }
+
   private void generateSourcesForResources(Document radl, final Collection<Code> sources) throws Exception {
+    defaultMediaType = getDefaultMediaType(radl.getDocumentElement());
     final String startTransition = getStartTransition(radl);
     Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
       @Override
@@ -94,6 +327,15 @@ public class SpringCodeGenerator implements CodeGenerator {
     }, RESOURCE_ELEMENT);
     sources.add(generateApi(radl));
     sources.add(generateUris());
+  }
+
+  private String getDefaultMediaType(Element documentElement) {
+    Element mediaTypesElement = Xml.getFirstChildElement(documentElement, MEDIA_TYPES_ELEMENT);
+    if (mediaTypesElement == null) {
+      return null;
+    }
+    String result = mediaTypesElement.getAttributeNS(null, DEFAULT_ATTRIBUTE);
+    return result.isEmpty() ? null : result;
   }
 
   private Code generateUris() {
@@ -126,9 +368,9 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("");
     result.add("");
     result.add("public interface %s {", API_TYPE);
-    addLinkRelations(radl, result);
-    addMediaTypes(result);
     addBillboardUri(result);
+    addMediaTypes(result);
+    addLinkRelations(radl, result);
     addErrors(radl, result);
     result.add("");
     result.add("}");
@@ -136,7 +378,6 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void addErrors(Document radl, Code code) throws Exception {
-    Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
     addErrorConstants(radl, errorConstants);
     addConstants(errorConstants, "Error conditions", code);
   }
@@ -147,7 +388,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       public void process(Element errorElement) throws Exception {
         String value = errorElement.getAttributeNS(null, "name");
         String documentation = getDocumentation(errorElement);
-        errorConstants.put(value, ensureConstant("ERROR_", value, value, documentation, errorConstants));
+        errorConstants.put(value, ensureConstant("ERROR_", getErrorName(value), value, documentation, errorConstants));
       }
     }, ERROR_ELEMENT);
   }
@@ -161,7 +402,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       }
       return "See " + specificationElement.getAttributeNS(null, "href");
     }
-    return documentationElement.getTextContent();
+    return documentationElement.getTextContent().replaceAll("\\s+", " ");
   }
 
   private void addBillboardUri(Code code) {
@@ -199,10 +440,14 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private void addMediaTypes(Code code) {
     addConstants(mediaTypeConstants, "Media types", code);
+    if (defaultMediaType != null) {
+      code.add("  String %s = %s;", DEFAULT_MEDIA_TYPE_CONSTANT, getLocalMediaTypeConstant(defaultMediaType));
+    }
   }
 
   private void addConstants(Map<String, Constant> constants, String heading, Code code) {
     if (!constants.isEmpty()) {
+      code.add("");
       code.add("");
       code.add("  // %s", heading);
       code.add("");
@@ -244,6 +489,9 @@ public class SpringCodeGenerator implements CodeGenerator {
         result.delete(i, j);
       }
       i++;
+    }
+    if (result.charAt(result.length() - 1) == 's') {
+      result.setLength(result.length() - 1);
     }
     return result.toString();
   }
@@ -288,7 +536,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       addUris = true;
     }
     addControllerImports(resourceElement, addUris, result);
-    result.add("@Controller");
+    result.add("@RestController");
     if (uri != null) {
       Constant constant = ensureConstant(namePrefix, constantName, uri, null, uriConstants);
       result.add(String.format("@RequestMapping(%s.%s)", type,  constant.getName()));
@@ -328,9 +576,6 @@ public class SpringCodeGenerator implements CodeGenerator {
     String argName = parameterName(consumes);
     code.add("  @RequestMapping(method = RequestMethod.%s%s%s)", method.toUpperCase(Locale.getDefault()),
         consumes, produces);
-    if (!produces.isEmpty()) {
-      code.add("  @ResponseBody");
-    }
     code.add("  public %s %s(%s) {", returnValue(produces), method, parameters(consumes, argName));
     code.add("    %sservice.%s(%s);", returnStatement(produces), method, argName);
     code.add("  }");
@@ -354,9 +599,13 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getMediaTypeConstant(String mediaType) {
+    return API_TYPE + '.' + getLocalMediaTypeConstant(mediaType);
+  }
+
+  private String getLocalMediaTypeConstant(String mediaType) {
     String name = mediaType.startsWith(DEFAULT_MEDIA_TYPE) ? mediaType.substring(DEFAULT_MEDIA_TYPE.length())
         : mediaType;
-    return API_TYPE + '.' + ensureConstant("MEDIA_", name, mediaType, null, mediaTypeConstants).getName();
+    return ensureConstant(MEDIA_TYPE_CONSTANT_PREFIX, name, mediaType, null, mediaTypeConstants).getName();
   }
 
   private Constant ensureConstant(String namePrefix, String name, String value, String documentation,
@@ -397,7 +646,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       controllerClass.add("import %s;", urisType());
     }
     controllerClass.add("import org.springframework.beans.factory.annotation.Autowired;");
-    controllerClass.add("import org.springframework.stereotype.Controller;");
+    controllerClass.add("import org.springframework.web.bind.annotation.RestController;");
     boolean hasMethod = hasMethod(resourceElement);
     if (hasMethod && hasMethod(resourceElement, "request")) {
       controllerClass.add("import org.springframework.web.bind.annotation.RequestBody;");
@@ -407,9 +656,6 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
     if (hasMethod) {
       controllerClass.add("import org.springframework.web.bind.annotation.RequestMethod;");
-    }
-    if (hasMethod && hasMethod(resourceElement, "response")) {
-      controllerClass.add("import org.springframework.web.bind.annotation.ResponseBody;");
     }
     controllerClass.add("");
     controllerClass.add("");
@@ -508,31 +754,15 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getMediaTypes(final Element methodElement, String messageType, String prefix) throws Exception {
-    final Collection<String> mediaTypes = new ArrayList<String>();
-    Element messageElement = Xml.getFirstChildElement(methodElement, messageType);
-    Xml.processNestedElements(messageElement, new ElementProcessor() {
-      @Override
-      public void process(Element representationElement) throws Exception {
-        String mediaTypeName = representationElement.getAttributeNS(null, MEDIA_TYPE_REF_ATTRIBUTE);
-        if (!mediaTypeName.isEmpty()) {
-          String mediaType = getMediaType(methodElement.getOwnerDocument().getDocumentElement(), mediaTypeName);
-          if (mediaType != null) {
-            mediaTypes.add(mediaType);
-          }
-        }
-      }
-    }, REPRESENTATIONS_ELEMENT, REPRESENTATION_ELEMENT);
-    if (mediaTypes.isEmpty() && messageElement != null) {
-      // No explicit representations defined, look for default media type
-      Element mediaTypesElement = Xml.getFirstChildElement(methodElement.getOwnerDocument().getDocumentElement(),
-          MEDIA_TYPES_ELEMENT);
-      String defaultMediaType = mediaTypesElement.getAttributeNS(null, DEFAULT_ATTRIBUTE);
-      if (!defaultMediaType.isEmpty()) {
-        mediaTypes.add(getMediaTypeConstant(defaultMediaType));
-      }
-    }
+    final Collection<String> mediaTypes = getMediaTypes(methodElement, messageType);
     if (mediaTypes.isEmpty()) {
       return "";
+    }
+    if (mediaTypes.size() == 1 && defaultMediaType != null
+        && mediaTypes.iterator().next().equals(getMediaTypeConstant(defaultMediaType))) {
+      // Explicit use of default media type
+      mediaTypes.clear();
+      mediaTypes.add(API_TYPE + '.' + DEFAULT_MEDIA_TYPE_CONSTANT);
     }
     StringBuilder result = new StringBuilder();
     result.append(", ").append(prefix).append(" = { ");
@@ -545,7 +775,29 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result.toString();
   }
 
-  private String getMediaType(Element serviceElement, String mediaTypeName) throws Exception {
+  private Collection<String> getMediaTypes(final Element methodElement, String messageType) throws Exception {
+    final Collection<String> result = new LinkedHashSet<String>();
+    Element messageElement = Xml.getFirstChildElement(methodElement, messageType);
+    Xml.processNestedElements(messageElement, new ElementProcessor() {
+      @Override
+      public void process(Element representationElement) throws Exception {
+        String mediaTypeName = representationElement.getAttributeNS(null, MEDIA_TYPE_REF_ATTRIBUTE);
+        if (!mediaTypeName.isEmpty()) {
+          String mediaType = getMediaTypeConstant(methodElement.getOwnerDocument().getDocumentElement(), mediaTypeName);
+          if (mediaType != null) {
+            result.add(mediaType);
+          }
+        }
+      }
+    }, REPRESENTATIONS_ELEMENT, REPRESENTATION_ELEMENT);
+    if (result.isEmpty() && messageElement != null && defaultMediaType != null) {
+      // No explicit representations defined, use default media type
+      result.add(API_TYPE + '.' + DEFAULT_MEDIA_TYPE_CONSTANT);
+    }
+    return result;
+  }
+
+  private String getMediaTypeConstant(Element serviceElement, String mediaTypeName) throws Exception {
     Element mediaTypesElement = Xml.getFirstChildElement(serviceElement, MEDIA_TYPES_ELEMENT);
     if (mediaTypesElement == null) {
       return null;
@@ -595,7 +847,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     String returns = produces.isEmpty() ? "void" : "Object";
     String returnStatement = produces.isEmpty() ? "" : "return null; ";
     code.add("  public %s %s(%s) {", returns, method, args);
-    // Make sure the comment is not viewed as a to-do in this code base
+    // Make sure the comment is not viewed as a to-do in *this* code base
     code.add("    %s// TO%s: Implement", returnStatement, "DO");
     code.add("  }");
     code.add("");

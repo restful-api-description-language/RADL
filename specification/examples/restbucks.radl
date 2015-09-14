@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 ##
 ## Sample RADL file for RESTBucks.
 ##
 ## Copyright © EMC Corporation. All rights reserved.
 ##
 -->
-<service name="RESTBucks" xmlns="urn:radl:service" xmlns:radl="urn:radl:service"
+<service name="RESTBucks" radl-version="1.0"
+    xmlns="urn:radl:service" xmlns:radl="urn:radl:service"
     xmlns:html="http://www.w3.org/1999/xhtml">
   <documentation>
     This example service follows <html:a href="http://www.infoq.com/articles/webber-rest-workflow">RESTBucks</html:a>, 
@@ -24,7 +25,7 @@
       </transitions>
     </start-state>
 
-    <state name="Arrived">
+    <state name="Arrived" property-group="home">
       <transitions>
         <transition name="Read menu" to="Deciding">
           <documentation>
@@ -58,7 +59,7 @@
         </transition>
         <transition name="Pay" to="Paid">
           <documentation>The customer pays for the order.</documentation>
-          <input property-group="paymen"/>
+          <input property-group="payment"/>
         </transition>
       </transitions>
     </state>
@@ -73,7 +74,7 @@
       </transitions>
     </state>
 
-    <state name="Waiting">
+    <state name="Waiting" property-group="serving">
       <transitions>
         <transition name="Wait" to="Waiting">
           <documentation>The customer has to wait a while.</documentation>
@@ -100,13 +101,14 @@
       <specification href="http://tools.ietf.org/html/rfc4287"/>
       <transitions>
         <transition ref="Receive notification"/>
+        <transition ref="Wait"/>
       </transitions>
     </link-relation>
 
     <link-relation name="edit">
       <specification href="http://tools.ietf.org/html/rfc5023"/>
       <transitions>
-        <transition ref="Change order"/>
+        <transition ref="Change"/>
         <transition ref="Cancel"/>
         <transition ref="Take serving"/>
       </transitions>
@@ -142,29 +144,50 @@
   </link-relations>
 
   <property-groups>
+    <property-group name="home" uri="http://schema.org/CafeOrCoffeeShop"/>
+
     <property-group name="items">
-      <property-group name="item" repeats="true">
-        <property name="name" type="string"/>
-        <property name="quantity" type="number"/>
-        <property name="price" type="number"/>
+      <property-group name="item" repeats="true" uri="http://schema.org/Product">
+        <property name="name" uri="http://schema.org/name"/>
+        <property name="size" uri="http://schema.org/height"/>
+        <property name="milk" uri="http://www.productontology.org/doc/Milk"/>
+        <property name="price" uri="http://schema.org/price"/>
+        <property name="currency" uri="http://schema.org/priceCurrency"/>
       </property-group>
     </property-group>
 
-    <property-group name="menu">
-      <property-group ref="items"/>
+    <property-group name="menu" uri="http://schema.org/menu">
+      <property-group name="items" ref="items"/>
     </property-group>
 
-    <property-group name="order">
-      <property-group ref="items"/>
+    <property-group name="order" uri="http://schema.org/Order">
+      <property-group name="items" ref="items"/>
+      <property name="customer" uri="http://schema.org/customer"/>
+      <property name="total" uri="http://schema.org/totalPrice"/>
+      <property name="currency" uri="http://schema.org/priceCurrency"/>
     </property-group>
 
-    <property-group name="receipt">
-      <property-group ref="items"/>
+    <property-group name="receipt" uri="http://schema.org/Order">
+      <property name="dateTime" uri="http://schema.org/orderDate"/>
+      <property name="shop" uri="http://schema.org/seller"/>
+      <property-group name="items" ref="items"/>
+      <property name="total" uri="http://schema.org/totalPrice"/>
+      <property name="currency" uri="http://schema.org/priceCurrency"/>
+      <property name="paymentMethod" uri="http://schema.org/acceptedPaymentMethod"/>
     </property-group>
 
-    <property-group name="payment">
-      <!-- TODO: Describe semantics and data types -->
+    <property-group name="payment" uri="http://reference.data.gov.uk/def/payment#payment">
+      <property name="amount" uri="http://schema.org/totalPrice"/>
+      <property name="currency" uri="http://schema.org/priceCurrency"/>
+      <property name="paymentMethod" uri="http://schema.org/acceptedPaymentMethod"/>
+      <property name="cardholderName" uri="https://w3id.org/creditcard/v1/name"/>
+      <property name="cardNumber" uri="https://w3id.org/creditcard/v1/number"/>
+      <property name="expiryMotnh" uri="https://w3id.org/creditcard/v1/expiryMonth"/>
+      <property name="expiryYear" uri="https://w3id.org/creditcard/v1/expiryYear"/>
+      <property name="cardSecurityCode" uri="https://w3id.org/creditcard/v1/verificationCode"/>
     </property-group>
+
+    <property-group name="serving" uri="http://schema.org/Order"/>
   </property-groups>
 
   <media-types default="application/ld+json">
