@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +46,6 @@ public class GenerateAndExtractTest {
 
   private static final File TESTS_DIR = new File(System.getProperty("radl.dir", "."), "specification/examples");
   private static final String RADL_FILE_EXTENSION = ".radl";
-  private static final String CLASSPATH = System.getProperty("classpath", "");
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {
@@ -102,8 +103,8 @@ public class GenerateAndExtractTest {
     PrintWriter writer = new PrintWriter(argumentsFile, "UTF-8");
     try {
       writer.println("service.name = " + example);
-      writer.println("base.dir = " + fileToPropertiesPath(generatedSpringCodeDir));
-      writer.println("radl.file = " + fileToPropertiesPath(generatedRadlFile));
+      writer.println("base.dir = " + fileToPropertiesPath(generatedSpringCodeDir.getPath()));
+      writer.println("radl.file = " + fileToPropertiesPath(generatedRadlFile.getPath()));
       writer.println("classpath = " + getClassPath());
       writer.println("java.version = " + Java.getVersion());
     } finally {
@@ -112,15 +113,17 @@ public class GenerateAndExtractTest {
     return argumentsFile;
   }
 
-  private String fileToPropertiesPath(File file) {
-    return file.getPath().replaceAll("\\" + File.separator, "/");
+  private String fileToPropertiesPath(String file) {
+    return file.replaceAll("\\" + File.separator, "/");
   }
 
   private String getClassPath() {
     StringBuilder result = new StringBuilder();
     String prefix = "";
-    for (String path : CLASSPATH.split("\\" + File.pathSeparator)) {
-      result.append(prefix).append(fileToPropertiesPath(new File(path)));
+    ClassLoader cl = ClassLoader.getSystemClassLoader();
+    URL[] urls = ((URLClassLoader)cl).getURLs();
+    for(URL url: urls){
+      result.append(prefix).append(fileToPropertiesPath(url.getFile()));
       prefix = File.pathSeparator;
     }
     return result.toString();

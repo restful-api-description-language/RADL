@@ -256,6 +256,10 @@ public class JavaCode extends Code {
     }
     return "";
   }
+  
+  public String fullyQualifiedName() {
+    return String.format("%s.%s", packageName(), typeName());
+  }
 
   /**
    * @param method The name of the required method

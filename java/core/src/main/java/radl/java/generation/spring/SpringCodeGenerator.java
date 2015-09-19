@@ -37,9 +37,11 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String API_PACKAGE = "api";
   private static final String BILLBOARD_URL = "BILLBOARD";
   private static final String CONSTANT_PREFIX_URL = "URL_";
+  private static final String MEDIA_TYPE_JSON_LD = "application/ld+json";
   private static final String DEFAULT_MEDIA_TYPE = "application/";
   private static final String NAME_ATTRIBUTE = "name";
   private static final String REF_ATTRIBUTE = "ref";
+  private static final String URI_ATTRIBUTE = "uri";
   private static final String MEDIA_TYPES_ELEMENT = "media-types";
   private static final String DEFAULT_ATTRIBUTE = "default";
   private static final String MEDIA_TYPE_ELEMENT = "media-type";
@@ -48,8 +50,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String DEFAULT_MEDIA_TYPE_CONSTANT = MEDIA_TYPE_CONSTANT_PREFIX + "DEFAULT";
   private static final String RESOURCE_ELEMENT = "resource";
   private static final String LOCATION_ELEMENT = "location";
-  private static final String LOCATION_URI_ATTRIBUTE = "uri";
-  private static final String LOCATION_URI_TEMPLATE_ATTRIBUTE = "uri-template";
+  private static final String URI_TEMPLATE_ATTRIBUTE = "uri-template";
   private static final String METHODS_ELEMENT = "methods";
   private static final String METHOD_ELEMENT = "method";
   private static final String REQUEST_ELEMENT = "request";
@@ -71,6 +72,13 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String IDENTIFIABLE_TYPE = "Identifiable";
   private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
   private static final Collection<String> FRAMEWORK_HANDLED_STATUSES = Arrays.asList("405", "406");
+  private static final String PROPERTY_GROUP_ELEMENT = "property-group";
+  private static final String PROPERTY_GROUPS_ELEMENT = PROPERTY_GROUP_ELEMENT + 's';
+  private static final String PROPERTY_ELEMENT = "property";
+  private static final String TYPE_ATTRIBUTE = "type";
+  private static final String REPEATS_ATTRIBUTE = "repeats";
+  private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
+  private static final String SEMANTIC_ANNOTATION = "Expose";
 
   private final String packagePrefix;
   private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
@@ -133,10 +141,130 @@ public class SpringCodeGenerator implements CodeGenerator {
   public Iterable<Code> generateFrom(Document radl) {
     Collection<Code> result = new ArrayList<Code>();
     try {
+      defaultMediaType = getDefaultMediaType(radl.getDocumentElement());
+      generateSourcesForPropertyGroups(radl, result);
       generateSourcesForResources(radl, result);
       generateSourcesForErrors(radl, result);
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+    return result;
+  }
+
+  private void generateSourcesForPropertyGroups(Document radl, final Collection<Code> sources) throws Exception {
+    Xml.processNestedElements(radl.getDocumentElement(), new ElementProcessor() {
+      @Override
+      public void process(Element propertySourceElement) throws Exception {
+        addDtosFor(propertySourceElement, sources);
+      }
+    }, PROPERTY_GROUPS_ELEMENT, PROPERTY_GROUP_ELEMENT);
+  }
+
+  protected String addDtosFor(Element propertySourceElement, Collection<Code> sources) throws Exception {
+    final Code code = new JavaCode();
+    String name = getName(propertySourceElement);
+    addPackage(name, code);
+    code.add("");
+    addSemanticAnnotationImport(propertySourceElement, code);
+    addDtoImports(propertySourceElement, code);
+    addSemanticAnnotation(propertySourceElement, "", code);
+    String result = getDtoClass(name);
+    code.add("public class %s {", result);
+    code.add("");
+    addDtoFields(propertySourceElement, code, sources);
+    code.add("");
+    code.add("}");
+    sources.add(code);
+    return result;
+  }
+
+  private String getDtoClass(String name) {
+    return Java.toIdentifier(name) + "Dto";
+  }
+
+  private void addDtoImports(Element propertySourceElement, final Code code) throws Exception {
+    final AtomicBoolean added = new AtomicBoolean();
+    Xml.processDecendantElements(propertySourceElement, new ElementProcessor() {
+      @Override
+      public void process(Element propertyGroupElement) throws Exception {
+        String name = propertyGroupElement.getAttributeNS(null, REF_ATTRIBUTE);
+        if (name.isEmpty()) {
+          name = getName(propertyGroupElement);
+        }
+        code.add("import %s.%s.%s;", packagePrefix, toPackage(name), getDtoClass(name));
+        added.set(true);
+      }
+    }, PROPERTY_GROUP_ELEMENT);
+    code.add("");
+    if (added.get()) {
+      code.add("");
+    }
+  }
+
+  private void addSemanticAnnotationImport(Element propertySourceElement, Code code) throws Exception {
+    if (isSemanticMediaType() && hasSemantics(propertySourceElement)) {
+      code.add("import %s.%s;", SEMANTIC_ANNOTATION_PACKAGE, SEMANTIC_ANNOTATION);
+      code.add("");
+    }
+  }
+
+  private boolean isSemanticMediaType() {
+    return MEDIA_TYPE_JSON_LD.equals(defaultMediaType);
+  }
+
+  private boolean hasSemantics(Element propertySourceElement) throws Exception {
+    final AtomicBoolean result = new AtomicBoolean(doHasSemantics(propertySourceElement));
+    Xml.processChildElements(propertySourceElement, new ElementProcessor() {
+      @Override
+      public void process(Element element) throws Exception {
+        if (doHasSemantics(element)) {
+          result.set(true);
+        }
+      }
+    }, PROPERTY_ELEMENT, PROPERTY_GROUP_ELEMENT);
+    return result.get();
+  }
+
+  private boolean doHasSemantics(Element element) {
+    return !element.getAttributeNS(null, URI_ATTRIBUTE).isEmpty();
+  }
+
+  private void addSemanticAnnotation(Element element, String indent, final Code result) {
+    if (isSemanticMediaType()) {
+      String uri = element.getAttributeNS(null, URI_ATTRIBUTE);
+      if (!uri.isEmpty()) {
+        result.add("%s@%s(\"%s\")", indent, SEMANTIC_ANNOTATION, Java.toString(uri));
+      }
+    }
+  }
+
+  private void addDtoFields(Element propertySourceElement, final Code dto, final Collection<Code> sources)
+      throws Exception {
+    Xml.processChildElements(propertySourceElement, new ElementProcessor() {
+      @Override
+      public void process(Element propertyElement) throws Exception {
+        addSemanticAnnotation(propertyElement, "  ", dto);
+        dto.add("  public %s %s;", getType(propertyElement, sources), getName(propertyElement));
+      }
+    }, PROPERTY_ELEMENT, PROPERTY_GROUP_ELEMENT);
+  }
+
+  protected String getType(Element propertyElement, Collection<Code> sources) throws Exception {
+    String result = null;
+    if (PROPERTY_GROUP_ELEMENT.equals(propertyElement.getLocalName())) {
+      String ref = propertyElement.getAttributeNS(null, REF_ATTRIBUTE);
+      if (ref.isEmpty()) {
+        result = addDtosFor(propertyElement, sources);
+      } else {
+        result = getDtoClass(ref);
+      }
+    }
+    if (result == null) {
+      String type = propertyElement.getAttributeNS(null, TYPE_ATTRIBUTE);
+      result = type.isEmpty() ? "String" : type;
+    }
+    if (Boolean.parseBoolean(propertyElement.getAttributeNS(null, REPEATS_ATTRIBUTE))) {
+      return result + "[]";
     }
     return result;
   }
@@ -316,7 +444,6 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void generateSourcesForResources(Document radl, final Collection<Code> sources) throws Exception {
-    defaultMediaType = getDefaultMediaType(radl.getDocumentElement());
     final String startTransition = getStartTransition(radl);
     Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
       @Override
@@ -516,7 +643,7 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private Code generateController(Element resourceElement, String startTransition) throws Exception {
     final Code result = new JavaCode();
-    String name = getResourceName(resourceElement);
+    String name = getName(resourceElement);
     addPackage(name, result);
     result.add("");
     String uri = getUri(resourceElement);
@@ -689,11 +816,11 @@ public class SpringCodeGenerator implements CodeGenerator {
     if (locationElement == null) {
       return null;
     }
-    String uri = locationElement.getAttributeNS(null, LOCATION_URI_ATTRIBUTE);
+    String uri = locationElement.getAttributeNS(null, URI_ATTRIBUTE);
     if (!uri.isEmpty()) {
       return uri;
     }
-    return locationElement.getAttributeNS(null, LOCATION_URI_TEMPLATE_ATTRIBUTE);
+    return locationElement.getAttributeNS(null, URI_TEMPLATE_ATTRIBUTE);
   }
 
   private String getControllerClassName(Element resourceElement) {
@@ -701,7 +828,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getClassName(Element resourceElement) {
-    return toJavaIdentifier(getResourceName(resourceElement));
+    return toJavaIdentifier(getName(resourceElement));
   }
 
   public String toJavaIdentifier(String text) {
@@ -732,7 +859,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     builder.setCharAt(index, Character.toUpperCase(builder.charAt(index)));
   }
 
-  private String getResourceName(Element resourceElement) {
+  private String getName(Element resourceElement) {
     return resourceElement.getAttributeNS(null, NAME_ATTRIBUTE);
   }
 
@@ -817,7 +944,7 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private Code generateService(Element resourceElement) throws Exception {
     final Code result = new JavaCode();
-    addPackage(getResourceName(resourceElement), result);
+    addPackage(getName(resourceElement), result);
     result.add("");
     result.add("import org.springframework.stereotype.Service;");
     result.add("");

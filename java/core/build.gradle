@@ -25,6 +25,9 @@ dependencies {
   compile('jaxen:jaxen:1.1.6') {
     exclude module: 'xml-apis'
   }
+  testCompile 'org.springframework.hateoas:spring-hateoas',
+      'de.escalon.hypermedia:hydra-spring:0.2.0-beta2'
+  
 }
 
 sourceSets {
