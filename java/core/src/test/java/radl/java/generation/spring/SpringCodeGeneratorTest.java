@@ -343,7 +343,7 @@ public class SpringCodeGeneratorTest {
     JavaCode api = generateType(radl, TYPE_API);
     assertFileComments(api);
 
-    String field = "LINK_FOO_BAR";
+    String field = "LINK_REL_FOO_BAR";
     TestUtil.assertCollectionEquals("Fields", Arrays.asList(field), api.fieldNames());
     assertEquals("Field value #1", quote(linkRelation), api.fieldValue(field));
   }
@@ -528,7 +528,7 @@ public class SpringCodeGeneratorTest {
 
     JavaCode api = generateType(radl, TYPE_API);
 
-    String field = "LINK_FOO_BAR";
+    String field = "LINK_REL_FOO_BAR";
     TestUtil.assertCollectionEquals("Fields", Arrays.asList(field), api.fieldNames());
     assertEquals("Field comment", Arrays.asList("See " + linkRelationSpecificationUri), api.fieldComments(field));
   }

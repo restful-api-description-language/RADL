@@ -573,7 +573,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
         String value = linkRelationElement.getAttributeNS(null, "name");
         String name = value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value;
         String documentation = getDocumentation(linkRelationElement);
-        ensureConstant("LINK_", name, value, documentation, linkRelationConstants);
+        ensureConstant("LINK_REL_", name, value, documentation, linkRelationConstants);
       }
     }, LINK_RELATION_ELEMENT);
   }
