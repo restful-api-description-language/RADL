@@ -30,6 +30,14 @@ dependencies {
   
 }
 
+sourceSets {
+  main {
+    resources {
+      srcDir project.rootProject.file('specification')
+    }
+  }
+}
+
 def examples = project.rootProject.fileTree(dir: 'specification/examples', include: '**/*.radl')
 def schemaRnc = project.rootProject.file('specification/schema/radl.rnc')
 def schemaXsd = new File(buildDir, 'xsd/radl.xsd')
