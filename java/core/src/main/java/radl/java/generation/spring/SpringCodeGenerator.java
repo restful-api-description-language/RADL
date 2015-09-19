@@ -31,7 +31,7 @@ import radl.java.code.JavaCode;
 /**
  * Generates Java code for the Spring framework from a RADL document.
  */
-public class SpringCodeGenerator implements CodeGenerator {
+public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveClassLength
 
   private static final String DTO_SUFFIX = "Dto";
   private static final String UNKNOWN_TYPE = "Object";
@@ -1110,6 +1110,5 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
 
   }
-
 
 }

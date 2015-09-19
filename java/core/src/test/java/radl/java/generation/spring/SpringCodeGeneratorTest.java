@@ -18,7 +18,6 @@ import java.util.Locale;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import radl.common.xml.Xml;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
 import radl.java.code.Java;
@@ -820,18 +819,15 @@ public class SpringCodeGeneratorTest {
             .end()
         .end()
     .build();
-    System.out.println(Xml.toString(radl));
 
     Iterable<Code> sources = generator.generateFrom(radl);
     
     JavaCode controller1 = getType(sources, controllerName(state1));
-    System.out.println(controller1);
     String controllerMethod1 = javaMethodName(httpMethod1);
     assertEquals("Returns #1", dtoName(propertyGroup1), controller1.methodReturns(controllerMethod1));
     assertEquals("Args #1", "", controller1.methodArguments(controllerMethod1));
     
     JavaCode controller2 = getType(sources, controllerName(state2));
-    System.out.println(controller2);
     String controllerMethod2 = javaMethodName(httpMethod2);
     assertEquals("Returns #2", "void", controller2.methodReturns(controllerMethod2));
     assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
