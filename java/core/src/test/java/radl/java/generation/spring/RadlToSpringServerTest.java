@@ -56,8 +56,10 @@ public class RadlToSpringServerTest {
     String upper = lower.toUpperCase(Locale.getDefault());
     String name = RANDOM.string();
     Document radlDocument = RadlBuilder.aRadlDocument()
-        .withResource().named(lower + name)
-        .build();
+        .withResource()
+            .named(lower + name)
+        .end()
+    .build();
     PrintWriter writer = new PrintWriter(radlFile, "UTF8");
     try {
       writer.print(Xml.toString(radlDocument));
@@ -81,10 +83,10 @@ public class RadlToSpringServerTest {
     TestUtil.assertCollectionEquals("Header for " + controller.getName(), Arrays.asList(header),
         javaCode.fileComments());
 
-    File service = find(files, upper + name + "Service.java");
-    assertNotNull("Missing service: " + files, service);
-    expectedPath = expectedFilePath(mainSourceSetDir, packagePrefix, lower + name, service);
-    assertEquals("Path", expectedPath, service.getPath());
+    File controllerHelper = find(files, upper + name + "ControllerHelper.java");
+    assertNotNull("Missing controller helper: " + files, controllerHelper);
+    expectedPath = expectedFilePath(mainSourceSetDir, packagePrefix, lower + name, controllerHelper);
+    assertEquals("Path", expectedPath, controllerHelper.getPath());
   }
 
   private JavaCode toJava(File file) {

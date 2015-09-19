@@ -34,13 +34,18 @@ public class SpringCodeGeneratorTest {
   private static final String TYPE_API = "Api";
   private static final String TYPE_URIS = "Uris";
   private static final String TYPE_ERROR_DTO = "ErrorDto";
+  private static final String JSON_LD = "application/ld+json";
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
   private final CodeGenerator generator = new SpringCodeGenerator(packagePrefix);
 
   @Test(expected = RuntimeException.class)
   public void throwsExceptionOnInvalidRadl() {
-    Document radl = RadlBuilder.aRadlDocument().withResource().named("").build();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withResource()
+            .named("")
+        .end()
+    .build();
 
     generator.generateFrom(radl).iterator();
   }
@@ -48,7 +53,11 @@ public class SpringCodeGeneratorTest {
   @Test
   public void generatesControllerPerResource() {
     String resource = aName() + '-' + aName();
-    Document radl = RadlBuilder.aRadlDocument().withResource().named(resource).build();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withResource()
+            .named(resource)
+        .end()
+    .build();
 
     Iterator<Code> sources = generator.generateFrom(radl).iterator();
 
@@ -65,7 +74,7 @@ public class SpringCodeGeneratorTest {
     JavaCode javaSource = (JavaCode)source;
 
     assertFileComments(javaSource);
-    assertEquals("Class name", getControllerClassName(expectedClassName), javaSource.typeName());
+    assertEquals("Class name", controllerName(expectedClassName), javaSource.typeName());
     assertEquals("Class annotations", Arrays.asList("@RestController"), javaSource.typeAnnotations());
     TestUtil.assertCollectionEquals("Imports", Arrays.asList(packagePrefix + ".api.Api", packagePrefix + ".impl.Uris",
         "org.springframework.beans.factory.annotation.Autowired",
@@ -75,7 +84,7 @@ public class SpringCodeGeneratorTest {
 
     String fieldName = "service";
     TestUtil.assertCollectionEquals("Fields", Arrays.asList(fieldName), javaSource.fieldNames());
-    assertEquals("Field type", Java.toIdentifier(expectedClassName) + "Service", javaSource.fieldType(fieldName));
+    assertEquals("Field type", controllerHelperName(expectedClassName), javaSource.fieldType(fieldName));
     assertEquals("Field annotation", Arrays.asList("@Autowired"), javaSource.fieldAnnotations(fieldName));
   }
 
@@ -83,21 +92,30 @@ public class SpringCodeGeneratorTest {
     assertEquals("File comments", Arrays.asList("Generated from RADL."), javaSource.fileComments());
   }
 
-  private String getControllerClassName(String expectedClassName) {
-    return Java.toIdentifier(expectedClassName) + "Controller";
+  private String controllerName(String resourceName) {
+    return typeName(resourceName, "Controller");
   }
 
+  private String typeName(String name, String suffix) {
+    return Java.toIdentifier(name) + suffix;
+  }
+  
   @Test
   public void addsRequestMappingForResourceLocation() {
     String name = aName();
     String uri = aLocalUri();
-    Document radl = RadlBuilder.aRadlDocument().withResource().named(name).locatedAt(uri).build();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withResource()
+            .named(name)
+            .locatedAt(uri)
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
     JavaCode uris = getJavaCode(sources, TYPE_URIS);
     String constant = getFieldWithValue(uris, quote(uri));
-    JavaCode controller = getJavaCode(sources, getControllerClassName(name));
+    JavaCode controller = getJavaCode(sources, controllerName(name));
 
     String requestMappingAnnotation = String.format("@RequestMapping(%s.%s)", TYPE_URIS, constant);
     assertTrue("Missing @RequestMapping: " + controller.typeAnnotations(),
@@ -150,7 +168,9 @@ public class SpringCodeGeneratorTest {
             .withMethod(httpMethod)
                 .consuming(mediaType1)
                 .producing(mediaType2)
-        .build();
+            .end()
+        .end()
+    .build();
     String method = httpMethod.toLowerCase(Locale.getDefault());
 
     JavaCode source = generateController(radl);
@@ -211,9 +231,12 @@ public class SpringCodeGeneratorTest {
             .named(resource)
             .withMethod(httpMethod1)
                 .producing(mediaType)
-            .and().withMethod(httpMethod2)
+            .end()
+            .withMethod(httpMethod2)
                 .consuming(mediaType)
-        .build();
+            .end()
+        .end()
+    .build();
     String method1 = httpMethod1.toLowerCase(Locale.getDefault());
     String method2 = httpMethod2.toLowerCase(Locale.getDefault());
 
@@ -222,18 +245,18 @@ public class SpringCodeGeneratorTest {
     assertTrue("Missing controller", sources.hasNext());
     sources.next();
     assertTrue("Missing service", sources.hasNext());
-    assertService(resource, sources.next(), method1, method2);
+    assertControllerHelper(resource, sources.next(), method1, method2);
     assertType(TYPE_API, sources);
     assertType(TYPE_URIS, sources);
     assertFalse("Extra source", sources.hasNext());
   }
 
-  private void assertService(String expectedClassName, Code source, String... methods) {
+  private void assertControllerHelper(String expectedClassName, Code source, String... methods) {
     assertEquals("Source type", JavaCode.class, source.getClass());
     JavaCode javaSource = (JavaCode)source;
 
     assertFileComments(javaSource);
-    assertEquals("Class name", Java.toIdentifier(expectedClassName) + "Service", javaSource.typeName());
+    assertEquals("Class name", controllerHelperName(expectedClassName), javaSource.typeName());
     assertEquals("Class annotations", Arrays.asList("@Service"), javaSource.typeAnnotations());
     assertImports(Arrays.asList("org.springframework.stereotype.Service"), javaSource);
     assertEquals("Package", packagePrefix + '.' + expectedClassName, javaSource.packageName());
@@ -241,6 +264,10 @@ public class SpringCodeGeneratorTest {
     for (String method : methods) {
       assertMethod(javaSource, method);
     }
+  }
+
+  private String controllerHelperName(String resourceName) {
+    return typeName(resourceName, "ControllerHelper");
   }
 
   private void assertMethod(JavaCode javaSource, String method) {
@@ -271,7 +298,9 @@ public class SpringCodeGeneratorTest {
             .withMethod(httpMethod)
                 .consuming(fullMediaType1)
                 .producing(fullMediaType2)
-        .build();
+            .end()
+        .end()
+    .build();
 
     JavaCode api = generateType(radl, TYPE_API);
 
@@ -328,9 +357,17 @@ public class SpringCodeGeneratorTest {
     String otherUri = aLocalUri();
     Document radl = RadlBuilder.aRadlDocument()
         .startingAt(name)
-        .withResource().named(name).locatedAt(billboardUri).withMethod("GET").transitioningTo("Start")
-        .and().withResource().locatedAt(otherUri)
-        .build();
+        .withResource()
+            .named(name)
+            .locatedAt(billboardUri)
+            .withMethod("GET")
+                .transitioningTo("Start")
+            .end()
+        .end()
+        .withResource()
+            .locatedAt(otherUri)
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
@@ -360,8 +397,10 @@ public class SpringCodeGeneratorTest {
     String name1 = aName();
     String name2 = aName();
     Document radl = RadlBuilder.aRadlDocument()
-        .withResource().named(TestUtil.initCap(name1) + " " + name2 + "-")
-        .build();
+        .withResource()
+            .named(TestUtil.initCap(name1) + " " + name2 + "-")
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
@@ -378,8 +417,10 @@ public class SpringCodeGeneratorTest {
   public void generatesClassNamesWithoutSuccessiveCapitals() {
     String name = "PDP";
     Document radl = RadlBuilder.aRadlDocument()
-        .withResource().named(name)
-        .build();
+        .withResource()
+            .named(name)
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
@@ -391,13 +432,18 @@ public class SpringCodeGeneratorTest {
   public void addsRequestMappingForResourceWithUriTemplate() {
     String name = aName();
     String uri = aLocalUri();
-    Document radl = RadlBuilder.aRadlDocument().withResource().named(name).locatedAtTemplate(uri).build();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withResource()
+            .named(name)
+            .locatedAtTemplate(uri)
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
     JavaCode uris = getJavaCode(sources, TYPE_URIS);
     String constant = getFieldWithValue(uris, quote(uri));
-    JavaCode controller = getJavaCode(sources, getControllerClassName(name));
+    JavaCode controller = getJavaCode(sources, controllerName(name));
 
     String requestMappingAnnotation = String.format("@RequestMapping(Uris.%s)", constant);
     assertTrue("Missing @RequestMapping: " + controller.typeAnnotations(),
@@ -414,6 +460,7 @@ public class SpringCodeGeneratorTest {
             .withMethod("GET")
                 .producing(aMediaType())
             .end()
+        .end()
     .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
@@ -542,13 +589,17 @@ public class SpringCodeGeneratorTest {
         Collections.<String>singleton("@ExceptionHandler({ IllegalArgumentException.class })"),
         errorHandler.methodAnnotations("illegalArgument"));
     TestUtil.assertCollectionEquals("Error handler annotations",
-        Collections.<String>singleton("@ExceptionHandler({ " + Java.toIdentifier(name3) + "Exception.class })"),
+        Collections.<String>singleton("@ExceptionHandler({ " + exceptionName(name3) + ".class })"),
         errorHandler.methodAnnotations(name3));
+  }
+
+  private String exceptionName(String name) {
+    return typeName(name, "Exception");
   }
 
   private void assertExceptionType(String name, String documentation, String baseType,
       JavaCode implementedInterface, Iterable<Code> sources) {
-    JavaCode exceptionType = getType(sources, Java.toIdentifier(name) + "Exception");
+    JavaCode exceptionType = getType(sources, exceptionName(name));
     assertEquals("Base type", baseType, exceptionType.superTypeName());
     TestUtil.assertCollectionEquals("Implements", Collections.singleton(implementedInterface.typeName()),
         exceptionType.implementedInterfaces());
@@ -571,7 +622,7 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
     
-    getType(sources, Java.toIdentifier(name) + "Exception");
+    getType(sources, exceptionName(name));
   }
 
   @Test
@@ -587,7 +638,9 @@ public class SpringCodeGeneratorTest {
             .withMethod(method)
                 .consuming(fullMediaType)
                 .producing(fullMediaType)
-        .build();
+            .end()
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
     
@@ -596,7 +649,7 @@ public class SpringCodeGeneratorTest {
     String mediaTypeToConstant = mediaTypeToConstant(mediaType, true);
     assertEquals("Default media type", mediaTypeToConstant, api.fieldValue(defaultMediaTypeConstant));
     
-    JavaCode controller = getType(sources, Java.toIdentifier(resource) + "Controller");
+    JavaCode controller = getType(sources, controllerName(resource));
     TestUtil.assertCollectionEquals("Method annotations", Collections.<String>singleton(
         "@RequestMapping(method = RequestMethod." + method + ", consumes = { Api." + defaultMediaTypeConstant
         + " }, produces = { Api." + defaultMediaTypeConstant + " })"),
@@ -608,14 +661,18 @@ public class SpringCodeGeneratorTest {
     String resource1 = aName() + 'l';
     String resource2 = resource1 + 's';
     Document radl = RadlBuilder.aRadlDocument()
-        .withResource().named(resource1).and()
-        .withResource().named(resource2)
-        .build();
+        .withResource()
+            .named(resource1)
+        .end()
+        .withResource()
+            .named(resource2)
+        .end()
+    .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
-    JavaCode controller1 = getType(sources, Java.toIdentifier(resource1) + "Controller");
-    JavaCode controller2 = getType(sources, Java.toIdentifier(resource2) + "Controller");
+    JavaCode controller1 = getType(sources, controllerName(resource1));
+    JavaCode controller2 = getType(sources, controllerName(resource2));
     assertEquals("Package", controller1.packageName(), controller2.packageName());
   }
 
@@ -636,7 +693,7 @@ public class SpringCodeGeneratorTest {
     String property6 = 'b' + aName();
     String name4 = 'd' + aName();
     Document radl = RadlBuilder.aRadlDocument()
-        .withMediaTypes(true, "application/ld+json")
+        .withMediaTypes(true, JSON_LD)
         .withPropertyGroup()
             .named(name1)
             .withProperty(property1)
@@ -675,7 +732,7 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
     
-    JavaCode dto1 = getType(sources, Java.toIdentifier(name1) + "Dto");
+    JavaCode dto1 = getType(sources, dtoName(name1));
     assertEquals("Package", packagePrefix + '.' + name1, dto1.packageName());
     assertTrue("Annotations #1", dto1.typeAnnotations().isEmpty());
     TestUtil.assertCollectionEquals("Fields #1", Arrays.asList(property1, property2, property3), dto1.fieldNames());
@@ -683,26 +740,30 @@ public class SpringCodeGeneratorTest {
     assertEquals("Field #2 type", property2Type, dto1.fieldType(property2));
     assertEquals("Field #3 type", "String[]", dto1.fieldType(property3));
 
-    JavaCode dto2 = getType(sources, Java.toIdentifier(name2) + "Dto");
+    JavaCode dto2 = getType(sources, dtoName(name2));
     assertTrue("Missing import on Expose", dto2.imports().contains("de.escalon.hypermedia.hydra.mapping.Expose"));
     TestUtil.assertCollectionEquals("Annotations #2", Collections.<String>singleton("@Expose(\"" + uri1 + "\")"),
         dto2.typeAnnotations());
     TestUtil.assertCollectionEquals("Annotations property #4", Collections.<String>singleton("@Expose(\"" + uri2 + "\")"),
         dto2.fieldAnnotations(property4));
 
-    JavaCode dto3 = getType(sources, Java.toIdentifier(name3) + "Dto");
+    JavaCode dto3 = getType(sources, dtoName(name3));
     TestUtil.assertCollectionEquals("Fields #3", Arrays.asList(property5, property6), dto3.fieldNames());
     assertTrue("Imports #3 doesn't contain " + dto1.fullyQualifiedName(), dto3.imports().contains(dto1.fullyQualifiedName()));
     assertEquals("Field #5 type", dto1.typeName(), dto3.fieldType(property5));
-    String nestedDtoName = Java.toIdentifier(property6) + "Dto";
+    String nestedDtoName = dtoName(property6);
     assertEquals("Field #6 type", nestedDtoName, dto3.fieldType(property6));
     
     JavaCode nestedDto = getType(sources, nestedDtoName);
     assertTrue("Imports #3 doesn't contain " + nestedDto.fullyQualifiedName(),
         dto3.imports().contains(nestedDto.fullyQualifiedName()));
 
-    JavaCode dto4 = getType(sources, Java.toIdentifier(name4) + "Dto");
+    JavaCode dto4 = getType(sources, dtoName(name4));
     assertTrue("Missing import on Expose #4", dto4.imports().contains("de.escalon.hypermedia.hydra.mapping.Expose"));
   }
-  
+
+  private String dtoName(String name) {
+    return typeName(name, "Dto");
+  }
+
 }

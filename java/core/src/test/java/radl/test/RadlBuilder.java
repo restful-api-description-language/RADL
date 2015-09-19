@@ -86,19 +86,15 @@ public class RadlBuilder implements PropertGroupContainer {
   }
 
   public RadlBuilder startingAt(String state) {
-    builder.element("states")
-        .element("start-state")
-            .element("transitions")
-                .element("transition")
-                    .attribute("name", "Start")
-                    .attribute("to", state)
-            .end()
-        .end()
-        .element("state")
-            .attribute("name", state)
+    return withStates()
+        .startingAt(state)
+        .withState(state)
         .end()
     .end();
-    return this;
+  }
+
+  public StatesBuilder withStates() {
+    return new StatesBuilder(this);
   }
 
   public ErrorBuilder withErrors() {

@@ -449,7 +449,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       @Override
       public void process(Element resourceElement) throws Exception {
         sources.add(generateController(resourceElement, startTransition));
-        sources.add(generateService(resourceElement));
+        sources.add(generateControllerHelper(resourceElement));
       }
     }, RESOURCE_ELEMENT);
     sources.add(generateApi(radl));
@@ -671,7 +671,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("public class %s {", getControllerClassName(resourceElement));
     result.add("");
     result.add("  @Autowired");
-    result.add("  private %s service;", getServiceClassName(resourceElement));
+    result.add("  private %s service;", getControllerHelperClassName(resourceElement));
     result.add("");
     addMethods(resourceElement, new MethodAdder() {
       @Override
@@ -942,7 +942,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     return getMediaTypes(methodElement, RESPONSE_ELEMENT, "produces");
   }
 
-  private Code generateService(Element resourceElement) throws Exception {
+  private Code generateControllerHelper(Element resourceElement) throws Exception {
     final Code result = new JavaCode();
     addPackage(getName(resourceElement), result);
     result.add("");
@@ -950,7 +950,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("");
     result.add("");
     result.add("@Service");
-    result.add("public class %s {", getServiceClassName(resourceElement));
+    result.add("public class %s {", getControllerHelperClassName(resourceElement));
     result.add("");
     addMethods(resourceElement, new MethodAdder() {
       @Override
@@ -962,8 +962,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result;
   }
 
-  private String getServiceClassName(Element resourceElement) {
-    return getClassName(resourceElement) + "Service";
+  private String getControllerHelperClassName(Element resourceElement) {
+    return getClassName(resourceElement) + "ControllerHelper";
   }
 
   private void addServiceMethod(Element methodElement, Code code) throws Exception {

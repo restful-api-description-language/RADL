@@ -3,8 +3,6 @@
  */
 package radl.test;
 
-import org.w3c.dom.Document;
-
 import radl.common.xml.DocumentBuilder;
 
 
@@ -34,7 +32,7 @@ public class ResourceBuilder {
   public MethodBuilder withMethod(String method) {
     ensureName();
     ensureMethods();
-    return new MethodBuilder(this).add(method);
+    return new MethodBuilder(this, method);
   }
 
   private void ensureName() {
@@ -70,11 +68,7 @@ public class ResourceBuilder {
     return located("uri-template", uriTemplate);
   }
 
-  public Document build() {
-    return and().build();
-  }
-
-  public RadlBuilder and() {
+  public RadlBuilder end() {
     ensureName();
     builder().end();
     return parent;

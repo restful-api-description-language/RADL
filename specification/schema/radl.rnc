@@ -59,9 +59,8 @@ identity-provider-ref = attribute identity-provider { xsd:string }
 states = element states { start-state?, state* }
 
 start-state = element start-state {
-    documentation*,
-    property-group-ref?,
-    state-transitions?
+  documentation*,
+  state-transitions?
 }
 
 state =

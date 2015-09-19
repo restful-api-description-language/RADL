@@ -3,8 +3,6 @@
  */
 package radl.test;
 
-import org.w3c.dom.Document;
-
 import radl.common.xml.DocumentBuilder;
 
 
@@ -15,8 +13,18 @@ public class MethodBuilder {
 
   private final ResourceBuilder parent;
 
-  public MethodBuilder(ResourceBuilder parent) {
+  public MethodBuilder(ResourceBuilder parent, String method) {
     this.parent = parent;
+    builder().element("method").attribute("name", method);
+  }
+
+  public MethodBuilder consuming() {
+    return message("request");
+  }
+
+  private MethodBuilder message(String type) {
+    builder().element(type).end();
+    return this;
   }
 
   public MethodBuilder consuming(String mediaTypeId) {
@@ -38,37 +46,32 @@ public class MethodBuilder {
     return parent.builder();
   }
 
+  public MethodBuilder producing() {
+    return message("response");
+  }
+
   public MethodBuilder producing(String mediaTypeId) {
     message("response", mediaTypeId);
     return this;
   }
 
-  public MethodBuilder add(String method) {
-    builder().element("method").attribute("name", method);
-    return this;
-  }
-
-  public Document build() {
-    return end().build();
-  }
-
-  public RadlBuilder end() {
-    return parent.parent();
-  }
-
-  public ResourceBuilder and() {
+  public MethodBuilder and(String method) {
     builder().end();
+    return new MethodBuilder(parent, method);
+  }
+
+  public ResourceBuilder end() {
+    builder().end().end();
     return parent;
   }
 
-  public ResourceBuilder transitioningTo(String name) {
+  public MethodBuilder transitioningTo(String name) {
     builder().element("transitions")
         .element("transition")
             .attribute("ref", name)
         .end()
-    .end()
-    .end().end();
-    return parent;
+    .end();
+    return this;
   }
 
 }
