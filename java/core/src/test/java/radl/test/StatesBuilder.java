@@ -22,7 +22,7 @@ public class StatesBuilder {
   public StatesBuilder startingAt(String state) {
     builder().element("start-state");
     return new StateBuilder(this)
-        .transitioningTo(state)
+        .transitioningTo("Start", state)
     .end();
   }
 

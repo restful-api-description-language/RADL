@@ -70,6 +70,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String TRANSITIONS_ELEMENT = "transitions";
   private static final String TRANSITION_ELEMENT = "transition";
   private static final String TO_ATTRIBUTE = "to";
+  private static final String INPUT_ELEMENT = "input";
   private static final String ERRORS_ELEMENT = "errors";
   private static final String ERROR_ELEMENT = "error";
   private static final String STATUS_CODE_ATTRIBUTE = "status-code";
@@ -717,7 +718,7 @@ public class SpringCodeGenerator implements CodeGenerator {
         consumes, produces);
     String type = returnType(produces, methodElement);
     addReturnTypeImport(type, code);
-    code.add("  public %s %s(%s) {", type, method, parameters(consumes, argName));
+    code.add("  public %s %s(%s) {", type, method, parameters(consumes, methodElement, argName));
     code.add("    %s%s.%s(%s);", returnStatement(produces), CONTROLLER_HELPER_NAME, method, argName);
     code.add("  }");
     code.add("");
@@ -740,9 +741,9 @@ public class SpringCodeGenerator implements CodeGenerator {
     Xml.processDecendantElements(methodElement, new ElementProcessor() {
       @Override
       public void process(Element transitionElement) throws Exception {
-        String propertyGroup = getPropertyGroup(transitionElement);
+        String propertyGroup = getOutputPropertyGroup(transitionElement);
         if (propertyGroup.isEmpty()) {
-          result.set(UNKNOWN_TYPE);
+          result.set(noType);
         } else {
           String dto = getDtoClass(propertyGroup);
           if (noType.equals(result.get())) {
@@ -756,7 +757,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result.get();
   }
 
-  protected String getPropertyGroup(Element transitionElement) throws Exception {
+  protected String getOutputPropertyGroup(Element transitionElement) throws Exception {
     final AtomicReference<String> result = new AtomicReference<String>("");
     final String transition = transitionElement.getAttributeNS(null, REF_ATTRIBUTE);
     Xml.processDecendantElements(transitionElement.getOwnerDocument().getDocumentElement(), new ElementProcessor() {
@@ -777,8 +778,47 @@ public class SpringCodeGenerator implements CodeGenerator {
     return stateElement == null ? "" : stateElement.getAttributeNS(null, PROPERTY_GROUP_REF_ATTRIBUTE);
   }
 
-  private String parameters(String consumes, String argName) {
-    return consumes.isEmpty() ? "" : "@RequestBody String " + argName;
+  private String parameters(String consumes, Element methodElement, String argName) throws Exception {
+    return consumes.isEmpty() ? "" : parameterType(consumes, methodElement) + ' ' + argName;
+  }
+
+  private String parameterType(String consumes, Element methodElement) throws Exception {
+    final String noType = consumes.isEmpty() ? NO_TYPE : UNKNOWN_TYPE;
+    final AtomicReference<String> result = new AtomicReference<String>(noType);
+    Xml.processDecendantElements(methodElement, new ElementProcessor() {
+      @Override
+      public void process(Element transitionElement) throws Exception {
+        String propertyGroup = getInputPropertyGroup(transitionElement);
+        if (propertyGroup.isEmpty()) {
+          result.set(noType);
+        } else {
+          String dto = getDtoClass(propertyGroup);
+          if (noType.equals(result.get())) {
+            result.set(dto);
+          } else if (!result.get().equals(dto)) {
+            result.set(UNKNOWN_TYPE);
+          }
+        }
+      }
+    }, TRANSITION_ELEMENT);
+    return result.get();
+  }
+
+  protected String getInputPropertyGroup(Element transitionElement) throws Exception {
+    final AtomicReference<String> result = new AtomicReference<String>("");
+    final String transition = transitionElement.getAttributeNS(null, REF_ATTRIBUTE);
+    Xml.processDecendantElements(transitionElement.getOwnerDocument().getDocumentElement(), new ElementProcessor() {
+      @Override
+      public void process(Element transitionElement) throws Exception {
+        if (transition.equals(getName(transitionElement))) {
+          Element inputElement = Xml.getFirstChildElement(transitionElement, INPUT_ELEMENT);
+          if (inputElement != null) {
+            result.set(inputElement.getAttributeNS(null, PROPERTY_GROUP_REF_ATTRIBUTE));
+          }
+        }
+      }
+    }, TRANSITION_ELEMENT);
+    return result.get();
   }
 
   private String parameterName(String consumes) {
@@ -1031,7 +1071,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     String method = getMethodName(methodElement);
     String consumes = getConsumes(methodElement);
     String produces = getProduces(methodElement);
-    String args = consumes.isEmpty() ? "" : "Object input";
+    String argName = parameterName(consumes);
+    String args = parameters(consumes, methodElement, argName);
     String type = returnType(produces, methodElement);
     addReturnTypeImport(type, code);
     String returnStatement = produces.isEmpty() ? "" : "return null; ";

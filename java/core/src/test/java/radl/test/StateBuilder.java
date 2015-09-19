@@ -23,14 +23,12 @@ public class StateBuilder {
     return parent;
   }
 
-  public StateBuilder transitioningTo(String state) {
-    builder().element("transitions")
-        .element("transition")
-            .attribute("name", "Start")
-            .attribute("to", state)
-        .end()
-    .end();
-    return this;
+  public StateBuilder transitioningTo(String name, String state) {
+    return withTransition(name, state).end();
+  }
+
+  public TransitionBuilder withTransition(String name, String state) {
+    return new TransitionBuilder(this, name, state);
   }
 
   public StateBuilder containing(String propertyGroup) {

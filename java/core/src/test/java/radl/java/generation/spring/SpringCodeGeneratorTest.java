@@ -187,7 +187,7 @@ public class SpringCodeGeneratorTest {
         httpMethod, mediaTypeToConstant(mediaType1, false), mediaTypeToConstant(mediaType2, false));
     assertEquals("Method annotations", Collections.singleton(methodAnnotation).toString(),
         source.methodAnnotations(method).toString());
-    assertEquals("Method arguments", "@RequestBody String input", source.methodArguments(method));
+    assertEquals("Method arguments", "Object input", source.methodArguments(method));
     assertEquals("Method return type", "Object", source.methodReturns(method));
     assertEquals("Method body", String.format("return helper.%s(input);", method), source.methodBody(method));
   }
@@ -775,28 +775,48 @@ public class SpringCodeGeneratorTest {
 
   @Test
   public void generatedControllerUsesGeneratedDtos() {
-    String state = aName();
-    String propertyGroup = aName();
-    String property = aName();
-    String httpMethod = aMethod();
+    String state1 = aName();
+    String propertyGroup1 = aName();
+    String httpMethod1 = aMethod();
+    String transition = aName();
+    String state2 = aName();
+    String propertyGroup2 = aName();
+    String httpMethod2 = aMethod();
     Document radl = RadlBuilder.aRadlDocument()
         .withStates()
-            .startingAt(state)
-            .withState(state)
-                .containing(propertyGroup)
+            .startingAt(state1)
+            .withState(state1)
+                .containing(propertyGroup1)
+                .withTransition(transition, state2)
+                    .withInput(propertyGroup2)
+                .end()
+            .end()
+            .withState(state2)
             .end()
         .end()
         .withPropertyGroup()
-            .named(propertyGroup)
-            .withProperty(property)
+            .named(propertyGroup1)
+            .withProperty(aName())
+            .end()
+        .end()
+        .withPropertyGroup()
+            .named(propertyGroup2)
+            .withProperty(aName())
             .end()
         .end()
         .withMediaTypes(true, JSON_LD)
         .withResource()
-            .named(state)
-            .withMethod(httpMethod)
+            .named(state1)
+            .withMethod(httpMethod1)
                 .transitioningTo("Start")
                 .producing()
+            .end()
+        .end()
+        .withResource()
+            .named(state2)
+            .withMethod(httpMethod2)
+                .transitioningTo(transition)
+                .consuming()
             .end()
         .end()
     .build();
@@ -804,10 +824,17 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
     
-    JavaCode controller = getType(sources, controllerName(state));
-    System.out.println(controller);
-    String controllerMethod = javaMethodName(httpMethod);
-    assertEquals("Returns", dtoName(propertyGroup), controller.methodReturns(controllerMethod));
+    JavaCode controller1 = getType(sources, controllerName(state1));
+    System.out.println(controller1);
+    String controllerMethod1 = javaMethodName(httpMethod1);
+    assertEquals("Returns #1", dtoName(propertyGroup1), controller1.methodReturns(controllerMethod1));
+    assertEquals("Args #1", "", controller1.methodArguments(controllerMethod1));
+    
+    JavaCode controller2 = getType(sources, controllerName(state2));
+    System.out.println(controller2);
+    String controllerMethod2 = javaMethodName(httpMethod2);
+    assertEquals("Returns #2", "void", controller2.methodReturns(controllerMethod2));
+    assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
   }
 
 }
