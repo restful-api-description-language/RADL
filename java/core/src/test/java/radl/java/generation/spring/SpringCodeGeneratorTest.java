@@ -18,6 +18,7 @@ import java.util.Locale;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import radl.common.xml.Xml;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
 import radl.java.code.Java;
@@ -76,13 +77,15 @@ public class SpringCodeGeneratorTest {
     assertFileComments(javaSource);
     assertEquals("Class name", controllerName(expectedClassName), javaSource.typeName());
     assertEquals("Class annotations", Arrays.asList("@RestController"), javaSource.typeAnnotations());
-    TestUtil.assertCollectionEquals("Imports", Arrays.asList(packagePrefix + ".api.Api", packagePrefix + ".impl.Uris",
+    TestUtil.assertCollectionEquals("Imports", Arrays.asList(
         "org.springframework.beans.factory.annotation.Autowired",
-        "org.springframework.web.bind.annotation.RestController"), javaSource.imports());
+        "org.springframework.web.bind.annotation.RestController",
+        packagePrefix + ".api.Api",
+        packagePrefix + ".impl.Uris"), javaSource.imports());
     assertEquals("Package", packagePrefix + '.' + expectedClassName.replaceAll("\\-", ""),
         javaSource.packageName());
 
-    String fieldName = "service";
+    String fieldName = "helper";
     TestUtil.assertCollectionEquals("Fields", Arrays.asList(fieldName), javaSource.fieldNames());
     assertEquals("Field type", controllerHelperName(expectedClassName), javaSource.fieldType(fieldName));
     assertEquals("Field annotation", Arrays.asList("@Autowired"), javaSource.fieldAnnotations(fieldName));
@@ -171,7 +174,7 @@ public class SpringCodeGeneratorTest {
             .end()
         .end()
     .build();
-    String method = httpMethod.toLowerCase(Locale.getDefault());
+    String method = javaMethodName(httpMethod);
 
     JavaCode source = generateController(radl);
 
@@ -186,7 +189,11 @@ public class SpringCodeGeneratorTest {
         source.methodAnnotations(method).toString());
     assertEquals("Method arguments", "@RequestBody String input", source.methodArguments(method));
     assertEquals("Method return type", "Object", source.methodReturns(method));
-    assertEquals("Method body", String.format("return service.%s(input);", method), source.methodBody(method));
+    assertEquals("Method body", String.format("return helper.%s(input);", method), source.methodBody(method));
+  }
+
+  private String javaMethodName(String httpMethod) {
+    return httpMethod.toLowerCase(Locale.getDefault());
   }
 
   private JavaCode generateController(Document radl) {
@@ -237,8 +244,8 @@ public class SpringCodeGeneratorTest {
             .end()
         .end()
     .build();
-    String method1 = httpMethod1.toLowerCase(Locale.getDefault());
-    String method2 = httpMethod2.toLowerCase(Locale.getDefault());
+    String method1 = javaMethodName(httpMethod1);
+    String method2 = javaMethodName(httpMethod2);
 
     Iterator<Code> sources = generator.generateFrom(radl).iterator();
 
@@ -409,7 +416,7 @@ public class SpringCodeGeneratorTest {
 
     String controllerPackage = controller.packageName();
     assertTrue("Package: " + controllerPackage, controllerPackage.endsWith(name1 + name2));
-    assertEquals("Package should be all lowercase", controllerPackage.toLowerCase(Locale.getDefault()),
+    assertEquals("Package should be all lowercase", javaMethodName(controllerPackage),
         controllerPackage);
   }
 
@@ -424,7 +431,7 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
-    JavaCode controller = getJavaCode(sources, TestUtil.initCap(name.toLowerCase(Locale.getDefault())) + "Controller");
+    JavaCode controller = getJavaCode(sources, TestUtil.initCap(javaMethodName(name)) + "Controller");
     assertNotNull("Missing controller", controller);
   }
 
@@ -653,7 +660,7 @@ public class SpringCodeGeneratorTest {
     TestUtil.assertCollectionEquals("Method annotations", Collections.<String>singleton(
         "@RequestMapping(method = RequestMethod." + method + ", consumes = { Api." + defaultMediaTypeConstant
         + " }, produces = { Api." + defaultMediaTypeConstant + " })"),
-        controller.methodAnnotations(method.toLowerCase(Locale.getDefault())));
+        controller.methodAnnotations(javaMethodName(method)));
   }
 
   @Test
@@ -764,6 +771,43 @@ public class SpringCodeGeneratorTest {
 
   private String dtoName(String name) {
     return typeName(name, "Dto");
+  }
+
+  @Test
+  public void generatedControllerUsesGeneratedDtos() {
+    String state = aName();
+    String propertyGroup = aName();
+    String property = aName();
+    String httpMethod = aMethod();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withStates()
+            .startingAt(state)
+            .withState(state)
+                .containing(propertyGroup)
+            .end()
+        .end()
+        .withPropertyGroup()
+            .named(propertyGroup)
+            .withProperty(property)
+            .end()
+        .end()
+        .withMediaTypes(true, JSON_LD)
+        .withResource()
+            .named(state)
+            .withMethod(httpMethod)
+                .transitioningTo("Start")
+                .producing()
+            .end()
+        .end()
+    .build();
+    System.out.println(Xml.toString(radl));
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode controller = getType(sources, controllerName(state));
+    System.out.println(controller);
+    String controllerMethod = javaMethodName(httpMethod);
+    assertEquals("Returns", dtoName(propertyGroup), controller.methodReturns(controllerMethod));
   }
 
 }

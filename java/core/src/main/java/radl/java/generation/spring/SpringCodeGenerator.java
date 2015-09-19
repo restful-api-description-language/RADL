@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,6 +33,9 @@ import radl.java.code.JavaCode;
  */
 public class SpringCodeGenerator implements CodeGenerator {
 
+  private static final String DTO_SUFFIX = "Dto";
+  private static final String UNKNOWN_TYPE = "Object";
+  private static final String NO_TYPE = "void";
   private static final String DEFAULT_HEADER = "Generated from RADL.";
   private static final String IMPL_PACKAGE = "impl";
   private static final String API_PACKAGE = "api";
@@ -59,11 +63,13 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String REPRESENTATION_ELEMENT = "representation";
   private static final String LINK_RELATION_ELEMENT = "link-relation";
   private static final String STATES_ELEMENT = "states";
+  private static final String STATE_ELEMENT = "state";
   private static final String START_STATE_ELEMENT = "start-state";
   private static final String API_TYPE = "Api";
   private static final String URIS_TYPE = "Uris";
   private static final String TRANSITIONS_ELEMENT = "transitions";
   private static final String TRANSITION_ELEMENT = "transition";
+  private static final String TO_ATTRIBUTE = "to";
   private static final String ERRORS_ELEMENT = "errors";
   private static final String ERROR_ELEMENT = "error";
   private static final String STATUS_CODE_ATTRIBUTE = "status-code";
@@ -75,10 +81,12 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String PROPERTY_GROUP_ELEMENT = "property-group";
   private static final String PROPERTY_GROUPS_ELEMENT = PROPERTY_GROUP_ELEMENT + 's';
   private static final String PROPERTY_ELEMENT = "property";
+  private static final String PROPERTY_GROUP_REF_ATTRIBUTE = "property-group";
   private static final String TYPE_ATTRIBUTE = "type";
   private static final String REPEATS_ATTRIBUTE = "repeats";
   private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
   private static final String SEMANTIC_ANNOTATION = "Expose";
+  private static final String CONTROLLER_HELPER_NAME = "helper";
 
   private final String packagePrefix;
   private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
@@ -179,7 +187,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getDtoClass(String name) {
-    return Java.toIdentifier(name) + "Dto";
+    return Java.toIdentifier(name) + DTO_SUFFIX;
   }
 
   private void addDtoImports(Element propertySourceElement, final Code code) throws Exception {
@@ -482,11 +490,15 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getStartTransition(Document radl) {
-    Element statesElement = Xml.getFirstChildElement(radl.getDocumentElement(), STATES_ELEMENT);
+    Element statesElement = getStatesElement(radl);
     Element startElement = Xml.getFirstChildElement(statesElement, START_STATE_ELEMENT);
     Element transitionsElement = Xml.getFirstChildElement(startElement, TRANSITIONS_ELEMENT);
     Element transitionElement = Xml.getFirstChildElement(transitionsElement, TRANSITION_ELEMENT);
     return transitionElement == null ? "" : transitionElement.getAttributeNS(null, NAME_ATTRIBUTE);
+  }
+
+  private Element getStatesElement(Document radl) {
+    return Xml.getFirstChildElement(radl.getDocumentElement(), STATES_ELEMENT);
   }
 
   private Code generateApi(Document radl) throws Exception {
@@ -642,7 +654,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private Code generateController(Element resourceElement, String startTransition) throws Exception {
-    final Code result = new JavaCode();
+    final JavaCode result = new JavaCode();
     String name = getName(resourceElement);
     addPackage(name, result);
     result.add("");
@@ -671,7 +683,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("public class %s {", getControllerClassName(resourceElement));
     result.add("");
     result.add("  @Autowired");
-    result.add("  private %s service;", getControllerHelperClassName(resourceElement));
+    result.add("  private %s %s;", getControllerHelperClassName(resourceElement), CONTROLLER_HELPER_NAME);
     result.add("");
     addMethods(resourceElement, new MethodAdder() {
       @Override
@@ -696,25 +708,73 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result.get();
   }
 
-  private void addControllerMethod(Element methodElement, Code code) throws Exception {
+  private void addControllerMethod(Element methodElement, JavaCode code) throws Exception {
     String method = getMethodName(methodElement);
     String consumes = getConsumes(methodElement);
     String produces = getProduces(methodElement);
     String argName = parameterName(consumes);
     code.add("  @RequestMapping(method = RequestMethod.%s%s%s)", method.toUpperCase(Locale.getDefault()),
         consumes, produces);
-    code.add("  public %s %s(%s) {", returnValue(produces), method, parameters(consumes, argName));
-    code.add("    %sservice.%s(%s);", returnStatement(produces), method, argName);
+    String type = returnType(produces, methodElement);
+    addReturnTypeImport(type, code);
+    code.add("  public %s %s(%s) {", type, method, parameters(consumes, argName));
+    code.add("    %s%s.%s(%s);", returnStatement(produces), CONTROLLER_HELPER_NAME, method, argName);
     code.add("  }");
     code.add("");
+  }
+
+  private void addReturnTypeImport(String type, JavaCode code) {
+    if (type.endsWith(DTO_SUFFIX)) {
+      String packageName = join(packagePrefix, toPackage(type.substring(0, type.length() - DTO_SUFFIX.length())));
+      code.ensureImport(packageName, type);
+    }
   }
 
   private String returnStatement(String produces) {
     return produces.isEmpty() ? "" : "return ";
   }
 
-  private String returnValue(String produces) {
-    return produces.isEmpty() ? "void" : "Object";
+  private String returnType(String produces, Element methodElement) throws Exception {
+    final String noType = produces.isEmpty() ? NO_TYPE : UNKNOWN_TYPE;
+    final AtomicReference<String> result = new AtomicReference<String>(noType);
+    Xml.processDecendantElements(methodElement, new ElementProcessor() {
+      @Override
+      public void process(Element transitionElement) throws Exception {
+        String propertyGroup = getPropertyGroup(transitionElement);
+        if (propertyGroup.isEmpty()) {
+          result.set(UNKNOWN_TYPE);
+        } else {
+          String dto = getDtoClass(propertyGroup);
+          if (noType.equals(result.get())) {
+            result.set(dto);
+          } else if (!result.get().equals(dto)) {
+            result.set(UNKNOWN_TYPE);
+          }
+        }
+      }
+    }, TRANSITION_ELEMENT);
+    return result.get();
+  }
+
+  protected String getPropertyGroup(Element transitionElement) throws Exception {
+    final AtomicReference<String> result = new AtomicReference<String>("");
+    final String transition = transitionElement.getAttributeNS(null, REF_ATTRIBUTE);
+    Xml.processDecendantElements(transitionElement.getOwnerDocument().getDocumentElement(), new ElementProcessor() {
+      @Override
+      public void process(Element transitionElement) throws Exception {
+        if (transition.equals(getName(transitionElement))) {
+          String state = transitionElement.getAttributeNS(null, TO_ATTRIBUTE);
+          result.set(getPropertyGroup(transitionElement.getOwnerDocument(), state));
+        }
+      }
+    }, TRANSITION_ELEMENT);
+    return result.get();
+  }
+
+  private String getPropertyGroup(Document radl, String state) throws Exception {
+    Element statesElement = getStatesElement(radl);
+    Element stateElement = Xml.getChildElementByAttribute(statesElement, STATE_ELEMENT, NAME_ATTRIBUTE, state);
+    return stateElement == null ? "" : stateElement.getAttributeNS(null, PROPERTY_GROUP_REF_ATTRIBUTE);
   }
 
   private String parameters(String consumes, String argName) {
@@ -768,12 +828,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void addControllerImports(Element resourceElement, boolean addUris, Code controllerClass) throws Exception {
-    controllerClass.add("import %s;", apiType());
-    if (addUris) {
-      controllerClass.add("import %s;", urisType());
-    }
     controllerClass.add("import org.springframework.beans.factory.annotation.Autowired;");
-    controllerClass.add("import org.springframework.web.bind.annotation.RestController;");
     boolean hasMethod = hasMethod(resourceElement);
     if (hasMethod && hasMethod(resourceElement, "request")) {
       controllerClass.add("import org.springframework.web.bind.annotation.RequestBody;");
@@ -783,6 +838,12 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
     if (hasMethod) {
       controllerClass.add("import org.springframework.web.bind.annotation.RequestMethod;");
+    }
+    controllerClass.add("import org.springframework.web.bind.annotation.RestController;");
+    controllerClass.add("");
+    controllerClass.add("import %s;", apiType());
+    if (addUris) {
+      controllerClass.add("import %s;", urisType());
     }
     controllerClass.add("");
     controllerClass.add("");
@@ -943,7 +1004,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private Code generateControllerHelper(Element resourceElement) throws Exception {
-    final Code result = new JavaCode();
+    final JavaCode result = new JavaCode();
     addPackage(getName(resourceElement), result);
     result.add("");
     result.add("import org.springframework.stereotype.Service;");
@@ -955,7 +1016,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     addMethods(resourceElement, new MethodAdder() {
       @Override
       public void addMethod(Element methodElement) throws Exception {
-        addServiceMethod(methodElement, result);
+        addControllerHelperMethod(methodElement, result);
       }
     });
     result.add("}");
@@ -966,14 +1027,15 @@ public class SpringCodeGenerator implements CodeGenerator {
     return getClassName(resourceElement) + "ControllerHelper";
   }
 
-  private void addServiceMethod(Element methodElement, Code code) throws Exception {
+  private void addControllerHelperMethod(Element methodElement, JavaCode code) throws Exception {
     String method = getMethodName(methodElement);
     String consumes = getConsumes(methodElement);
     String produces = getProduces(methodElement);
     String args = consumes.isEmpty() ? "" : "Object input";
-    String returns = produces.isEmpty() ? "void" : "Object";
+    String type = returnType(produces, methodElement);
+    addReturnTypeImport(type, code);
     String returnStatement = produces.isEmpty() ? "" : "return null; ";
-    code.add("  public %s %s(%s) {", returns, method, args);
+    code.add("  public %s %s(%s) {", type, method, args);
     // Make sure the comment is not viewed as a to-do in *this* code base
     code.add("    %s// TO%s: Implement", returnStatement, "DO");
     code.add("  }");

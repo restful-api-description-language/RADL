@@ -29,7 +29,7 @@ public class PropertyGroupBuilder implements PropertGroupContainer {
   }
 
   public RadlBuilder end() {
-    builder().end();
+    builder().end().end();
     return (RadlBuilder)parent;
   }
 

@@ -6,7 +6,9 @@ package radl.java.code;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,11 +104,20 @@ public class JavaCode extends Code {
    * @return The packages that this code imports, or an empty collection if there are none
    */
   public Collection<String> imports() {
-    return collectPatterns(IMPORT_PATTERN, 1);
+    return collectPatterns(IMPORT_PATTERN, 1, new ImportComparator());
   }
 
   private Collection<String> collectPatterns(Pattern pattern, int group) {
-    Collection<String> result = new TreeSet<String>();
+    return collectPatterns(pattern, group, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        return o1.compareTo(o2);
+      }
+    });
+  }
+  
+  private Collection<String> collectPatterns(Pattern pattern, int group, Comparator<String> comparator) {
+    Collection<String> result = new TreeSet<String>(comparator);
     if (isSingleLinePattern(pattern)) {
       collectPatternsByLine(pattern, group, result);
     } else {
@@ -479,6 +490,24 @@ public class JavaCode extends Code {
       end++;
     }
     return result.substring(start, end).trim();
+  }
+
+  public void ensureImport(String packageName, String typeName) {
+    if (packageName().equals(packageName)) {
+      return;
+    }
+    String fullyQualifiedName = packageName + '.' + typeName;
+    Collection<String> currentImports = imports();
+    if (currentImports.contains(fullyQualifiedName)) {
+      return;
+    }
+    String lastImport = ((SortedSet<String>)currentImports).last();
+    int index = indexOf(importFor(lastImport));
+    add(index + 1, importFor(fullyQualifiedName));
+  }
+
+  private String importFor(String fullyQualifiedName) {
+    return "import " + fullyQualifiedName + ';';
   }
 
 }
