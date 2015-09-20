@@ -3,7 +3,10 @@
  */
 package radl.test;
 
+import org.w3c.dom.Element;
+
 import radl.common.xml.DocumentBuilder;
+import radl.common.xml.Xml;
 
 
 public class PropertyGroupBuilder implements PropertGroupContainer {
@@ -12,10 +15,24 @@ public class PropertyGroupBuilder implements PropertGroupContainer {
 
   public PropertyGroupBuilder(PropertGroupContainer parent) {
     this.parent = parent;
-    if (parent instanceof RadlBuilder && !"property-groups".equals(builder().getCurrent().getLocalName())) {
-      builder().element("property-groups");
+    if (parent instanceof RadlBuilder) {
+      ensurePropertyGroups();
     }
     builder().element("property-group");
+  }
+
+  private void ensurePropertyGroups() {
+    String currentNodeName = builder().getCurrent().getLocalName();
+    if ("service".equals(currentNodeName)) {
+      Element propertyGroupsElement = Xml.getFirstChildElement((Element)builder().getCurrent(), "property-groups");
+      if (propertyGroupsElement != null) {
+        builder().setCurrent(propertyGroupsElement);
+        currentNodeName = propertyGroupsElement.getLocalName();
+      }
+    }
+    if (!"property-groups".equals(currentNodeName)) {
+      builder().element("property-groups");
+    }
   }
 
   @Override

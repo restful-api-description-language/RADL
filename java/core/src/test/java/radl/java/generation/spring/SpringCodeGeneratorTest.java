@@ -9,12 +9,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -38,17 +40,6 @@ public class SpringCodeGeneratorTest {
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
   private final CodeGenerator generator = new SpringCodeGenerator(packagePrefix);
-
-  @Test(expected = RuntimeException.class)
-  public void throwsExceptionOnInvalidRadl() {
-    Document radl = RadlBuilder.aRadlDocument()
-        .withResource()
-            .named("")
-        .end()
-    .build();
-
-    generator.generateFrom(radl).iterator();
-  }
 
   @Test
   public void generatesControllerPerResource() {
@@ -75,7 +66,7 @@ public class SpringCodeGeneratorTest {
 
     assertFileComments(javaSource);
     assertEquals("Class name", controllerName(expectedClassName), javaSource.typeName());
-    assertEquals("Class annotations", Arrays.asList("@RestController"), javaSource.typeAnnotations());
+    assertTrue("Missing @RestController", javaSource.typeAnnotations().contains("@RestController"));
     TestUtil.assertCollectionEquals("Imports", Arrays.asList(
         "org.springframework.beans.factory.annotation.Autowired",
         "org.springframework.web.bind.annotation.RestController",
@@ -115,9 +106,9 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
-    JavaCode uris = getJavaCode(sources, TYPE_URIS);
+    JavaCode uris = getType(sources, TYPE_URIS);
     String constant = getFieldWithValue(uris, quote(uri));
-    JavaCode controller = getJavaCode(sources, controllerName(name));
+    JavaCode controller = getType(sources, controllerName(name));
 
     String requestMappingAnnotation = String.format("@RequestMapping(%s.%s)", TYPE_URIS, constant);
     assertTrue("Missing @RequestMapping: " + controller.typeAnnotations(),
@@ -130,19 +121,6 @@ public class SpringCodeGeneratorTest {
 
   private String someValue() {
     return RANDOM.string(10);
-  }
-
-  private JavaCode getJavaCode(Iterable<Code> sources, String typeName) {
-    for (Code source : sources) {
-      if (source instanceof JavaCode) {
-        JavaCode code = (JavaCode)source;
-        if (typeName.equals(code.typeName())) {
-          return code;
-        }
-      }
-    }
-    fail("Missing type: " + typeName);
-    return null; // NOTREACHED
   }
 
   private String quote(String value) {
@@ -177,8 +155,7 @@ public class SpringCodeGeneratorTest {
 
     JavaCode source = generateController(radl);
 
-    assertImports(Arrays.asList("org.springframework.web.bind.annotation.RequestBody",
-        "org.springframework.web.bind.annotation.RequestMapping",
+    assertImports(Arrays.asList("org.springframework.web.bind.annotation.RequestMapping",
         "org.springframework.web.bind.annotation.RequestMethod"), source);
     TestUtil.assertCollectionEquals("Methods", Arrays.asList(method), source.methods());
     String methodAnnotation = String.format(
@@ -188,7 +165,8 @@ public class SpringCodeGeneratorTest {
         source.methodAnnotations(method).toString());
     assertEquals("Method arguments", "Object input", source.methodArguments(method));
     assertEquals("Method return type", "Object", source.methodReturns(method));
-    assertEquals("Method body", String.format("return helper.%s(input);", method), source.methodBody(method));
+    assertTrue("Method body calls helper", source.methodBody(method).contains(
+        String.format("helper.%s(input);", method)));
   }
 
   private String javaMethodName(String httpMethod) {
@@ -278,7 +256,7 @@ public class SpringCodeGeneratorTest {
 
   private void assertMethod(JavaCode javaSource, String method) {
     String arguments = "GET".equalsIgnoreCase(method) ? "" : "Object input";
-    String ret = "GET".equalsIgnoreCase(method) ? "return null; " : "";
+    String ret = "GET".equalsIgnoreCase(method) ? "return new Object(); " : "";
 
     assertEquals("Method arguments for " + method, arguments, javaSource.methodArguments(method));
     // Make sure the comment is not viewed as a to-do in this code base
@@ -322,13 +300,15 @@ public class SpringCodeGeneratorTest {
   }
 
   private JavaCode getType(Iterable<Code> sources, String type) {
+    Collection<String> types = new ArrayList<String>();
     for (Code source : sources) {
       JavaCode javaSource = (JavaCode)source;
       if (type.equals(javaSource.typeName())) {
         return javaSource;
       }
+      types.add(javaSource.typeName());
     }
-    fail("Missing type: " + type);
+    fail("Missing type: " + type + " in\n" + types);
     return null; // NOTREACHED
   }
 
@@ -378,19 +358,19 @@ public class SpringCodeGeneratorTest {
     Iterable<Code> sources = generator.generateFrom(radl);
 
     String field = "URL_BILLBOARD";
-    JavaCode api = getJavaCode(sources, TYPE_API);
+    JavaCode api = getType(sources, TYPE_API);
     assertFileComments(api);
     assertEquals("Fields", Arrays.asList(field).toString(), api.fieldNames().toString());
     assertEquals("Field value #1", quote(billboardUri), api.fieldValue(field));
 
-    JavaCode uris = getJavaCode(sources, TYPE_URIS);
+    JavaCode uris = getType(sources, TYPE_URIS);
     assertFileComments(uris);
     assertEquals("# Implementation URIs", 1, uris.fieldNames().size());
     String constant = uris.fieldNames().iterator().next();
     assertFalse("URI constant doesn't fit naming pattern: " + constant, constant.startsWith("URL_"));
     assertEquals("URI value", quote(otherUri), uris.fieldValue(constant));
 
-    JavaCode controller = getJavaCode(sources, TestUtil.initCap(name) + "Controller");
+    JavaCode controller = getType(sources, TestUtil.initCap(name) + "Controller");
     assertFileComments(controller);
     assertNotNull("Missing controller", controller);
     for (String type : controller.imports()) {
@@ -410,7 +390,7 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
-    JavaCode controller = getJavaCode(sources, TestUtil.initCap(name1) + TestUtil.initCap(name2) + "Controller");
+    JavaCode controller = getType(sources, TestUtil.initCap(name1) + TestUtil.initCap(name2) + "Controller");
     assertNotNull("Missing controller", controller);
 
     String controllerPackage = controller.packageName();
@@ -430,7 +410,7 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
-    JavaCode controller = getJavaCode(sources, TestUtil.initCap(javaMethodName(name)) + "Controller");
+    JavaCode controller = getType(sources, TestUtil.initCap(javaMethodName(name)) + "Controller");
     assertNotNull("Missing controller", controller);
   }
 
@@ -447,40 +427,13 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
-    JavaCode uris = getJavaCode(sources, TYPE_URIS);
+    JavaCode uris = getType(sources, TYPE_URIS);
     String constant = getFieldWithValue(uris, quote(uri));
-    JavaCode controller = getJavaCode(sources, controllerName(name));
+    JavaCode controller = getType(sources, controllerName(name));
 
     String requestMappingAnnotation = String.format("@RequestMapping(Uris.%s)", constant);
     assertTrue("Missing @RequestMapping: " + controller.typeAnnotations(),
         controller.typeAnnotations().contains(requestMappingAnnotation));
-  }
-
-  @Test
-  public void doesntAddProducesForInvalidMediaTypeReference() {
-    Document radl = RadlBuilder.aRadlDocument()
-        .withMediaTypes(aMediaType())
-        .withResource()
-            .named(aName())
-            .locatedAt(aLocalUri())
-            .withMethod("GET")
-                .producing(aMediaType())
-            .end()
-        .end()
-    .build();
-
-    Iterable<Code> sources = generator.generateFrom(radl);
-
-    for (Code source : sources) {
-      JavaCode code = (JavaCode)source;
-      if (code.typeName().endsWith("Controller")) {
-        for (String method : code.methods()) {
-          for (String annotation : code.methodAnnotations(method)) {
-            assertEquals("Annotation", "@RequestMapping(method = RequestMethod.GET)", annotation);
-          }
-        }
-      }
-    }
   }
 
   // #39 - Add error conditions to generated API
@@ -502,7 +455,7 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
 
-    JavaCode api = getJavaCode(sources, TYPE_API);
+    JavaCode api = getType(sources, TYPE_API);
     assertNotNull("Missing API", api);
 
     String error1 = "ERROR_" + name1.toUpperCase(Locale.getDefault());
@@ -522,7 +475,7 @@ public class SpringCodeGeneratorTest {
     String linkRelationSpecificationUri = aUri();
     Document radl = RadlBuilder.aRadlDocument()
         .withLinkRelations()
-            .linkRelation(linkRelation, linkRelationSpecificationUri)
+            .withLinkRelation(linkRelation, linkRelationSpecificationUri)
         .end()
     .build();
 
@@ -833,4 +786,68 @@ public class SpringCodeGeneratorTest {
     assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
   }
 
+  // #45 Generated controllers should add links/forms to responses
+  @Test
+  @Ignore("TODO: Implement")
+  public void generatedControllersAddLinks() {
+    String state1 = aName();
+    String propertyGroup1 = aName();
+    String httpMethod1 = aMethod();
+    String transition = aName();
+    String state2 = aName();
+    String httpMethod2 = aMethod();
+    String linkRel = aUri();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withStates()
+            .startingAt(state1)
+            .withState(state1)
+                .containing(propertyGroup1)
+                .withTransition(transition, state2)
+                .end()
+            .end()
+            .withState(state2)
+            .end()
+        .end()
+        .withLinkRelations()
+            .withLinkRelation(linkRel, null)
+                .implementing(transition)
+            .end()
+        .end()
+        .withPropertyGroup()
+            .named(propertyGroup1)
+            .withProperty(aName())
+            .end()
+        .end()
+        .withMediaTypes(true, JSON_LD)
+        .withResource()
+            .named(state1)
+            .withMethod(httpMethod1)
+                .transitioningTo("Start")
+                .producing()
+            .end()
+        .end()
+        .withResource()
+            .named(state2)
+            .withMethod(httpMethod2)
+                .transitioningTo(transition)
+                .consuming()
+            .end()
+        .end()
+    .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode dto1 = getType(sources, dtoName(propertyGroup1));
+    assertEquals("DTO super class", "ResourceSupport", dto1.superTypeName());
+    
+    String controllerMethod1 = javaMethodName(httpMethod1);
+    JavaCode controllerHelper1 = getType(sources, controllerHelperName(state1));
+    assertEquals("Controller helper #1", "return new " + dto1.typeName() + "(); // TODO: Implement",
+        controllerHelper1.methodBody(controllerMethod1));
+    
+    JavaCode controller1 = getType(sources, controllerName(state1));
+    assertTrue("Controller #1 doesn't add link", controller1.methodBody(controllerMethod1).contains(
+        "methodOn(" + controllerName(state2) + ".class)"));
+  }
+  
 }

@@ -9,20 +9,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import radl.common.xml.ElementProcessor;
-import radl.common.xml.Xml;
 import radl.core.code.Code;
+import radl.core.code.MediaType;
+import radl.core.code.Property;
+import radl.core.code.PropertyGroup;
+import radl.core.code.PropertyGroups;
+import radl.core.code.RadlCode;
 import radl.core.generation.CodeGenerator;
 import radl.java.code.Java;
 import radl.java.code.JavaCode;
@@ -31,7 +31,7 @@ import radl.java.code.JavaCode;
 /**
  * Generates Java code for the Spring framework from a RADL document.
  */
-public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveClassLength
+public class SpringCodeGenerator implements CodeGenerator {
 
   private static final String DTO_SUFFIX = "Dto";
   private static final String UNKNOWN_TYPE = "Object";
@@ -41,50 +41,16 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final String API_PACKAGE = "api";
   private static final String BILLBOARD_URL = "BILLBOARD";
   private static final String CONSTANT_PREFIX_URL = "URL_";
-  private static final String MEDIA_TYPE_JSON_LD = "application/ld+json";
   private static final String DEFAULT_MEDIA_TYPE = "application/";
-  private static final String NAME_ATTRIBUTE = "name";
-  private static final String REF_ATTRIBUTE = "ref";
-  private static final String URI_ATTRIBUTE = "uri";
-  private static final String MEDIA_TYPES_ELEMENT = "media-types";
-  private static final String DEFAULT_ATTRIBUTE = "default";
-  private static final String MEDIA_TYPE_ELEMENT = "media-type";
-  private static final String MEDIA_TYPE_REF_ATTRIBUTE = "media-type";
   private static final String MEDIA_TYPE_CONSTANT_PREFIX = "MEDIA_TYPE_";
   private static final String DEFAULT_MEDIA_TYPE_CONSTANT = MEDIA_TYPE_CONSTANT_PREFIX + "DEFAULT";
-  private static final String RESOURCE_ELEMENT = "resource";
-  private static final String LOCATION_ELEMENT = "location";
-  private static final String URI_TEMPLATE_ATTRIBUTE = "uri-template";
-  private static final String METHODS_ELEMENT = "methods";
-  private static final String METHOD_ELEMENT = "method";
-  private static final String REQUEST_ELEMENT = "request";
-  private static final String RESPONSE_ELEMENT = "response";
-  private static final String REPRESENTATIONS_ELEMENT = "representations";
-  private static final String REPRESENTATION_ELEMENT = "representation";
-  private static final String LINK_RELATION_ELEMENT = "link-relation";
-  private static final String STATES_ELEMENT = "states";
-  private static final String STATE_ELEMENT = "state";
-  private static final String START_STATE_ELEMENT = "start-state";
   private static final String API_TYPE = "Api";
   private static final String URIS_TYPE = "Uris";
-  private static final String TRANSITIONS_ELEMENT = "transitions";
-  private static final String TRANSITION_ELEMENT = "transition";
-  private static final String TO_ATTRIBUTE = "to";
-  private static final String INPUT_ELEMENT = "input";
-  private static final String ERRORS_ELEMENT = "errors";
-  private static final String ERROR_ELEMENT = "error";
-  private static final String STATUS_CODE_ATTRIBUTE = "status-code";
   private static final String DEFAULT_STATUS_CODE = "400";
   private static final String ERROR_DTO_TYPE = "ErrorDto";
   private static final String IDENTIFIABLE_TYPE = "Identifiable";
   private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
   private static final Collection<String> FRAMEWORK_HANDLED_STATUSES = Arrays.asList("405", "406");
-  private static final String PROPERTY_GROUP_ELEMENT = "property-group";
-  private static final String PROPERTY_GROUPS_ELEMENT = PROPERTY_GROUP_ELEMENT + 's';
-  private static final String PROPERTY_ELEMENT = "property";
-  private static final String PROPERTY_GROUP_REF_ATTRIBUTE = "property-group";
-  private static final String TYPE_ATTRIBUTE = "type";
-  private static final String REPEATS_ATTRIBUTE = "repeats";
   private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
   private static final String SEMANTIC_ANNOTATION = "Expose";
   private static final String CONTROLLER_HELPER_NAME = "helper";
@@ -94,7 +60,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> uriConstants = new TreeMap<String, Constant>();
   private final String header;
-  private String defaultMediaType;
+  private MediaType defaultMediaType;
 
   public SpringCodeGenerator(String packagePrefix) {
     this(packagePrefix, null);
@@ -150,37 +116,52 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   public Iterable<Code> generateFrom(Document radl) {
     Collection<Code> result = new ArrayList<Code>();
     try {
-      defaultMediaType = getDefaultMediaType(radl.getDocumentElement());
-      generateSourcesForPropertyGroups(radl, result);
-      generateSourcesForResources(radl, result);
-      generateSourcesForErrors(radl, result);
+      generate(new RadlCode(radl), result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return result;
   }
 
-  private void generateSourcesForPropertyGroups(Document radl, final Collection<Code> sources) throws Exception {
-    Xml.processNestedElements(radl.getDocumentElement(), new ElementProcessor() {
-      @Override
-      public void process(Element propertySourceElement) throws Exception {
-        addDtosFor(propertySourceElement, sources);
-      }
-    }, PROPERTY_GROUPS_ELEMENT, PROPERTY_GROUP_ELEMENT);
+  private void generate(RadlCode radl, Collection<Code> result) throws Exception {
+    defaultMediaType = radl.defaultMediaType();
+    boolean hasHyperMediaTypes = radl.hasHyperMediaTypes();
+    generateSourcesForPropertyGroups(radl.propertyGroups(), hasHyperMediaTypes, result);
+    generateSourcesForResources(radl, hasHyperMediaTypes, result);
+    generateSourcesForErrors(radl, result);
   }
 
-  protected String addDtosFor(Element propertySourceElement, Collection<Code> sources) throws Exception {
-    final Code code = new JavaCode();
-    String name = getName(propertySourceElement);
-    addPackage(name, code);
+  private void generateSourcesForPropertyGroups(PropertyGroups propertyGroups, final boolean hasHyperMediaTypes,
+      final Collection<Code> sources) throws Exception {
+    if (propertyGroups == null) {
+      return;
+    }
+    for (String propertyGroup : propertyGroups.names()) {
+      addDtosFor(propertyGroups.item(propertyGroup), hasHyperMediaTypes, sources);
+    }
+  }
+
+  protected String addDtosFor(PropertyGroup propertyGroup, boolean hasHyperMediaTypes, Collection<Code> sources)
+      throws Exception {
+    final JavaCode code = new JavaCode();
+    addPackage(propertyGroup.name(), code);
     code.add("");
-    addSemanticAnnotationImport(propertySourceElement, code);
-    addDtoImports(propertySourceElement, code);
-    addSemanticAnnotation(propertySourceElement, "", code);
-    String result = getDtoClass(name);
-    code.add("public class %s {", result);
+    String superType;
+    if (hasHyperMediaTypes) {
+      code.add("import org.springframework.hateoas.ResourceSupport;");
+      code.add("");
+      superType = "extends ResourceSupport ";
+    } else {
+      superType = "";
+    }
+    addSemanticAnnotationImport(propertyGroup, code);
+    addDtoImports(propertyGroup, code);
     code.add("");
-    addDtoFields(propertySourceElement, code, sources);
+    addSemanticAnnotation(propertyGroup, "", code);
+    String result = getDtoClass(propertyGroup.name());
+    code.add("public class %s %s{", result, superType);
+    code.add("");
+    addDtoFields(hasHyperMediaTypes, propertyGroup, code, sources);
     code.add("");
     code.add("}");
     sources.add(code);
@@ -191,116 +172,89 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return Java.toIdentifier(name) + DTO_SUFFIX;
   }
 
-  private void addDtoImports(Element propertySourceElement, final Code code) throws Exception {
-    final AtomicBoolean added = new AtomicBoolean();
-    Xml.processDecendantElements(propertySourceElement, new ElementProcessor() {
-      @Override
-      public void process(Element propertyGroupElement) throws Exception {
-        String name = propertyGroupElement.getAttributeNS(null, REF_ATTRIBUTE);
-        if (name.isEmpty()) {
-          name = getName(propertyGroupElement);
-        }
-        code.add("import %s.%s.%s;", packagePrefix, toPackage(name), getDtoClass(name));
-        added.set(true);
+  private void addDtoImports(PropertyGroups propertyGroup, final Code code) throws Exception {
+    boolean added = false;
+    for (String name : propertyGroup.names()) {
+      String ref = propertyGroup.item(name).reference();
+      if (ref.isEmpty()) {
+        ref = name;
       }
-    }, PROPERTY_GROUP_ELEMENT);
-    code.add("");
-    if (added.get()) {
-      code.add("");
+      if (!added) {
+        added = true;
+        code.add("");
+      }
+      code.add("import %s.%s.%s;", packagePrefix, toPackage(ref), getDtoClass(ref));
     }
+    code.add("");
   }
 
-  private void addSemanticAnnotationImport(Element propertySourceElement, Code code) throws Exception {
-    if (isSemanticMediaType() && hasSemantics(propertySourceElement)) {
+  private void addSemanticAnnotationImport(PropertyGroup propertyGroup, Code code) throws Exception {
+    if (defaultMediaType.isSemanticMediaType() && propertyGroup.hasSemantics()) {
       code.add("import %s.%s;", SEMANTIC_ANNOTATION_PACKAGE, SEMANTIC_ANNOTATION);
       code.add("");
     }
   }
 
-  private boolean isSemanticMediaType() {
-    return MEDIA_TYPE_JSON_LD.equals(defaultMediaType);
-  }
-
-  private boolean hasSemantics(Element propertySourceElement) throws Exception {
-    final AtomicBoolean result = new AtomicBoolean(doHasSemantics(propertySourceElement));
-    Xml.processChildElements(propertySourceElement, new ElementProcessor() {
-      @Override
-      public void process(Element element) throws Exception {
-        if (doHasSemantics(element)) {
-          result.set(true);
-        }
-      }
-    }, PROPERTY_ELEMENT, PROPERTY_GROUP_ELEMENT);
-    return result.get();
-  }
-
-  private boolean doHasSemantics(Element element) {
-    return !element.getAttributeNS(null, URI_ATTRIBUTE).isEmpty();
-  }
-
-  private void addSemanticAnnotation(Element element, String indent, final Code result) {
-    if (isSemanticMediaType()) {
-      String uri = element.getAttributeNS(null, URI_ATTRIBUTE);
+  private void addSemanticAnnotation(Property property, String indent, final Code result) {
+    if (defaultMediaType.isSemanticMediaType()) {
+      String uri = property.uri();
       if (!uri.isEmpty()) {
         result.add("%s@%s(\"%s\")", indent, SEMANTIC_ANNOTATION, Java.toString(uri));
       }
     }
   }
 
-  private void addDtoFields(Element propertySourceElement, final Code dto, final Collection<Code> sources)
+  private void addDtoFields(final boolean hasHyperMediaTypes, PropertyGroup propertyGroup, final Code dto, final Collection<Code> sources)
       throws Exception {
-    Xml.processChildElements(propertySourceElement, new ElementProcessor() {
-      @Override
-      public void process(Element propertyElement) throws Exception {
-        addSemanticAnnotation(propertyElement, "  ", dto);
-        dto.add("  public %s %s;", getType(propertyElement, sources), getName(propertyElement));
-      }
-    }, PROPERTY_ELEMENT, PROPERTY_GROUP_ELEMENT);
+    for (String name : propertyGroup.propertyNames()) {
+      Property property = propertyGroup.property(name);
+      addSemanticAnnotation(property, "  ", dto);
+      dto.add("  public %s %s;", getType(property, hasHyperMediaTypes, sources), name);
+    }
   }
 
-  protected String getType(Element propertyElement, Collection<Code> sources) throws Exception {
+  protected String getType(Property property, boolean hasHyperMediaTypes, Collection<Code> sources)
+      throws Exception {
     String result = null;
-    if (PROPERTY_GROUP_ELEMENT.equals(propertyElement.getLocalName())) {
-      String ref = propertyElement.getAttributeNS(null, REF_ATTRIBUTE);
+    if (property instanceof PropertyGroup) {
+      PropertyGroup propertyGroup = (PropertyGroup)property;
+      String ref = propertyGroup.reference();
       if (ref.isEmpty()) {
-        result = addDtosFor(propertyElement, sources);
+        result = addDtosFor(propertyGroup, hasHyperMediaTypes, sources);
       } else {
         result = getDtoClass(ref);
       }
     }
     if (result == null) {
-      String type = propertyElement.getAttributeNS(null, TYPE_ATTRIBUTE);
+      String type = property.type();
       result = type.isEmpty() ? "String" : type;
     }
-    if (Boolean.parseBoolean(propertyElement.getAttributeNS(null, REPEATS_ATTRIBUTE))) {
+    if (property.repeats()) {
       return result + "[]";
     }
     return result;
   }
 
-  private void generateSourcesForErrors(Document radl, final Collection<Code> sources) throws Exception {
-    Element errorsElement = Xml.getFirstChildElement(radl.getDocumentElement(), ERRORS_ELEMENT);
-    if (errorsElement == null) {
+  private void generateSourcesForErrors(RadlCode radl, final Collection<Code> sources) throws Exception {
+    Iterator<String> errors = radl.errors().iterator();
+    if (!errors.hasNext()) {
       return;
     }
     sources.add(generateErrorDto());
     sources.add(generateIdentifiable());
     final JavaCode errorHandler = startErrorHandler();
     final Collection<String> errorHandlingMethods = new ArrayList<String>();
-    Xml.processChildElements(errorsElement, new ElementProcessor() {
-      @Override
-      public void process(Element errorElement) throws Exception {
-        String name = errorElement.getAttributeNS(null, NAME_ATTRIBUTE);
-        String statusCode = errorElement.getAttributeNS(null, STATUS_CODE_ATTRIBUTE);
-        if (statusCode.isEmpty()) {
-          statusCode = DEFAULT_STATUS_CODE;
-        }
-        String documentation = getDocumentation(errorElement);
-        JavaCode exceptionType = generateException(name, statusCode, documentation);
-        sources.add(exceptionType);
-        handleException(exceptionType, statusCode, errorHandlingMethods, errorHandler);
+    do {
+      String name = errors.next();
+      String statusCode = radl.errorStatus(name);
+      if (statusCode.isEmpty()) {
+        statusCode = DEFAULT_STATUS_CODE;
       }
-    }, ERROR_ELEMENT);
+      String documentation = radl.errorDocumentation(name);
+      JavaCode exceptionType = generateException(name, statusCode, documentation);
+      sources.add(exceptionType);
+      handleException(exceptionType, statusCode, errorHandlingMethods, errorHandler);
+    } while (errors.hasNext());
     sources.add(endErrorHandler(errorHandler));
   }
 
@@ -452,26 +406,16 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return errorHandler;
   }
 
-  private void generateSourcesForResources(Document radl, final Collection<Code> sources) throws Exception {
-    final String startTransition = getStartTransition(radl);
-    Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
-      @Override
-      public void process(Element resourceElement) throws Exception {
-        sources.add(generateController(resourceElement, startTransition));
-        sources.add(generateControllerHelper(resourceElement));
-      }
-    }, RESOURCE_ELEMENT);
+  private void generateSourcesForResources(RadlCode radl, final boolean hasHyperMediaTypes,
+      final Collection<Code> sources) throws Exception {
+    Iterator<String> startTransitions = radl.stateTransitionNames("").iterator();
+    String startTransition = startTransitions.hasNext() ? startTransitions.next() : null;
+    for (String resource : radl.resourceNames()) {
+      sources.add(generateController(radl, resource, hasHyperMediaTypes, startTransition));
+      sources.add(generateControllerHelper(radl, resource));
+    }
     sources.add(generateApi(radl));
     sources.add(generateUris());
-  }
-
-  private String getDefaultMediaType(Element documentElement) {
-    Element mediaTypesElement = Xml.getFirstChildElement(documentElement, MEDIA_TYPES_ELEMENT);
-    if (mediaTypesElement == null) {
-      return null;
-    }
-    String result = mediaTypesElement.getAttributeNS(null, DEFAULT_ATTRIBUTE);
-    return result.isEmpty() ? null : result;
   }
 
   private Code generateUris() {
@@ -490,19 +434,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     addConstants(filter(uriConstants, CONSTANT_PREFIX_URL + BILLBOARD_URL, false), "Resource locations", code);
   }
 
-  private String getStartTransition(Document radl) {
-    Element statesElement = getStatesElement(radl);
-    Element startElement = Xml.getFirstChildElement(statesElement, START_STATE_ELEMENT);
-    Element transitionsElement = Xml.getFirstChildElement(startElement, TRANSITIONS_ELEMENT);
-    Element transitionElement = Xml.getFirstChildElement(transitionsElement, TRANSITION_ELEMENT);
-    return transitionElement == null ? "" : transitionElement.getAttributeNS(null, NAME_ATTRIBUTE);
-  }
-
-  private Element getStatesElement(Document radl) {
-    return Xml.getFirstChildElement(radl.getDocumentElement(), STATES_ELEMENT);
-  }
-
-  private Code generateApi(Document radl) throws Exception {
+  private Code generateApi(RadlCode radl) throws Exception {
     Code result = new JavaCode();
     addPackage(API_PACKAGE, result);
     result.add("");
@@ -517,32 +449,16 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private void addErrors(Document radl, Code code) throws Exception {
+  private void addErrors(RadlCode radl, Code code) throws Exception {
     addErrorConstants(radl, errorConstants);
     addConstants(errorConstants, "Error conditions", code);
   }
 
-  private void addErrorConstants(Document radl, final Map<String, Constant> errorConstants) throws Exception {
-    Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
-      @Override
-      public void process(Element errorElement) throws Exception {
-        String value = errorElement.getAttributeNS(null, "name");
-        String documentation = getDocumentation(errorElement);
-        errorConstants.put(value, ensureConstant("ERROR_", getErrorName(value), value, documentation, errorConstants));
-      }
-    }, ERROR_ELEMENT);
-  }
-
-  private String getDocumentation(Element errorElement) {
-    Element documentationElement = Xml.getFirstChildElement(errorElement, "documentation");
-    if (documentationElement == null) {
-      Element specificationElement = Xml.getFirstChildElement(errorElement, "specification");
-      if (specificationElement == null) {
-        return null;
-      }
-      return "See " + specificationElement.getAttributeNS(null, "href");
+  private void addErrorConstants(RadlCode radl, final Map<String, Constant> errorConstants) throws Exception {
+    for (String value : radl.errors()) {
+      String documentation = radl.errorDocumentation(value);
+      errorConstants.put(value, ensureConstant("ERROR_", getErrorName(value), value, documentation, errorConstants));
     }
-    return documentationElement.getTextContent().replaceAll("\\s+", " ");
   }
 
   private void addBillboardUri(Code code) {
@@ -559,29 +475,26 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private void addLinkRelations(Document radl, Code code) throws Exception {
+  private void addLinkRelations(RadlCode radl, Code code) throws Exception {
     Map<String, Constant> linkRelationConstants = new TreeMap<String, Constant>();
     addLinkRelationConstants(radl, linkRelationConstants);
     addConstants(linkRelationConstants, "Link relations", code);
   }
 
-  private void addLinkRelationConstants(Document radl, final Map<String, Constant> linkRelationConstants)
+  private void addLinkRelationConstants(RadlCode radl, final Map<String, Constant> linkRelationConstants)
       throws Exception {
-    Xml.processDecendantElements(radl.getDocumentElement(), new ElementProcessor() {
-      @Override
-      public void process(Element linkRelationElement) throws Exception {
-        String value = linkRelationElement.getAttributeNS(null, "name");
-        String name = value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value;
-        String documentation = getDocumentation(linkRelationElement);
-        ensureConstant("LINK_REL_", name, value, documentation, linkRelationConstants);
-      }
-    }, LINK_RELATION_ELEMENT);
+    for (String value : radl.linkRelationNames()) {
+      String name = value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value;
+      String documentation = radl.linkRelationDocumentation(value);
+      ensureConstant("LINK_REL_", name, value, documentation, linkRelationConstants);
+    }
   }
 
   private void addMediaTypes(Code code) {
     addConstants(mediaTypeConstants, "Media types", code);
     if (defaultMediaType != null) {
-      code.add("  String %s = %s;", DEFAULT_MEDIA_TYPE_CONSTANT, getLocalMediaTypeConstant(defaultMediaType));
+      code.add("  String %s = \"%s\";", getLocalMediaTypeConstant(defaultMediaType.name()), defaultMediaType.name());
+      code.add("  String %s = %s;", DEFAULT_MEDIA_TYPE_CONSTANT, getLocalMediaTypeConstant(defaultMediaType.name()));
     }
   }
 
@@ -654,17 +567,18 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return join(packagePrefix, IMPL_PACKAGE, URIS_TYPE);
   }
 
-  private Code generateController(Element resourceElement, String startTransition) throws Exception {
+  private Code generateController(RadlCode radl, String resource, final boolean hasHyperMediaTypes, String startTransition)
+      throws Exception {
     final JavaCode result = new JavaCode();
-    String name = getName(resourceElement);
+    String name = resource;
     addPackage(name, result);
     result.add("");
-    String uri = getUri(resourceElement);
+    String uri = radl.resourceLocation(resource);
     boolean addUris;
     String namePrefix;
     String constantName;
     String type;
-    if (transitionsToStart(startTransition, resourceElement)) {
+    if (transitionsToStart(radl, startTransition, resource)) {
       namePrefix = CONSTANT_PREFIX_URL;
       constantName = BILLBOARD_URL;
       type = API_TYPE;
@@ -675,53 +589,59 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       type = URIS_TYPE;
       addUris = true;
     }
-    addControllerImports(resourceElement, addUris, result);
+    addControllerImports(radl, resource, addUris, result);
     result.add("@RestController");
     if (uri != null) {
       Constant constant = ensureConstant(namePrefix, constantName, uri, null, uriConstants);
       result.add(String.format("@RequestMapping(%s.%s)", type,  constant.getName()));
     }
-    result.add("public class %s {", getControllerClassName(resourceElement));
+    result.add("public class %s {", getControllerClassName(resource));
     result.add("");
     result.add("  @Autowired");
-    result.add("  private %s %s;", getControllerHelperClassName(resourceElement), CONTROLLER_HELPER_NAME);
+    result.add("  private %s %s;", getControllerHelperClassName(resource), CONTROLLER_HELPER_NAME);
     result.add("");
-    addMethods(resourceElement, new MethodAdder() {
-      @Override
-      public void addMethod(Element methodElement) throws Exception {
-        addControllerMethod(methodElement, result);
-      }
-    });
+    for (String method : radl.methodNames(resource)) {
+      addControllerMethod(radl, resource, method, hasHyperMediaTypes, result);
+    }
     result.add("}");
     return result;
   }
 
-  private boolean transitionsToStart(final String startState, Element resourceElement) throws Exception {
-    final AtomicBoolean result = new AtomicBoolean();
-    Xml.processNestedElements(resourceElement, new ElementProcessor() {
-      @Override
-      public void process(Element startElement) throws Exception {
-        if (startElement.getAttributeNS(null, REF_ATTRIBUTE).equals(startState)) {
-          result.set(true);
+  private boolean transitionsToStart(RadlCode radl, final String startTransition, String resource) throws Exception {
+    for (String method : radl.methodNames(resource)) {
+      for (String transition : radl.methodTransitions(resource, method)) {
+        if (transition.equals(startTransition)) {
+          return true;
         }
       }
-    }, METHODS_ELEMENT, METHOD_ELEMENT, TRANSITIONS_ELEMENT, TRANSITION_ELEMENT);
-    return result.get();
+    }
+    return false;
   }
 
-  private void addControllerMethod(Element methodElement, JavaCode code) throws Exception {
-    String method = getMethodName(methodElement);
-    String consumes = getConsumes(methodElement);
-    String produces = getProduces(methodElement);
+  private void addControllerMethod(RadlCode radl, String resource, String method, boolean hasHyperMediaTypes, JavaCode code) throws Exception {
+    String consumes = getConsumes(radl, resource, method);
+    String produces = getProduces(radl, resource, method);
     String argName = parameterName(consumes);
     code.add("  @RequestMapping(method = RequestMethod.%s%s%s)", method.toUpperCase(Locale.getDefault()),
         consumes, produces);
-    String type = returnType(produces, methodElement);
+    String type = returnType(produces, radl, resource, method);
     addReturnTypeImport(type, code);
-    code.add("  public %s %s(%s) {", type, method, parameters(consumes, methodElement, argName));
-    code.add("    %s%s.%s(%s);", returnStatement(produces), CONTROLLER_HELPER_NAME, method, argName);
+    String javaMethod = method.toLowerCase(Locale.getDefault());
+    code.add("  public %s %s(%s) {", type, javaMethod, parameters(consumes, radl, resource, method, argName));
+    if (NO_TYPE.equals(type)) {
+      code.add("    %s.%s(%s);", CONTROLLER_HELPER_NAME, javaMethod, argName);
+    } else {
+      code.add("    %s result = %s.%s(%s);", type, CONTROLLER_HELPER_NAME, javaMethod, argName);
+      if (hasHyperMediaTypes) {
+        addLinks(radl, resource, method, code);
+      }
+      code.add("    return result;");
+    }
     code.add("  }");
     code.add("");
+  }
+
+  private void addLinks(RadlCode radl, String resource, String method, JavaCode code) { // NOPMD UnusedFormalParameter
   }
 
   private void addReturnTypeImport(String type, JavaCode code) {
@@ -731,94 +651,57 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     }
   }
 
-  private String returnStatement(String produces) {
-    return produces.isEmpty() ? "" : "return ";
-  }
-
-  private String returnType(String produces, Element methodElement) throws Exception {
+  private String returnType(String produces, RadlCode radl, String resource, String method) throws Exception {
     final String noType = produces.isEmpty() ? NO_TYPE : UNKNOWN_TYPE;
-    final AtomicReference<String> result = new AtomicReference<String>(noType);
-    Xml.processDecendantElements(methodElement, new ElementProcessor() {
-      @Override
-      public void process(Element transitionElement) throws Exception {
-        String propertyGroup = getOutputPropertyGroup(transitionElement);
-        if (propertyGroup.isEmpty()) {
-          result.set(noType);
-        } else {
-          String dto = getDtoClass(propertyGroup);
-          if (noType.equals(result.get())) {
-            result.set(dto);
-          } else if (!result.get().equals(dto)) {
-            result.set(UNKNOWN_TYPE);
-          }
+    String result = noType;
+    for (String transition : radl.methodTransitions(resource, method)) {
+      String propertyGroup = getOutputPropertyGroup(radl, transition);
+      if (propertyGroup.isEmpty()) {
+        result = noType;
+      } else {
+        String dto = getDtoClass(propertyGroup);
+        if (noType.equals(result)) {
+          result = dto;
+        } else if (!result.equals(dto)) {
+          result = UNKNOWN_TYPE;
         }
       }
-    }, TRANSITION_ELEMENT);
-    return result.get();
+    }
+    return result;
   }
 
-  protected String getOutputPropertyGroup(Element transitionElement) throws Exception {
-    final AtomicReference<String> result = new AtomicReference<String>("");
-    final String transition = transitionElement.getAttributeNS(null, REF_ATTRIBUTE);
-    Xml.processDecendantElements(transitionElement.getOwnerDocument().getDocumentElement(), new ElementProcessor() {
-      @Override
-      public void process(Element transitionElement) throws Exception {
-        if (transition.equals(getName(transitionElement))) {
-          String state = transitionElement.getAttributeNS(null, TO_ATTRIBUTE);
-          result.set(getPropertyGroup(transitionElement.getOwnerDocument(), state));
-        }
+  protected String getOutputPropertyGroup(RadlCode radl, String transition) throws Exception {
+    String result = "";
+    for (String state : radl.transitionEnds(transition)) {
+      result = radl.statePropertyGroup(state);
+      if (!result.isEmpty()) {
+        return result;
       }
-    }, TRANSITION_ELEMENT);
-    return result.get();
+    }
+    return "";
   }
 
-  private String getPropertyGroup(Document radl, String state) throws Exception {
-    Element statesElement = getStatesElement(radl);
-    Element stateElement = Xml.getChildElementByAttribute(statesElement, STATE_ELEMENT, NAME_ATTRIBUTE, state);
-    return stateElement == null ? "" : stateElement.getAttributeNS(null, PROPERTY_GROUP_REF_ATTRIBUTE);
+  private String parameters(String consumes, RadlCode radl, String resource, String method, String argName) {
+    return consumes.isEmpty() ? "" : parameterType(consumes, radl, resource, method) + ' ' + argName;
   }
 
-  private String parameters(String consumes, Element methodElement, String argName) throws Exception {
-    return consumes.isEmpty() ? "" : parameterType(consumes, methodElement) + ' ' + argName;
-  }
-
-  private String parameterType(String consumes, Element methodElement) throws Exception {
+  private String parameterType(String consumes, RadlCode radl, String resource, String method) {
     final String noType = consumes.isEmpty() ? NO_TYPE : UNKNOWN_TYPE;
-    final AtomicReference<String> result = new AtomicReference<String>(noType);
-    Xml.processDecendantElements(methodElement, new ElementProcessor() {
-      @Override
-      public void process(Element transitionElement) throws Exception {
-        String propertyGroup = getInputPropertyGroup(transitionElement);
-        if (propertyGroup.isEmpty()) {
-          result.set(noType);
-        } else {
-          String dto = getDtoClass(propertyGroup);
-          if (noType.equals(result.get())) {
-            result.set(dto);
-          } else if (!result.get().equals(dto)) {
-            result.set(UNKNOWN_TYPE);
-          }
+    String result = noType;
+    for (String transition : radl.methodTransitions(resource, method)) {
+      String propertyGroup = radl.transitionPropertyGroup(transition);
+      if (propertyGroup.isEmpty()) {
+        result = noType;
+      } else {
+        String dto = getDtoClass(propertyGroup);
+        if (noType.equals(result)) {
+          result = dto;
+        } else if (!result.equals(dto)) {
+          result = UNKNOWN_TYPE;
         }
       }
-    }, TRANSITION_ELEMENT);
-    return result.get();
-  }
-
-  protected String getInputPropertyGroup(Element transitionElement) throws Exception {
-    final AtomicReference<String> result = new AtomicReference<String>("");
-    final String transition = transitionElement.getAttributeNS(null, REF_ATTRIBUTE);
-    Xml.processDecendantElements(transitionElement.getOwnerDocument().getDocumentElement(), new ElementProcessor() {
-      @Override
-      public void process(Element transitionElement) throws Exception {
-        if (transition.equals(getName(transitionElement))) {
-          Element inputElement = Xml.getFirstChildElement(transitionElement, INPUT_ELEMENT);
-          if (inputElement != null) {
-            result.set(inputElement.getAttributeNS(null, PROPERTY_GROUP_REF_ATTRIBUTE));
-          }
-        }
-      }
-    }, TRANSITION_ELEMENT);
-    return result.get();
+    }
+    return result;
   }
 
   private String parameterName(String consumes) {
@@ -867,13 +750,10 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result.toString();
   }
 
-  private void addControllerImports(Element resourceElement, boolean addUris, Code controllerClass) throws Exception {
+  private void addControllerImports(RadlCode radl, String resource, boolean addUris, Code controllerClass) throws Exception {
     controllerClass.add("import org.springframework.beans.factory.annotation.Autowired;");
-    boolean hasMethod = hasMethod(resourceElement);
-    if (hasMethod && hasMethod(resourceElement, "request")) {
-      controllerClass.add("import org.springframework.web.bind.annotation.RequestBody;");
-    }
-    if (hasMethod || hasLocation(resourceElement)) {
+    boolean hasMethod = radl.methodNames(resource).iterator().hasNext();
+    if (hasMethod || !radl.resourceLocation(resource).isEmpty()) {
       controllerClass.add("import org.springframework.web.bind.annotation.RequestMapping;");
     }
     if (hasMethod) {
@@ -889,47 +769,12 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     controllerClass.add("");
   }
 
-  private boolean hasLocation(Element resourceElement) {
-    return getUri(resourceElement) != null;
+  private String getControllerClassName(String resource) {
+    return getClassName(resource) + "Controller";
   }
 
-  private boolean hasMethod(Element resourceElement) {
-    Element methodsElement = Xml.getFirstChildElement(resourceElement, METHODS_ELEMENT);
-    if (methodsElement == null) {
-      return false;
-    }
-    return Xml.getFirstChildElement(methodsElement, METHOD_ELEMENT) != null;
-  }
-
-  private boolean hasMethod(Element resourceElement, String type) throws Exception {
-    final AtomicBoolean result = new AtomicBoolean();
-    Xml.processNestedElements(resourceElement, new ElementProcessor() {
-      @Override
-      public void process(Element typeElement) throws Exception {
-        result.set(true);
-      }
-    }, METHODS_ELEMENT, METHOD_ELEMENT, type);
-    return result.get();
-  }
-
-  private String getUri(Element resourceElement) {
-    Element locationElement = Xml.getFirstChildElement(resourceElement, LOCATION_ELEMENT);
-    if (locationElement == null) {
-      return null;
-    }
-    String uri = locationElement.getAttributeNS(null, URI_ATTRIBUTE);
-    if (!uri.isEmpty()) {
-      return uri;
-    }
-    return locationElement.getAttributeNS(null, URI_TEMPLATE_ATTRIBUTE);
-  }
-
-  private String getControllerClassName(Element resourceElement) {
-    return getClassName(resourceElement) + "Controller";
-  }
-
-  private String getClassName(Element resourceElement) {
-    return toJavaIdentifier(getName(resourceElement));
+  private String getClassName(String name) {
+    return toJavaIdentifier(name);
   }
 
   public String toJavaIdentifier(String text) {
@@ -960,134 +805,70 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     builder.setCharAt(index, Character.toUpperCase(builder.charAt(index)));
   }
 
-  private String getName(Element resourceElement) {
-    return resourceElement.getAttributeNS(null, NAME_ATTRIBUTE);
+  private String getConsumes(RadlCode radl, String resource, String method) throws Exception {
+    return getMediaTypes(radl.methodRequestRepresentations(resource, method), "consumes");
   }
 
-  private void addMethods(Element resourceElement, final MethodAdder methodAdder) throws Exception {
-    Xml.processNestedElements(resourceElement, new ElementProcessor() {
-      @Override
-      public void process(Element methodElement) throws Exception {
-        methodAdder.addMethod(methodElement);
-      }
-    }, METHODS_ELEMENT, METHOD_ELEMENT);
-  }
-
-  private String getMethodName(Element methodElement) {
-    return methodElement.getAttributeNS(null, NAME_ATTRIBUTE).toLowerCase(Locale.getDefault());
-  }
-
-  private String getConsumes(Element methodElement) throws Exception {
-    return getMediaTypes(methodElement, REQUEST_ELEMENT, "consumes");
-  }
-
-  private String getMediaTypes(final Element methodElement, String messageType, String prefix) throws Exception {
-    final Collection<String> mediaTypes = getMediaTypes(methodElement, messageType);
-    if (mediaTypes.isEmpty()) {
+  private String getMediaTypes(Iterable<String> mediaTypes, String prefix) throws Exception {
+    Iterator<String> iterator = mediaTypes.iterator();
+    if (!iterator.hasNext()) {
       return "";
     }
-    if (mediaTypes.size() == 1 && defaultMediaType != null
-        && mediaTypes.iterator().next().equals(getMediaTypeConstant(defaultMediaType))) {
+    String mediaType = iterator.next();
+    if (!iterator.hasNext() && defaultMediaType != null
+        && mediaType.equals(defaultMediaType.name())) {
       // Explicit use of default media type
-      mediaTypes.clear();
-      mediaTypes.add(API_TYPE + '.' + DEFAULT_MEDIA_TYPE_CONSTANT);
+      mediaType = API_TYPE + '.' + DEFAULT_MEDIA_TYPE_CONSTANT;
+    } else {
+      mediaType = getMediaTypeConstant(mediaType);
     }
     StringBuilder result = new StringBuilder();
-    result.append(", ").append(prefix).append(" = { ");
-    String separator = "";
-    for (String mediaType : mediaTypes) {
-      result.append(separator).append(mediaType);
-      separator = ", ";
+    result.append(", ").append(prefix).append(" = { ").append(mediaType);
+    while (iterator.hasNext()) {
+      result.append(", ").append(getMediaTypeConstant(iterator.next()));
     }
     result.append(" }");
     return result.toString();
   }
 
-  private Collection<String> getMediaTypes(final Element methodElement, String messageType) throws Exception {
-    final Collection<String> result = new LinkedHashSet<String>();
-    Element messageElement = Xml.getFirstChildElement(methodElement, messageType);
-    Xml.processNestedElements(messageElement, new ElementProcessor() {
-      @Override
-      public void process(Element representationElement) throws Exception {
-        String mediaTypeName = representationElement.getAttributeNS(null, MEDIA_TYPE_REF_ATTRIBUTE);
-        if (!mediaTypeName.isEmpty()) {
-          String mediaType = getMediaTypeConstant(methodElement.getOwnerDocument().getDocumentElement(), mediaTypeName);
-          if (mediaType != null) {
-            result.add(mediaType);
-          }
-        }
-      }
-    }, REPRESENTATIONS_ELEMENT, REPRESENTATION_ELEMENT);
-    if (result.isEmpty() && messageElement != null && defaultMediaType != null) {
-      // No explicit representations defined, use default media type
-      result.add(API_TYPE + '.' + DEFAULT_MEDIA_TYPE_CONSTANT);
-    }
-    return result;
+  private String getProduces(RadlCode radl, String resource, String method) throws Exception {
+    return getMediaTypes(radl.methodResponseRepresentations(resource, method), "produces");
   }
 
-  private String getMediaTypeConstant(Element serviceElement, String mediaTypeName) throws Exception {
-    Element mediaTypesElement = Xml.getFirstChildElement(serviceElement, MEDIA_TYPES_ELEMENT);
-    if (mediaTypesElement == null) {
-      return null;
-    }
-    Element mediaTypeElement = Xml.getChildElementByAttribute(mediaTypesElement,
-        MEDIA_TYPE_ELEMENT, NAME_ATTRIBUTE, mediaTypeName);
-    if (mediaTypeElement == null) {
-      return null;
-    }
-    String mediaType = mediaTypeElement.getAttributeNS(null, NAME_ATTRIBUTE);
-    return getMediaTypeConstant(mediaType);
-  }
-
-  private String getProduces(Element methodElement) throws Exception {
-    return getMediaTypes(methodElement, RESPONSE_ELEMENT, "produces");
-  }
-
-  private Code generateControllerHelper(Element resourceElement) throws Exception {
+  private Code generateControllerHelper(RadlCode radl, String resource) throws Exception {
     final JavaCode result = new JavaCode();
-    addPackage(getName(resourceElement), result);
+    addPackage(resource, result);
     result.add("");
     result.add("import org.springframework.stereotype.Service;");
     result.add("");
     result.add("");
     result.add("@Service");
-    result.add("public class %s {", getControllerHelperClassName(resourceElement));
+    result.add("public class %s {", getControllerHelperClassName(resource));
     result.add("");
-    addMethods(resourceElement, new MethodAdder() {
-      @Override
-      public void addMethod(Element methodElement) throws Exception {
-        addControllerHelperMethod(methodElement, result);
-      }
-    });
+    for (String method : radl.methodNames(resource)) {
+      addControllerHelperMethod(radl, resource, method, result);
+    }
     result.add("}");
     return result;
   }
 
-  private String getControllerHelperClassName(Element resourceElement) {
-    return getClassName(resourceElement) + "ControllerHelper";
+  private String getControllerHelperClassName(String resource) {
+    return getControllerClassName(resource) + "Helper";
   }
 
-  private void addControllerHelperMethod(Element methodElement, JavaCode code) throws Exception {
-    String method = getMethodName(methodElement);
-    String consumes = getConsumes(methodElement);
-    String produces = getProduces(methodElement);
+  private void addControllerHelperMethod(RadlCode radl, String resource, String method, JavaCode code) throws Exception {
+    String consumes = getConsumes(radl, resource, method);
+    String produces = getProduces(radl, resource, method);
     String argName = parameterName(consumes);
-    String args = parameters(consumes, methodElement, argName);
-    String type = returnType(produces, methodElement);
+    String args = parameters(consumes, radl, resource, method, argName);
+    String type = returnType(produces, radl, resource, method);
     addReturnTypeImport(type, code);
-    String returnStatement = produces.isEmpty() ? "" : "return null; ";
-    code.add("  public %s %s(%s) {", type, method, args);
+    String returnStatement = type.equals(NO_TYPE) ? "" : "return new " + type + "(); ";
+    code.add("  public %s %s(%s) {", type, method.toLowerCase(Locale.getDefault()), args);
     // Make sure the comment is not viewed as a to-do in *this* code base
     code.add("    %s// TO%s: Implement", returnStatement, "DO");
     code.add("  }");
     code.add("");
-  }
-
-
-  private interface MethodAdder {
-
-    void addMethod(Element methodElement) throws Exception;
-
   }
 
 

@@ -5,23 +5,27 @@ package radl.core.code;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.collect.Iterables;
 
 import radl.common.xml.DocumentBuilder;
 import radl.common.xml.Xml;
 import radl.core.Radl;
 import radl.test.RandomData;
-
-import com.google.common.collect.Iterables;
+import radl.test.TestUtil;
 
 
 public class XmlCodeTest {
 
   private static final RandomData RANDOM = new RandomData();
 
-  private final XmlCode code = new XmlCode();
+  private XmlCode code = new XmlCode();
 
   @Test(expected = IllegalStateException.class)
   public void throwsExceptionOnInvalidXmlCode() {
@@ -127,4 +131,37 @@ public class XmlCodeTest {
     assertEquals("XML", String.format("<%s>\n  <%s/>\n  <%s/>\n</%s>\n", parent, child1, child2, parent), code.text());
   }
 
+  @Test
+  public void walksRecursiveStructure() {
+    String nsUri = "http://example.com/foo";
+    Document document = DocumentBuilder.newDocument()
+        .namespace(nsUri)
+        .element("root")
+            .element("n")
+                .attribute("name", "n1")
+                .element("n")
+                    .attribute("name", "n11")
+                .end()
+                .element("n")
+                    .attribute("name", "n12")
+                .end()
+            .end()
+            .element("n")
+                .attribute("name", "n2")
+            .end()
+        .end()
+    .build();
+    code = new XmlCode(document);
+    code.addNamespace("foo", nsUri);
+    
+    NestedXml nested = code.nested("/foo:root", "foo:n", "name");
+    TestUtil.assertCollectionEquals("items", Arrays.asList("n1", "n2"), nested.items());
+    
+    nested = nested.item("n1");
+    TestUtil.assertCollectionEquals("n1 items", Arrays.asList("n11", "n12"), nested.items());
+    
+    nested = nested.item("n11");
+    TestUtil.assertCollectionEquals("n11 items", Collections.<String>emptyList(), nested.items());
+  }
+  
 }

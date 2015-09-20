@@ -80,7 +80,7 @@ public class RadlBuilder implements PropertGroupContainer {
   public RadlBuilder withLinkRelations(String... names) {
     LinkRelationsBuilder linkBuilder = withLinkRelations();
     for (String name : names) {
-      linkBuilder = linkBuilder.linkRelation(name, null);
+      linkBuilder = linkBuilder.withLinkRelation(name, null).end();
     }
     return linkBuilder.end();
   }
@@ -111,21 +111,6 @@ public class RadlBuilder implements PropertGroupContainer {
       }
       if (error.getDocumentation() != null) {
         builder.element("documentation", error.getDocumentation());
-      }
-      builder.end();
-    }
-    builder.end();
-  }
-
-  public void addLinkRelations(Map<String, String> linkRelations) {
-    builder.element("link-relations");
-    for (Entry<String, String> entry : linkRelations.entrySet()) {
-      builder.element("link-relation")
-          .attribute("name", entry.getKey());
-      if (entry.getValue() != null) {
-        builder.element("specification")
-            .attribute("href", entry.getValue())
-        .end();
       }
       builder.end();
     }

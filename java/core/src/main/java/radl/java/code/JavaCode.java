@@ -501,13 +501,23 @@ public class JavaCode extends Code {
     if (currentImports.contains(fullyQualifiedName)) {
       return;
     }
-    String lastImport = ((SortedSet<String>)currentImports).last();
-    int index = indexOf(importFor(lastImport));
-    add(index + 1, importFor(fullyQualifiedName));
+    if (currentImports.isEmpty()) {
+      int index = indexOf(statement("package", packageName()));
+      add(index + 1, importStatement(fullyQualifiedName));
+      add(index + 1, "");
+    } else {
+      String lastImport = ((SortedSet<String>)currentImports).last();
+      int index = indexOf(importStatement(lastImport));
+      add(index + 1, importStatement(fullyQualifiedName));
+    }
   }
 
-  private String importFor(String fullyQualifiedName) {
-    return "import " + fullyQualifiedName + ';';
+  private String importStatement(String fullyQualifiedName) {
+    return statement("import", fullyQualifiedName);
+  }
+
+  private String statement(String keyword, String fullyQualifiedName) {
+    return keyword + ' ' + fullyQualifiedName + ';';
   }
 
 }
