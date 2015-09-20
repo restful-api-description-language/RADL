@@ -661,6 +661,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       String controller = getControllerClassName(resourceMethod.getResource());
       String method = httpToJavaMethod(resourceMethod.getMethod());
       code.ensureImport(packagePrefix + '.' + toPackage(resourceMethod.getResource()), controller);
+      code.ensureImport("org.springframework.hateoas.mvc", "ControllerLinkBuilder");
       for (String linkRelation : radl.transitionImplementations(transition)) {
         String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
         code.add("    if (helper.isLinkEnabled(%s)) {", linkConstant);

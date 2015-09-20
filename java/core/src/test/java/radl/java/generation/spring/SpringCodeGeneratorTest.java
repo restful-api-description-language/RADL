@@ -846,12 +846,14 @@ public class SpringCodeGeneratorTest {
     
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerName2 = controllerName(state2);
-    assertTrue("Controller #1 doesn't add link", controller1.methodBody(controllerMethod1).contains(
-        "methodOn(" + controllerName2 + ".class)"));
-    
     JavaCode controller2 = getType(sources, controllerName2);
     assertTrue("Controller #1 doesn't import controller #2",
         controller1.imports().contains(controller2.fullyQualifiedName()));
+    assertTrue("Controller #1 doesn't import controller link builder",
+        controller1.imports().contains("org.springframework.hateoas.mvc.ControllerLinkBuilder"));
+    assertTrue("Controller #1 doesn't add link", controller1.methodBody(controllerMethod1).contains(
+        "methodOn(" + controllerName2 + ".class)"));
+    
   }
   
 }
