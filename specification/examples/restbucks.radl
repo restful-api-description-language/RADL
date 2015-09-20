@@ -110,17 +110,23 @@
       <transitions>
         <transition ref="Change"/>
         <transition ref="Cancel"/>
-        <transition ref="Take serving"/>
       </transitions>
     </link-relation>
-
+  
     <link-relation name="payment">
       <specification href="http://tools.ietf.org/html/rfc5988"/>
       <transitions>
         <transition ref="Pay"/>
       </transitions>
     </link-relation>
-
+  
+    <link-relation name="http://schema.org/ReceiveAction">
+      <specification href="http://schema.org/ReceiveAction"/>
+      <transitions>
+        <transition ref="Take serving"/>
+      </transitions>
+    </link-relation>
+    
     <link-relation name="http://schema.org/menu">
       <specification href="http://schema.org/menu"/>
       <transitions>
