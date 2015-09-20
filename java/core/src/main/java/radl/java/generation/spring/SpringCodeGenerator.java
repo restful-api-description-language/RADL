@@ -23,6 +23,7 @@ import radl.core.code.Property;
 import radl.core.code.PropertyGroup;
 import radl.core.code.PropertyGroups;
 import radl.core.code.RadlCode;
+import radl.core.code.RadlCode.ResourceMethod;
 import radl.core.generation.CodeGenerator;
 import radl.java.code.Java;
 import radl.java.code.JavaCode;
@@ -57,6 +58,7 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private final String packagePrefix;
   private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
+  private final Map<String, Constant> linkRelationConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> uriConstants = new TreeMap<String, Constant>();
   private final String header;
@@ -126,6 +128,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private void generate(RadlCode radl, Collection<Code> result) throws Exception {
     defaultMediaType = radl.defaultMediaType();
     boolean hasHyperMediaTypes = radl.hasHyperMediaTypes();
+    addLinkRelationConstants(radl, linkRelationConstants);
     generateSourcesForPropertyGroups(radl.propertyGroups(), hasHyperMediaTypes, result);
     generateSourcesForResources(radl, hasHyperMediaTypes, result);
     generateSourcesForErrors(radl, result);
@@ -412,7 +415,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     String startTransition = startTransitions.hasNext() ? startTransitions.next() : null;
     for (String resource : radl.resourceNames()) {
       sources.add(generateController(radl, resource, hasHyperMediaTypes, startTransition));
-      sources.add(generateControllerHelper(radl, resource));
+      sources.add(generateControllerHelper(radl, hasHyperMediaTypes, resource));
     }
     sources.add(generateApi(radl));
     sources.add(generateUris());
@@ -442,7 +445,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("public interface %s {", API_TYPE);
     addBillboardUri(result);
     addMediaTypes(result);
-    addLinkRelations(radl, result);
+    addLinkRelations(result);
     addErrors(radl, result);
     result.add("");
     result.add("}");
@@ -475,16 +478,15 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result;
   }
 
-  private void addLinkRelations(RadlCode radl, Code code) throws Exception {
-    Map<String, Constant> linkRelationConstants = new TreeMap<String, Constant>();
-    addLinkRelationConstants(radl, linkRelationConstants);
+  private void addLinkRelations(Code code) throws Exception {
     addConstants(linkRelationConstants, "Link relations", code);
   }
 
   private void addLinkRelationConstants(RadlCode radl, final Map<String, Constant> linkRelationConstants)
       throws Exception {
     for (String value : radl.linkRelationNames()) {
-      String name = value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value;
+      String[] segments = value.split("/");
+      String name = segments[segments.length - 1];
       String documentation = radl.linkRelationDocumentation(value);
       ensureConstant("LINK_REL_", name, value, documentation, linkRelationConstants);
     }
@@ -626,7 +628,7 @@ public class SpringCodeGenerator implements CodeGenerator {
         consumes, produces);
     String type = returnType(produces, radl, resource, method);
     addReturnTypeImport(type, code);
-    String javaMethod = method.toLowerCase(Locale.getDefault());
+    String javaMethod = httpToJavaMethod(method);
     code.add("  public %s %s(%s) {", type, javaMethod, parameters(consumes, radl, resource, method, argName));
     if (NO_TYPE.equals(type)) {
       code.add("    %s.%s(%s);", CONTROLLER_HELPER_NAME, javaMethod, argName);
@@ -641,7 +643,33 @@ public class SpringCodeGenerator implements CodeGenerator {
     code.add("");
   }
 
-  private void addLinks(RadlCode radl, String resource, String method, JavaCode code) { // NOPMD UnusedFormalParameter
+  private String httpToJavaMethod(String httpMethod) {
+    return httpMethod.toLowerCase(Locale.getDefault());
+  }
+
+  private void addLinks(RadlCode radl, String resource, String method, JavaCode code) {
+    for (String transition : radl.methodTransitions(resource, method)) {
+      for (String state : radl.transitionEnds(transition)) {
+        addLinks(radl, state, code);
+      }
+    }
+  }
+
+  private void addLinks(RadlCode radl, String state, JavaCode code) {
+    for (String transition : radl.stateTransitionNames(state)) {
+      ResourceMethod resourceMethod = radl.transitionMethod(transition);
+      String controller = getControllerClassName(resourceMethod.getResource());
+      String method = httpToJavaMethod(resourceMethod.getMethod());
+      code.ensureImport(packagePrefix + '.' + toPackage(resourceMethod.getResource()), controller);
+      for (String linkRelation : radl.transitionImplementations(transition)) {
+        String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
+        code.add("    if (helper.isLinkEnabled(%s)) {", linkConstant);
+        code.add("      result.add(ControllerLinkBuilder");
+        code.add("        .linkTo(ControllerLinkBuilder.methodOn(%s.class).%s())", controller, method);
+        code.add("        .withRel(%s));", linkConstant);
+        code.add("    }");
+      }
+    }
   }
 
   private void addReturnTypeImport(String type, JavaCode code) {
@@ -835,7 +863,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     return getMediaTypes(radl.methodResponseRepresentations(resource, method), "produces");
   }
 
-  private Code generateControllerHelper(RadlCode radl, String resource) throws Exception {
+  private Code generateControllerHelper(RadlCode radl, boolean hasHyperMediaTypes, String resource) throws Exception {
     final JavaCode result = new JavaCode();
     addPackage(resource, result);
     result.add("");
@@ -847,6 +875,12 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("");
     for (String method : radl.methodNames(resource)) {
       addControllerHelperMethod(radl, resource, method, result);
+    }
+    if (hasHyperMediaTypes) {
+      result.add("  public boolean isLinkEnabled(String linkRelation) {");
+      addDummyReturnStatement("return true; ", result);
+      result.add("  }");
+      result.add("");
     }
     result.add("}");
     return result;
@@ -864,11 +898,15 @@ public class SpringCodeGenerator implements CodeGenerator {
     String type = returnType(produces, radl, resource, method);
     addReturnTypeImport(type, code);
     String returnStatement = type.equals(NO_TYPE) ? "" : "return new " + type + "(); ";
-    code.add("  public %s %s(%s) {", type, method.toLowerCase(Locale.getDefault()), args);
-    // Make sure the comment is not viewed as a to-do in *this* code base
-    code.add("    %s// TO%s: Implement", returnStatement, "DO");
+    code.add("  public %s %s(%s) {", type, httpToJavaMethod(method), args);
+    addDummyReturnStatement(returnStatement, code);
     code.add("  }");
     code.add("");
+  }
+
+  private void addDummyReturnStatement(String returnStatement, JavaCode code) {
+    // Make sure the comment is not viewed as a to-do in *this* code base
+    code.add("    %s// TO%s: Implement", returnStatement, "DO");
   }
 
 

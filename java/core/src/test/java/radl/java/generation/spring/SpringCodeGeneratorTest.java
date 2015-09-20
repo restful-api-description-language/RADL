@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -788,7 +787,6 @@ public class SpringCodeGeneratorTest {
 
   // #45 Generated controllers should add links/forms to responses
   @Test
-  @Ignore("TODO: Implement")
   public void generatedControllersAddLinks() {
     String state1 = aName();
     String propertyGroup1 = aName();
@@ -842,12 +840,18 @@ public class SpringCodeGeneratorTest {
     
     String controllerMethod1 = javaMethodName(httpMethod1);
     JavaCode controllerHelper1 = getType(sources, controllerHelperName(state1));
-    assertEquals("Controller helper #1", "return new " + dto1.typeName() + "(); // TODO: Implement",
+    assertEquals("Controller helper #1 method", "return new " + dto1.typeName() + "(); // TODO: Implement",
         controllerHelper1.methodBody(controllerMethod1));
+    assertTrue("Controller helper #1 isLinkEnabled", controllerHelper1.methods().contains("isLinkEnabled"));
     
     JavaCode controller1 = getType(sources, controllerName(state1));
+    String controllerName2 = controllerName(state2);
     assertTrue("Controller #1 doesn't add link", controller1.methodBody(controllerMethod1).contains(
-        "methodOn(" + controllerName(state2) + ".class)"));
+        "methodOn(" + controllerName2 + ".class)"));
+    
+    JavaCode controller2 = getType(sources, controllerName2);
+    assertTrue("Controller #1 doesn't import controller #2",
+        controller1.imports().contains(controller2.fullyQualifiedName()));
   }
   
 }

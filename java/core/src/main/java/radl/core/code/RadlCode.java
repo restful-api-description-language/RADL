@@ -49,21 +49,21 @@ public class RadlCode extends XmlCode {
   }
 
   public Iterable<String> resourceNames() {
-    return getElementsName("//radl:resource");
+    return elementsName("//radl:resource");
   }
 
-  private Iterable<String> getElementsName(String elementXPath, Object... args) {
+  private Iterable<String> elementsName(String elementXPath, Object... args) {
     return elementsAttribute("name", elementXPath, args);
   }
 
-  private Iterable<String> getElementsRef(String elementXPath, Object... args) {
+  private Iterable<String> elementsRef(String elementXPath, Object... args) {
     return elementsAttribute("ref", elementXPath, args);
   }
 
   public Iterable<String> methodNames(String resource) {
     Iterable<String> result = methodsByResource.get(resource);
     if (result == null) {
-      result = getElementsName("//radl:resource[@name='%s']//radl:method", resource);
+      result = elementsName("//radl:resource[@name='%s']//radl:method", resource);
       methodsByResource.put(resource, result);
     }
     return result;
@@ -72,7 +72,7 @@ public class RadlCode extends XmlCode {
   public Iterable<String> stateNames() {
     Iterable<String> result = states;
     if (result == null) {
-      result = getElementsName(STATES_PATH);
+      result = elementsName(STATES_PATH);
       if (multiple("//radl:states/radl:start-state", Element.class).iterator().hasNext()) {
         result = combine(result, "");
       }
@@ -91,7 +91,7 @@ public class RadlCode extends XmlCode {
   public Iterable<String> stateTransitionNames(String state) {
     String xpath = state.isEmpty() ? "//radl:states/radl:start-state/radl:transitions/radl:transition"
         : statePath(state) + "/radl:transitions/radl:transition";
-    return getElementsName(xpath, state);
+    return elementsName(xpath, state);
   }
   
   public String statePath(String name) {
@@ -119,9 +119,13 @@ public class RadlCode extends XmlCode {
     return optional(elementsAttribute("property-group", transitionPath(transition) + "/radl:input"));
   }
 
+  public Iterable<String> transitionImplementations(String transition) {
+    return elementsName(LINK_RELATIONS_PATH + "[radl:transitions/radl:transition[@ref='" + transition + "']" + "]");
+  }
+
   public Iterable<String> methodTransitions(String resource, String method) {
     String xpath = "//radl:resource[@name='%s']//radl:method[@name='%s']//radl:transition";
-    return getElementsRef(xpath, resource, method);
+    return elementsRef(xpath, resource, method);
   }
 
   public String resourceLocation(String resource) {
@@ -172,11 +176,11 @@ public class RadlCode extends XmlCode {
   }
 
   public Iterable<String> mediaTypeNames() {
-    return getElementsName("//radl:media-types/radl:media-type");
+    return elementsName("//radl:media-types/radl:media-type");
   }
 
   public Iterable<String> linkRelationNames() {
-    return getElementsName(LINK_RELATIONS_PATH);
+    return elementsName(LINK_RELATIONS_PATH);
   }
 
   public String linkRelationDocumentation(String name) {
@@ -204,7 +208,7 @@ public class RadlCode extends XmlCode {
   }
 
   public Iterable<String> linkRelationTransitions(String linkRelation) {
-    return getElementsRef(linkRelationPath(linkRelation) + "//radl:transition");
+    return elementsRef(linkRelationPath(linkRelation) + "//radl:transition");
   }
 
   public boolean hasHyperMediaTypes() {
@@ -230,7 +234,7 @@ public class RadlCode extends XmlCode {
   }
 
   public Iterable<String> errors() {
-    return getElementsName(ERRORS_PATH);
+    return elementsName(ERRORS_PATH);
   }
 
   public String errorStatus(String name) {
@@ -244,6 +248,42 @@ public class RadlCode extends XmlCode {
 
   public String errorDocumentation(String name) {
     return documentation(errorPath(name));
+  }
+
+  public ResourceMethod transitionMethod(String transition) {
+    String resource = optional(elementsName("//radl:resource[.//radl:transition[@ref='%s']]", transition));
+    for (String method : methodNames(resource)) {
+      if (((Collection<String>)methodTransitions(resource, method)).contains(transition)) {
+        return new ResourceMethod(resource, method);
+      }
+    }
+    return null;
+  }
+
+  
+  public static class ResourceMethod {
+    
+    private final String resource;
+    private final String method;
+
+    public ResourceMethod(String resource, String method) {
+      this.resource = resource;
+      this.method = method;
+    }
+
+    public String getResource() {
+      return resource;
+    }
+
+    public String getMethod() {
+      return method;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%s.%s", resource, method);
+    }
+
   }
 
 }
