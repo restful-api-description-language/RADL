@@ -128,7 +128,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private void generate(RadlCode radl, Collection<Code> result) throws Exception {
     defaultMediaType = radl.defaultMediaType();
     boolean hasHyperMediaTypes = radl.hasHyperMediaTypes();
-    addLinkRelationConstants(radl, linkRelationConstants);
+    addLinkRelationConstants(radl);
     generateSourcesForPropertyGroups(radl.propertyGroups(), hasHyperMediaTypes, result);
     generateSourcesForResources(radl, hasHyperMediaTypes, result);
     generateSourcesForErrors(radl, result);
@@ -453,11 +453,11 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void addErrors(RadlCode radl, Code code) throws Exception {
-    addErrorConstants(radl, errorConstants);
+    addErrorConstants(radl);
     addConstants(errorConstants, "Error conditions", code);
   }
 
-  private void addErrorConstants(RadlCode radl, final Map<String, Constant> errorConstants) throws Exception {
+  private void addErrorConstants(RadlCode radl) throws Exception {
     for (String value : radl.errors()) {
       String documentation = radl.errorDocumentation(value);
       errorConstants.put(value, ensureConstant("ERROR_", getErrorName(value), value, documentation, errorConstants));
@@ -482,7 +482,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     addConstants(linkRelationConstants, "Link relations", code);
   }
 
-  private void addLinkRelationConstants(RadlCode radl, final Map<String, Constant> linkRelationConstants)
+  private void addLinkRelationConstants(RadlCode radl)
       throws Exception {
     for (String value : radl.linkRelationNames()) {
       String[] segments = value.split("/");
