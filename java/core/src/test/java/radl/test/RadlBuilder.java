@@ -17,7 +17,7 @@ import radl.test.ErrorBuilder.Error;
 /**
  * Data test builder for RADL documents.
  */
-public class RadlBuilder {
+public class RadlBuilder implements PropertGroupContainer {
 
   private static final RandomData RANDOM = new RandomData();
   private static final int NAME_LENGTH = 5;
@@ -31,7 +31,8 @@ public class RadlBuilder {
     return RANDOM.string(NAME_LENGTH);
   }
 
-  DocumentBuilder builder() {
+  @Override
+  public DocumentBuilder builder() {
     return builder;
   }
 
@@ -48,6 +49,7 @@ public class RadlBuilder {
     if (firstIsDefault) {
       builder.setCurrent(Xml.getFirstChildElement((Element)builder.getCurrent(), "media-types"));
       builder.attribute("default", names[0]);
+      builder.end();
     }
     return this;
   }
@@ -78,25 +80,21 @@ public class RadlBuilder {
   public RadlBuilder withLinkRelations(String... names) {
     LinkRelationsBuilder linkBuilder = withLinkRelations();
     for (String name : names) {
-      linkBuilder = linkBuilder.linkRelation(name, null);
+      linkBuilder = linkBuilder.withLinkRelation(name, null).end();
     }
     return linkBuilder.end();
   }
 
   public RadlBuilder startingAt(String state) {
-    builder.element("states")
-        .element("start-state")
-            .element("transitions")
-                .element("transition")
-                    .attribute("name", "Start")
-                    .attribute("to", state)
-            .end()
-        .end()
-        .element("state")
-            .attribute("name", state)
+    return withStates()
+        .startingAt(state)
+        .withState(state)
         .end()
     .end();
-    return this;
+  }
+
+  public StatesBuilder withStates() {
+    return new StatesBuilder(this);
   }
 
   public ErrorBuilder withErrors() {
@@ -119,19 +117,8 @@ public class RadlBuilder {
     builder.end();
   }
 
-  public void addLinkRelations(Map<String, String> linkRelations) {
-    builder.element("link-relations");
-    for (Entry<String, String> entry : linkRelations.entrySet()) {
-      builder.element("link-relation")
-          .attribute("name", entry.getKey());
-      if (entry.getValue() != null) {
-        builder.element("specification")
-            .attribute("href", entry.getValue())
-        .end();
-      }
-      builder.end();
-    }
-    builder.end();
+  public PropertyGroupBuilder withPropertyGroup() {
+    return new PropertyGroupBuilder(this);
   }
 
 }

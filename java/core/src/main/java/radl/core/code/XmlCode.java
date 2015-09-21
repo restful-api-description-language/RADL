@@ -5,8 +5,10 @@ package radl.core.code;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -15,6 +17,7 @@ import org.jaxen.XPath;
 import org.jaxen.dom.DOMXPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import radl.common.io.StringStream;
 import radl.common.xml.Xml;
@@ -27,31 +30,53 @@ public class XmlCode extends Code {
 
   private final Map<String, String> namespaces = new HashMap<String, String>();
   private final StringBuilder indentation = new StringBuilder(); // NOPMD AvoidStringBufferField
-  private transient Document document;
+  private transient Node root;
 
   public XmlCode() {
     super(new XmlSyntax());
   }
 
+  public XmlCode(Node root) {
+    this();
+    this.root = root;
+  }
+
+  public XmlCode(Element root, Map<String, String> namespaces) {
+    this(root);
+    this.namespaces.putAll(namespaces);
+  }
+
+  public Map<String, String> namespaces() {
+    return Collections.<String, String>unmodifiableMap(namespaces);
+  }
+
   @Override
   public boolean add(String text) {
-    document = null;
+    root = null;
     return super.add(indentation + text);
   }
 
   public Document asDom() {
-    return getDocument();
+    return (Document)getRoot();
   }
 
-  private Document getDocument() {
-    if (document == null) {
+  public Element asElement() {
+    return (Element)getRoot();
+  }
+
+  public Node asNode() {
+    return getRoot();
+  }
+
+  private Node getRoot() {
+    if (root == null) {
       try {
-        document = Xml.parse(new StringStream(text()));
+        root = Xml.parse(new StringStream(text()));
       } catch (Exception e) {
         throw new IllegalStateException("Not valid XML:\n" + text(), e);
       }
     }
-    return document;
+    return root;
   }
 
   protected <T> Iterable<T> multiple(String path, Class<T> returnType) {
@@ -61,7 +86,7 @@ public class XmlCode extends Code {
       for (Entry<String, String> entry : namespaces.entrySet()) {
         xpath.addNamespace(entry.getKey(), entry.getValue());
       }
-      for (Object found : xpath.selectNodes(getDocument())) {
+      for (Object found : xpath.selectNodes(getRoot())) {
         result.add(returnType.cast(found));
       }
     } catch (JaxenException e) {
@@ -102,6 +127,28 @@ public class XmlCode extends Code {
 
   void unindent(int toRemove) {
     indentation.setLength(indentation.length() - toRemove);
+  }
+
+  public NestedXml nested(String containerPath, String elementName, String idAttributeName) {
+    Iterator<Element> result = multiple(containerPath, Element.class).iterator();
+    return result.hasNext() ? new NestedXml(result.next(), elementName, idAttributeName, namespaces) : null;
+  }
+
+  public Iterable<String> elementsAttribute(String attribute, String elementXPath, Object... args) {
+    List<String> result = new ArrayList<String>();
+    for (Element element : multiple(String.format(elementXPath, args), Element.class)) {
+      String value = attr(element, attribute);
+      if (!value.isEmpty()) {
+        result.add(value);
+      }
+    }
+    Collections.sort(result);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    return root == null ? super.toString() : Xml.toString(root);
   }
 
 }

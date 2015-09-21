@@ -225,7 +225,6 @@ public final class Xml {
       final String attributeValue) throws Exception {
     final AtomicReference<Element> result = new AtomicReference<Element>();
     processChildElements(parent, new ElementProcessor() {
-
       @Override
       public void process(Element element) throws Exception {
         if (attributeValue.equals(element.getAttributeNS(null, attributeName))) {

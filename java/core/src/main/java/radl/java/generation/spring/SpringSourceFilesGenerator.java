@@ -24,10 +24,10 @@ import radl.java.code.JavaCode;
  */
 public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
-  private static final Collection<String> GENERATED_TYPES = Arrays.asList("Api", "Identifiable", "Uris");
+  private static final Collection<String> GENERATED_TYPES = Arrays.asList("Api", "CentralErrorHandler", "Identifiable",
+      "Uris");
   private static final Collection<String> GENERATED_TYPE_SUFFIXES = Arrays.asList(
-      "Controller", "Exception");
-  private static final Collection<String> GENERATED_TYPE_MARKERS = Arrays.asList("Error");
+      "Controller", "Dto", "Exception");
   
   private final CodeGenerator codeGenerator;
   private final String generatedSourceSetDir;
@@ -87,11 +87,6 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
     }
     for (String suffix : GENERATED_TYPE_SUFFIXES) {
       if (type.endsWith(suffix)) {
-        return true;
-      }
-    }
-    for (String marker : GENERATED_TYPE_MARKERS) {
-      if (type.contains(marker)) {
         return true;
       }
     }
