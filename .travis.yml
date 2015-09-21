@@ -2,6 +2,7 @@ sudo: false # Run on containers rather than VMs to enable caching
 cache:
   directories:
   - $HOME/.gradle
+  - .gradle
 env:
   global:
     - USER=ApiSecRay
