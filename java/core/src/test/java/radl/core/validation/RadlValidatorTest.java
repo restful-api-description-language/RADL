@@ -1,15 +1,7 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.validation;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,6 +25,14 @@ import radl.core.cli.Arguments;
 import radl.core.validation.Issue.Level;
 import radl.test.RandomData;
 import radl.test.TestUtil;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 public class RadlValidatorTest {
@@ -62,7 +62,7 @@ public class RadlValidatorTest {
     Validator validator = mock(Validator.class);
     Map<String, Collection<Issue>> issues = new TreeMap<String, Collection<Issue>>();
 
-    radlValidator.validate(args, validator, issues);
+    radlValidator.validate(args, validator, issues, dir);
 
     verify(validator, times(files.length)).validate(any(FileInputStream.class), any(Collection.class));
     TestUtil.assertCollectionEquals("Validated files", Arrays.asList(fileNames), issues.keySet());

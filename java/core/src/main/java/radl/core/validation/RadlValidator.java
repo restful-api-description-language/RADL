@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.validation;
 
@@ -18,7 +18,7 @@ import radl.core.cli.Application;
 import radl.core.cli.Arguments;
 import radl.core.cli.Cli;
 import radl.core.validation.Issue.Level;
-
+import radl.core.xml.RadlFileAssembler;
 
 /**
  * {@linkplain Application} that validates RADL documents and reports issues.
@@ -54,29 +54,31 @@ public final class RadlValidator implements Application {
         arguments.prev();
       }
     }
-    validate(arguments, issues);
+    File reportDir = new File(reportFileName).getParentFile();
+    validate(arguments, issues, reportDir);
     IssueReporter reporter = IssueReporterFactory.newInstance(issueReporterId);
     reporter.setReportFileName(reportFileName);
     reportIssues(issues, reporter);
     return numErrors(issues);
   }
 
-  public void validate(Arguments arguments, Map<String, Collection<Issue>> issues) {
-    validate(arguments, newValidator(), issues);
+  public void validate(Arguments arguments, Map<String, Collection<Issue>> issues, File reportDir) {
+    validate(arguments, newValidator(), issues, reportDir);
   }
 
   Validator newValidator() {
     return new CompositeValidator(new RelaxNgValidator(), new LintValidator());
   }
 
-  void validate(Arguments arguments, Validator validator, Map<String, Collection<Issue>> issues) {
+  void validate(Arguments arguments, Validator validator, Map<String, Collection<Issue>> issues, File reportDir) {
     while (arguments.hasNext()) {
-      File file = arguments.file();
-      Log.info("-> Validating " + file.getName() + " using " + validator);
+      File radlFile = arguments.file();
+      File assembledRadl = RadlFileAssembler.assemble(radlFile, reportDir);
+      Log.info("-> Validating " + assembledRadl.getName() + " using " + validator);
       Collection<Issue> issuesByFile = new ArrayList<Issue>();
-      issues.put(file.getName(), issuesByFile);
+      issues.put(assembledRadl.getName(), issuesByFile);
       try {
-        InputStream stream = new FileInputStream(file);
+        InputStream stream = new FileInputStream(assembledRadl);
         try {
           validator.validate(stream, issuesByFile);
         } finally {

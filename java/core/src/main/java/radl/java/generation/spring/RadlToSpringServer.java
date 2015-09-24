@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.java.generation.spring;
 
@@ -7,6 +7,7 @@ import java.io.File;
 
 import org.w3c.dom.Document;
 
+import radl.common.io.IO;
 import radl.common.xml.Xml;
 import radl.core.Log;
 import radl.core.cli.Application;
@@ -20,6 +21,7 @@ import radl.core.generation.DesiredSourceFiles;
 import radl.core.generation.RealSourceFiles;
 import radl.core.scm.ScmFactory;
 import radl.core.scm.SourceCodeManagementSystem;
+import radl.core.xml.RadlFileAssembler;
 import radl.java.code.Java;
 
 
@@ -66,12 +68,17 @@ public class RadlToSpringServer implements Application {
 
   void generate(File radlFile, File baseDir, String packagePrefix, String generatedSourceSetDir,
       String mainSourceSetDir, SourceCodeManagementSystem scm, String header) {
-    Document radlDocument = Xml.parse(radlFile);
-    Desired<String, SourceFile> desired = new DesiredSourceFiles(radlDocument,
-        new SpringSourceFilesGenerator(packagePrefix, generatedSourceSetDir, mainSourceSetDir, header), baseDir);
-    Reality<String, SourceFile> reality = new RealSourceFiles(baseDir, generatedSourceSetDir, mainSourceSetDir,
-        Java.packageToDir(packagePrefix), scm);
-    new Enforcer<String, SourceFile>().enforce(desired, reality);
+    File assembledRadl = RadlFileAssembler.assemble(radlFile, null);
+    try {
+      Document radlDocument = Xml.parse(assembledRadl);
+      Desired<String, SourceFile> desired = new DesiredSourceFiles(radlDocument,
+          new SpringSourceFilesGenerator(packagePrefix, generatedSourceSetDir, mainSourceSetDir, header), baseDir);
+      Reality<String, SourceFile> reality = new RealSourceFiles(baseDir, generatedSourceSetDir, mainSourceSetDir,
+          Java.packageToDir(packagePrefix), scm);
+      new Enforcer<String, SourceFile>().enforce(desired, reality);
+    } finally {
+      IO.delete(assembledRadl);
+    }
   }
 
 }

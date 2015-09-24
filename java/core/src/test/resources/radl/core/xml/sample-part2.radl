@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) EMC Corporation. All rights reserved.
+  -->
+
+<states xmlns="urn:radl:service">
+  <start-state>
+    <transitions>
+      <transition name="Start" to="Home">
+        <documentation>
+          You start interacting with the API via the billboard URI, which is the URI at which the service implementing the API is deployed. This URI varies from deployment to deployment and should be provided to you separately from this documentation.
+        </documentation>
+      </transition>
+    </transitions>
+  </start-state>
+  <state name="Home">
+    <transitions>
+      <transition name="Decide access" to="XACML response">
+        <documentation>
+          Ask the XACML PDP to decide whether access should be granted. You have to provide the XACML request context.
+        </documentation>
+      </transition>
+    </transitions>
+  </state>
+  <state name="XACML response">
+    <documentation>
+      The PDP returns with the XACML response context.
+    </documentation>
+  </state>
+</states>

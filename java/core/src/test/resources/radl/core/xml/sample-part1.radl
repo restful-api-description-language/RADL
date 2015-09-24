@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) EMC Corporation. All rights reserved.
+  -->
+
+<service xmlns="urn:radl:service" xmlns:xi="http://www.w3.org/2001/XInclude" name="XACML">
+  <xi:include href="sample-part2.radl"/>
+  <xi:include href="sample-part3.radl"/>
+  <xi:include href="sample-part4.radl"/>
+  <xi:include href="sample-part5.radl"/>
+</service>

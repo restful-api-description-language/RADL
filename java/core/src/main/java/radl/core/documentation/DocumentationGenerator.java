@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.core.documentation;
 
@@ -7,23 +7,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import net.sf.saxon.TransformerFactoryImpl;
-
 import org.w3c.dom.Document;
 
+import net.sf.saxon.TransformerFactoryImpl;
 import radl.common.xml.Xml;
 import radl.core.Log;
 import radl.core.cli.Application;
 import radl.core.cli.Arguments;
 import radl.core.cli.Cli;
-
+import radl.core.xml.RadlFileAssembler;
 
 /**
  * Generate documentation from a RADL file.
@@ -75,7 +73,8 @@ public final class DocumentationGenerator implements Application {
 
   private void generateClientDocumentation(File radlFile, File docDir, File configuration) {
     File serviceDir = getServiceDir(radlFile, docDir);
-    Document radlDocument = Xml.parse(radlFile);
+    File assembledRadl = RadlFileAssembler.assemble(radlFile, docDir);
+    Document radlDocument = Xml.parse(assembledRadl);
     new StateDiagramGenerator().generateFrom(radlDocument, serviceDir, configuration);
     generateClientDocumentation(radlDocument, getIndexFile(serviceDir));
   }

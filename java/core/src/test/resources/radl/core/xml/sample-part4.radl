@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) EMC Corporation. All rights reserved.
+  -->
+
+<media-types xmlns="urn:radl:service">
+  <media-type name="application/json-home">
+    <specification href="http://tools.ietf.org/html/draft-nottingham-json-home-03"/>
+  </media-type>
+  <media-type name="application/home+xml">
+    <specification href="http://tools.ietf.org/html/draft-wilde-home-xml-03"/>
+    <schema href="...home.xsd" type="xsd"/>
+  </media-type>
+  <media-type name="application/xacml+xml; version=2.0">
+    <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml"/>
+    <schema href="...xacml2.xsd" type="xsd"/>
+  </media-type>
+  <media-type name="application/xacml+xml; version=3.0">
+    <specification href="http://www.iana.org/assignments/media-types/application/xacml+xml"/>
+    <schema href="...xacml3.xsd" type="xsd"/>
+  </media-type>
+  <media-type name="application/vnd.xacml+json">
+    <specification href="https://www.oasis-open.org/apps/org/workgroup/xacml/download.php/52828/xacml-json-http-v1.0-wd18.doc"/>
+  </media-type>
+</media-types>

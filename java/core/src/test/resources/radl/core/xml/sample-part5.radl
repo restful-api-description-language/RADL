@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) EMC Corporation. All rights reserved.
+  -->
+
+<resources xmlns="urn:radl:service">
+  <resource name="Home">
+    <location uri="/"/>
+    <methods>
+      <method name="GET">
+        <transitions>
+          <transition ref="Start"/>
+        </transitions>
+        <response>
+          <representations>
+            <representation media-type="application/json-home"/>
+            <representation media-type="application/home+xml"/>
+          </representations>
+        </response>
+      </method>
+    </methods>
+  </resource>
+  <resource name="Pdp">
+    <location uri="/pdp/"/>
+    <methods>
+      <method name="POST">
+        <transitions>
+          <transition ref="Decide access"/>
+        </transitions>
+        <request>
+          <representations>
+            <representation media-type="application/xacml+xml; version=2.0"/>
+            <representation media-type="application/xacml+xml; version=3.0"/>
+            <representation media-type="application/vnd.xacml+json"/>
+          </representations>
+        </request>
+        <response>
+          <representations>
+            <representation media-type="application/xacml+xml; version=2.0"/>
+            <representation media-type="application/xacml+xml; version=3.0"/>
+            <representation media-type="application/vnd.xacml+json"/>
+          </representations>
+        </response>
+      </method>
+    </methods>
+  </resource>
+</resources>
