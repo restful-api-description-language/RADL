@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright (c) EMC Corporation. All rights reserved.
-  -->
-
 <resources xmlns="urn:radl:service">
   <resource name="Home">
     <location uri="/"/>

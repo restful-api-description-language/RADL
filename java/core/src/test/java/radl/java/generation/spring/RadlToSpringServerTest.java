@@ -3,10 +3,6 @@
  */
 package radl.java.generation.spring;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,6 +24,10 @@ import radl.java.code.JavaCode;
 import radl.test.RadlBuilder;
 import radl.test.RandomData;
 import radl.test.TestUtil;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 
 public class RadlToSpringServerTest {
@@ -78,7 +78,7 @@ public class RadlToSpringServerTest {
     File controller = find(files, upper + name + "Controller.java");
     assertNotNull("Missing controller: " + files, controller);
     String expectedPath = expectedFilePath(generatedSourceSetDir, packagePrefix, lower + name, controller);
-    assertEquals("Path", expectedPath, controller.getPath());
+    assertEquals("Path: " + expectedPath + " vs. " + controller.getPath(), expectedPath, controller.getPath());
     JavaCode javaCode = toJava(controller);
     TestUtil.assertCollectionEquals("Header for " + controller.getName(), Arrays.asList(header),
         javaCode.fileComments());
@@ -86,7 +86,7 @@ public class RadlToSpringServerTest {
     File controllerHelper = find(files, upper + name + "ControllerHelper.java");
     assertNotNull("Missing controller helper: " + files, controllerHelper);
     expectedPath = expectedFilePath(mainSourceSetDir, packagePrefix, lower + name, controllerHelper);
-    assertEquals("Path", expectedPath, controllerHelper.getPath());
+    assertEquals("Path: " + expectedPath + " vs. " + controllerHelper.getPath(), expectedPath, controllerHelper.getPath());
   }
 
   private JavaCode toJava(File file) {

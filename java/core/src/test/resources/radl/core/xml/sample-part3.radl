@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright (c) EMC Corporation. All rights reserved.
-  -->
-
 <link-relations xmlns="urn:radl:service">
   <link-relation name="http://docs.oasis-open.org/ns/xacml/relation/pdp">
     <specification href="http://docs.oasis-open.org/xacml/xacml-rest/v1.0/cs02/xacml-rest-v1.0-cs02.pdf"/>

@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright (c) EMC Corporation. All rights reserved.
-  -->
-
 <media-types xmlns="urn:radl:service">
   <media-type name="application/json-home">
     <specification href="http://tools.ietf.org/html/draft-nottingham-json-home-03"/>
