@@ -126,7 +126,7 @@ linkrel-transitions  = element transitions { transition-ref-element* }
 property-groups = element property-groups { property-group-top* }
 property-group-top = element property-group {
   uri?,
-  (property-group-internal-ref | (name, (property | property-group )*))
+  (property-group-internal-ref | (name, documentation?, (property | property-group )*))
 }
 property-group-internal-ref =  attribute ref { xsd:string }
 property-group = element property-group {
@@ -134,10 +134,10 @@ property-group = element property-group {
   required?,
   repeats?,
   uri?,
-  (property-group-internal-ref | (property | property-group)*)
+  (property-group-internal-ref | (documentation?, (property | property-group)*))
 }
 property-group-ref = attribute property-group { string }
-property = element property { name, property-type?, uri?, required?, repeats? }
+property = element property { name, property-type?, uri?, required?, repeats?, documentation? }
 property-type = attribute type { "string" | "number" | "boolean" | string }
 repeats = attribute repeats { "true" | "false"  }
 
