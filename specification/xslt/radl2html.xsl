@@ -13,18 +13,16 @@
    ##########################################################################
 -->
 <xsl:stylesheet version="2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:html="http://www.w3.org/1999/xhtml"
-                xmlns:radl="urn:radl:service"
-                exclude-result-prefixes="#all">
-                
-  <xsl:output method="html" encoding="utf-8" indent="yes"
-              cdata-section-elements="radl:example"/>
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:radl="urn:radl:service" exclude-result-prefixes="#all">
+
+  <xsl:output method="html" encoding="utf-8" indent="yes" cdata-section-elements="radl:example"/>
 
   <xsl:key name="status" match="//radl:status-codes/radl:status" use="@name"/>
 
   <xsl:variable name="start-state-name">Start</xsl:variable>
-  <xsl:variable name="general-media-types" select="('application/ld+json', 'application/vnd.mason+json', 'application/vnd.siren+json', 'application/hal+json', '*/*')"/>
+  <xsl:variable name="general-media-types"
+    select="('application/ld+json', 'application/vnd.mason+json', 'application/vnd.siren+json', 'application/hal+json', '*/*')"/>
 
   <xsl:template match="/radl:service">
     <html>
@@ -46,80 +44,192 @@
   </xsl:template>
 
   <xsl:template name="title">
-  <xsl:value-of select="@name"/> REST Service </xsl:template>
+    <xsl:value-of select="@name"/> REST Service </xsl:template>
 
   <xsl:template name="style">
     <style type="text/css">
-      body { margin: 0; padding: 0 0 0 16em; }
-
-      h1, h2 { color: Navy; }
-      h3 { color: Blue; }
-
-      table { border-collapse: collapse; margin-bottom: 1em; width: 90% }
-      th, td { border: 1px solid; padding: 0.35em; vertical-align: top; }
-      th { color: White; background-color: CornflowerBlue; text-align: left; border-color: Black; }
-      td { border-color: LightGrey; vertical-align: middle; }
-      tr:nth-child(odd) { background-color: eeeeef; padding: 16px; }
-
-      dl { margin: 16px; }
-      dl dl { background-color: eeeeef; padding: 12px; }
-
-      dt { font-weight: bold; padding-top: 9px; }
-      dt::after { content: ":"; }
-      dd { margin: 0; padding-left: 16px; }
-
-      li.transition { list-style-type: none; }
-
-      .outline { vertical-align: top; padding: 1em; }
-      .index { position: fixed; top: 0; left: 0; width: 16em; height: 100%; font-size: smaller; }
-      .reference { height: 100%;  }
-      .buggy { background-color: yellow; }
-      .http   {
-        border-radius: 2px;
-        color: white;
-        display: inline-block;
-        font-size: 0.7em;
-        padding: 7px 0 4px;
-        text-align: center;
-        width: 50px;
+      body{
+          margin:0;
+          padding:0 0 0 16em;
       }
-      .http a {
-        color: white;
+      
+      h1,
+      h2{
+          color:Navy;
       }
-      .DELETE { background-color: #a41e22; }
-      .GET    { background-color: #0f6ab4; }
-      .PATCH  { background-color: #d38042; }
-      .POST   { background-color: #10a54a; }
-      .PUT    { background-color: #c5862b; }
-      code {
-        background: none repeat scroll 0 0 #f5f5f5;
-        border: 1px solid #ccc;
-        border-radius: 2px;
-        padding: 1px 3px;
+      h3{
+          color:Blue;
       }
-    </style>
+      
+      table{
+          border-collapse:collapse;
+          margin-bottom:1em;
+          width:90%
+      }
+      th,
+      td{
+          border:1px solid;
+          padding:0.35em;
+          vertical-align:top;
+      }
+      th{
+          color:White;
+          background-color:CornflowerBlue;
+          text-align:left;
+          border-color:Black;
+      }
+      td{
+          border-color:LightGrey;
+          vertical-align:middle;
+      }
+      tr:nth-child(odd){
+          background-color:eeeeef;
+          padding:16px;
+      }
+      
+      dl{
+          margin:16px;
+      }
+      dl dl{
+          background-color:eeeeef;
+          padding:12px;
+      }
+      
+      dt{
+          font-weight:bold;
+          padding-top:9px;
+      }
+      dt::after{
+          content:":";
+      }
+      dd{
+          margin:0;
+          padding-left:16px;
+      }
+      div.nested{
+          margin:0;
+          padding-left:16px;
+      }
+      
+      li.transition{
+          list-style-type:none;
+      }
+      
+      .outline{
+          vertical-align:top;
+          padding:1em;
+      }
+      .index{
+          position:fixed;
+          top:0;
+          left:0;
+          width:16em;
+          height:100%;
+          font-size:smaller;
+      }
+      .reference{
+          height:100%;
+      }
+      .buggy{
+          background-color:yellow;
+      }
+      .http{
+          border-radius:2px;
+          color:white;
+          display:inline-block;
+          font-size:0.7em;
+          padding:7px 0 4px;
+          text-align:center;
+          width:50px;
+      }
+      .http a{
+          color:white;
+      }
+      .DELETE{
+          background-color:#a41e22;
+      }
+      .GET{
+          background-color:#0f6ab4;
+      }
+      .PATCH{
+          background-color:#d38042;
+      }
+      .POST{
+          background-color:#10a54a;
+      }
+      .PUT{
+          background-color:#c5862b;
+      }
+      code{
+          background:none repeat scroll 0 0 #f5f5f5;
+          border:1px solid #ccc;
+          border-radius:2px;
+          padding:1px 3px;
+      }</style>
   </xsl:template>
 
   <xsl:template name="index">
-    <h2><xsl:value-of select="/radl:service/@name"/></h2>
+    <h2>
+      <xsl:value-of select="/radl:service/@name"/>
+    </h2>
     <ul>
-      <li><h3><a href="#states">States</a></h3></li>
-      <li><h3><a href="#link-relations">Link Relations</a></h3></li>
-      <li><h3><a href="#uri-parameters">URI Parameters</a></h3></li>
-      <li><h3><a href="#media-types">Media Types</a></h3></li>
-      <li><h3><a href="#headers">Custom Headers</a></h3></li>
-      <li><h3><a href="#status-codes">Status Codes</a></h3></li>
-      <li><h3><a href="#resources">Resources</a></h3></li>
-      <li><h3><a href="#authentication">Authentication</a></h3></li>
+      <li>
+        <h3>
+          <a href="#states">States</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#link-relations">Link Relations</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#property-groups">Property Groups</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#uri-parameters">URI Parameters</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#media-types">Media Types</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#headers">Custom Headers</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#status-codes">Status Codes</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#resources">Resources</a>
+        </h3>
+      </li>
+      <li>
+        <h3>
+          <a href="#authentication">Authentication</a>
+        </h3>
+      </li>
     </ul>
   </xsl:template>
 
   <xsl:template name="reference">
-    <h1><xsl:value-of select="/radl:service/@name"/></h1>
+    <h1>
+      <xsl:value-of select="/radl:service/@name"/>
+    </h1>
     <xsl:apply-templates select="radl:documentation"/>
 
     <xsl:call-template name="states"/>
     <xsl:call-template name="link-relations"/>
+    <xsl:call-template name="property-groups"/>
     <xsl:call-template name="uri-parameters"/>
     <xsl:call-template name="custom-headers"/>
     <xsl:call-template name="status-codes"/>
@@ -202,12 +312,20 @@
     <h2>
       <xsl:variable name="state" select="(@name|$start-state-name)[1]"/>
       <xsl:call-template name="id">
-        <xsl:with-param name='prefix'>state</xsl:with-param>
-        <xsl:with-param name='name' select='$state'/>
+        <xsl:with-param name="prefix">state</xsl:with-param>
+        <xsl:with-param name="name" select="$state"/>
       </xsl:call-template>
       <xsl:text>State: </xsl:text>
       <xsl:value-of select="$state"/>
     </h2>
+    <xsl:if test="@property-group">
+      <h3>Properties</h3>
+      <p>See <xsl:call-template name="a-href">
+          <xsl:with-param name="prefix">propertygroup</xsl:with-param>
+          <xsl:with-param name="name" select="@property-group"/>
+        </xsl:call-template>
+      </p>
+    </xsl:if>
     <xsl:apply-templates/>
   </xsl:template>
 
@@ -242,57 +360,60 @@
     <xsl:variable name="from-state" select="(ancestor::radl:state/@name|$start-state-name)[1]"/>
     <xsl:variable name="transition-name" select="@name"/>
     <xsl:variable name="result-state" select="@to"/>
-    <xsl:variable name="link-relation" select="//radl:link-relation[radl:transitions/radl:transition/@ref=$transition-name]/@name"/>
-    <xsl:variable name="interfaces" select="//radl:method[radl:transitions/radl:transition[@ref=$transition-name and (if (@from) then @from=$from-state else true())]]"/>
+    <xsl:variable name="link-relation"
+      select="//radl:link-relation[radl:transitions/radl:transition/@ref=$transition-name]/@name"/>
+    <xsl:variable name="interfaces"
+      select="//radl:method[radl:transitions/radl:transition[@ref=$transition-name and (if (@from) then @from=$from-state else true())]]"/>
 
-      <tr>
-        <td>
-          <xsl:call-template name="a-href">
-            <xsl:with-param name="prefix">transition</xsl:with-param>
-            <xsl:with-param name="scope" select="$from-state"/>
-            <xsl:with-param name="name" select="$transition-name"/>
-          </xsl:call-template>
-        </td>
-        <td>
-          <xsl:choose>
-            <xsl:when test="$link-relation">
-              <code>             
-                <xsl:call-template name="a-href">
-                  <xsl:with-param name="prefix">linkrel</xsl:with-param>
-                  <xsl:with-param name="name" select="$link-relation"/>
-                </xsl:call-template>
-              </code>
-            </xsl:when>
-            <xsl:otherwise>[None]</xsl:otherwise>
-          </xsl:choose>
-        </td>
-        <td>
-          <xsl:for-each select="$interfaces">
-            <xsl:variable name="interface" select="."/>
-            <xsl:variable name="resource" select="ancestor::radl:resource/@name"/>            
-            <xsl:variable name="http-method" select="./@name"/>
-            <span>
-              <xsl:attribute name="class">
-                <xsl:text>http </xsl:text><xsl:value-of select="$http-method"/>
-              </xsl:attribute>
-              <a>
-                <xsl:call-template name="href">
-                  <xsl:with-param name="prefix">method</xsl:with-param>
-                  <xsl:with-param name="scope" select="$resource"/>
-                  <xsl:with-param name="name" select="$http-method"/>
-                </xsl:call-template>
-                <xsl:value-of select="$http-method"/>
-              </a>
-            </span>
-          </xsl:for-each>
-        </td>
-        <td>
-          <xsl:call-template name="a-href">
-            <xsl:with-param name="prefix">state</xsl:with-param>
-            <xsl:with-param name="name" select="$result-state"/>
-          </xsl:call-template>
-        </td>
-      </tr>
+    <tr>
+      <td>
+        <xsl:call-template name="a-href">
+          <xsl:with-param name="prefix">transition</xsl:with-param>
+          <xsl:with-param name="scope" select="$from-state"/>
+          <xsl:with-param name="name" select="$transition-name"/>
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:choose>
+          <xsl:when test="$link-relation">
+            <code>
+              <xsl:call-template name="a-href">
+                <xsl:with-param name="prefix">linkrel</xsl:with-param>
+                <xsl:with-param name="name" select="$link-relation"/>
+              </xsl:call-template>
+            </code>
+          </xsl:when>
+          <xsl:otherwise>[None]</xsl:otherwise>
+        </xsl:choose>
+      </td>
+      <td>
+        <xsl:for-each select="$interfaces">
+          <xsl:variable name="interface" select="."/>
+          <xsl:variable name="resource" select="ancestor::radl:resource/@name"/>
+          <xsl:variable name="http-method" select="./@name"/>
+          <span>
+            <xsl:attribute name="class">
+              <xsl:text>http </xsl:text>
+              <xsl:value-of select="$http-method"/>
+            </xsl:attribute>
+            <a>
+              <xsl:call-template name="href">
+                <xsl:with-param name="prefix">method</xsl:with-param>
+                <xsl:with-param name="scope" select="$resource"/>
+                <xsl:with-param name="name" select="$http-method"/>
+              </xsl:call-template>
+              <xsl:value-of select="$http-method"/>
+            </a>
+          </span>
+        </xsl:for-each>
+      </td>
+      <td>
+        <xsl:call-template name="a-href">
+          <xsl:with-param name="prefix">state</xsl:with-param>
+          <xsl:with-param name="name" select="$result-state"/>
+        </xsl:call-template>
+      </td>
+    </tr>
 
   </xsl:template>
 
@@ -300,13 +421,16 @@
     <xsl:variable name="transition" select="."/>
     <xsl:variable name="transition-name" select="@name"/>
     <xsl:variable name="from-state" select="(ancestor::radl:state/@name|$start-state-name)[1]"/>
-    <xsl:variable name="link-relation" select="//radl:link-relation[radl:transitions/radl:transition/@ref=$transition-name]/@name"/>
+    <xsl:variable name="link-relation"
+      select="//radl:link-relation[radl:transitions/radl:transition/@ref=$transition-name]/@name"/>
 
-    <xsl:variable name="interface" select="//radl:method[radl:transitions/radl:transition[@ref=$transition-name and (if (@from) then @from=$from-state else true())]]"/>
+    <xsl:variable name="interface"
+      select="//radl:method[radl:transitions/radl:transition[@ref=$transition-name and (if (@from) then @from=$from-state else true())]]"/>
 
     <!-- merge transitions with the same name within a given state -->
     <xsl:if test="not(preceding-sibling::radl:transition[@name=$transition-name])">
-      <xsl:variable name="transitions-with-same-name" select="following-sibling::radl:transition[@name=$transition-name]"/>
+      <xsl:variable name="transitions-with-same-name"
+        select="following-sibling::radl:transition[@name=$transition-name]"/>
 
       <li class="transition">
         <h3>
@@ -320,7 +444,7 @@
         </h3>
 
         <xsl:apply-templates select="radl:documentation"/>
-        
+
         <xsl:if test="empty($interface)">
           <h4>This transition is not yet specified in an HTTP interface.</h4>
         </xsl:if>
@@ -340,7 +464,8 @@
 
               <span>
                 <xsl:attribute name="class">
-                  <xsl:text>http </xsl:text><xsl:value-of select="$method/@name"/>
+                  <xsl:text>http </xsl:text>
+                  <xsl:value-of select="$method/@name"/>
                 </xsl:attribute>
                 <xsl:value-of select="$method/@name"/>
               </span>
@@ -349,17 +474,20 @@
             <dt>Link Relation</dt>
             <dd>
               <xsl:choose>
-                <xsl:when test="$link-relation"><code>
-                  <xsl:call-template name="a-href">
-                    <xsl:with-param name="prefix">linkrel</xsl:with-param>
-                    <xsl:with-param name="name" select="$link-relation"/>
-                  </xsl:call-template>
-                </code></xsl:when>
+                <xsl:when test="$link-relation">
+                  <code>
+                    <xsl:call-template name="a-href">
+                      <xsl:with-param name="prefix">linkrel</xsl:with-param>
+                      <xsl:with-param name="name" select="$link-relation"/>
+                    </xsl:call-template>
+                  </code>
+                </xsl:when>
                 <xsl:otherwise>[None]</xsl:otherwise>
               </xsl:choose>
             </dd>
 
             <xsl:apply-templates select="$method/radl:request">
+              <xsl:with-param name="property-group" select="$transition/radl:input/@property-group"/>
               <xsl:with-param name="transitions" select="$transition"/>
             </xsl:apply-templates>
             <xsl:apply-templates select="$method/radl:response">
@@ -372,6 +500,7 @@
   </xsl:template>
 
   <xsl:template match="radl:request">
+    <xsl:param name="property-group"/>
     <xsl:param name="transitions"/>
     <dt>Request</dt>
     <dd>
@@ -379,8 +508,18 @@
         <xsl:apply-templates select="radl:headers"/>
         <xsl:apply-templates select="radl:authentication"/>
         <xsl:apply-templates select="radl:uri-parameters"/>
+        <xsl:if test="$property-group">
+          <dt>Input</dt>
+          <dd>
+            <xsl:call-template name="a-href">
+              <xsl:with-param name="prefix">propertygroup</xsl:with-param>
+              <xsl:with-param name="name" select="$property-group"/>
+            </xsl:call-template>
+          </dd>
+        </xsl:if>
         <xsl:apply-templates select="radl:representations">
-          <xsl:with-param name="representation-names" select="distinct-values($transitions/radl:input/radl:properties/@name)"/>
+          <xsl:with-param name="representation-names"
+            select="distinct-values($transitions/radl:input/radl:properties/@name)"/>
         </xsl:apply-templates>
       </dl>
     </dd>
@@ -390,7 +529,8 @@
     <xsl:param name="transitions"/>
     <xsl:variable name="result-states" as="xs:string*">
       <xsl:call-template name="end-states-from-transitions">
-        <xsl:with-param name="transitions" select="preceding-sibling::radl:transitions/radl:transition"/>
+        <xsl:with-param name="transitions"
+          select="preceding-sibling::radl:transitions/radl:transition"/>
       </xsl:call-template>
     </xsl:variable>
 
@@ -445,21 +585,21 @@
   </xsl:template>
 
 
-    <xsl:template match="radl:status-codes">
-      <dt>Status Codes</dt>
-      <dd>
-        <ul>
-          <xsl:for-each select="radl:status-code">
-            <li>
-              <xsl:call-template name="a-href">
-                <xsl:with-param name="prefix">statuscode</xsl:with-param>
-                <xsl:with-param name="name" select="@ref"/>
-              </xsl:call-template>
-            </li>
-          </xsl:for-each>
-        </ul>
-      </dd>
-    </xsl:template>
+  <xsl:template match="radl:status-codes">
+    <dt>Status Codes</dt>
+    <dd>
+      <ul>
+        <xsl:for-each select="radl:status-code">
+          <li>
+            <xsl:call-template name="a-href">
+              <xsl:with-param name="prefix">statuscode</xsl:with-param>
+              <xsl:with-param name="name" select="@ref"/>
+            </xsl:call-template>
+          </li>
+        </xsl:for-each>
+      </ul>
+    </dd>
+  </xsl:template>
 
   <xsl:template match="radl:request/radl:uri-parameters">
     <dt>URI Parameters</dt>
@@ -493,9 +633,11 @@
                 <xsl:with-param name="name" select="$mediatype-name"/>
               </xsl:call-template>
             </code>
-            <xsl:if test="count($representation-names) > 0 and //radl:media-type[@name=$mediatype-name]/radl:representation[@name=$representation-names]">
+            <xsl:if
+              test="count($representation-names) > 0 and //radl:media-type[@name=$mediatype-name]/radl:representation[@name=$representation-names]">
               <xsl:text> (</xsl:text>
-              <xsl:for-each select="//radl:media-type[@name=$mediatype-name]/radl:representation[@name=$representation-names]/@name">
+              <xsl:for-each
+                select="//radl:media-type[@name=$mediatype-name]/radl:representation[@name=$representation-names]/@name">
                 <code>
                   <xsl:call-template name="a-href">
                     <xsl:with-param name="prefix">representation</xsl:with-param>
@@ -530,7 +672,7 @@
               <tr>
                 <td>
                   <xsl:call-template name="a-href">
-                    <xsl:with-param name='prefix'>resource</xsl:with-param>
+                    <xsl:with-param name="prefix">resource</xsl:with-param>
                     <xsl:with-param name="name" select="@name"/>
                   </xsl:call-template>
                 </td>
@@ -544,10 +686,11 @@
                   <xsl:for-each select=".//radl:methods/radl:method">
                     <span>
                       <xsl:attribute name="class">
-                        <xsl:text>http </xsl:text><xsl:value-of select="@name"/>
+                        <xsl:text>http </xsl:text>
+                        <xsl:value-of select="@name"/>
                       </xsl:attribute>
                       <xsl:call-template name="a-href">
-                        <xsl:with-param name='prefix'>method</xsl:with-param>
+                        <xsl:with-param name="prefix">method</xsl:with-param>
                         <xsl:with-param name="scope" select="$resource-name"/>
                         <xsl:with-param name="name" select="@name"/>
                       </xsl:call-template>
@@ -567,7 +710,7 @@
   <xsl:template match="radl:resource">
     <h2>
       <xsl:call-template name="id">
-        <xsl:with-param name='prefix'>resource</xsl:with-param>
+        <xsl:with-param name="prefix">resource</xsl:with-param>
         <xsl:with-param name="name" select="@name"/>
       </xsl:call-template>
       <xsl:text>Resource: </xsl:text>
@@ -597,16 +740,17 @@
   <xsl:template match="radl:method">
     <dl>
       <xsl:call-template name="id">
-        <xsl:with-param name='prefix'>method</xsl:with-param>
-        <xsl:with-param name='scope' select='./ancestor::radl:resource/@name'/>
-        <xsl:with-param name='name' select='@name'/>
+        <xsl:with-param name="prefix">method</xsl:with-param>
+        <xsl:with-param name="scope" select="./ancestor::radl:resource/@name"/>
+        <xsl:with-param name="name" select="@name"/>
       </xsl:call-template>
 
       <dt>HTTP Method</dt>
       <dd>
         <span>
           <xsl:attribute name="class">
-            <xsl:text>http </xsl:text><xsl:value-of select="@name"/>
+            <xsl:text>http </xsl:text>
+            <xsl:value-of select="@name"/>
           </xsl:attribute>
           <xsl:value-of select="@name"/>
         </span>
@@ -624,13 +768,15 @@
 
               <xsl:variable name="transition-name" select="@ref"/>
               <xsl:variable name="from" select="@from"/>
-              <xsl:variable name="states" select="if ($from) then
+              <xsl:variable name="states"
+                select="if ($from) then
                                                     if ($from = $start-state-name)
                                                     then //radl:start-state
                                                     else //radl:state[@name=$from]
                                                   else //radl:start-state|//radl:state"/>
 
-              <xsl:for-each select="$states[radl:transitions/radl:transition[@name=$transition-name]]">
+              <xsl:for-each
+                select="$states[radl:transitions/radl:transition[@name=$transition-name]]">
                 <xsl:sort select="@name"/>
                 <xsl:variable name="state-name" select="(@name|$start-state-name)[1]"/>
                 <li>
@@ -645,7 +791,8 @@
                     <xsl:with-param name="name" select="@name"/>
                   </xsl:call-template>
                   <xsl:variable name="previous" select="@name"/>
-                  <xsl:for-each select="radl:transitions/radl:transition[@name=$transition-name]/@to">
+                  <xsl:for-each
+                    select="radl:transitions/radl:transition[@name=$transition-name]/@to">
                     <xsl:choose>
                       <xsl:when test="position() = 1">
                         <xsl:text> &#8594; </xsl:text>
@@ -706,19 +853,19 @@
           </tr>
         </thead>
         <tbody>
-        <xsl:for-each select="radl:identity-provider">
-          <tr>
-            <td>
-              <xsl:call-template name="a-href">
-                <xsl:with-param name='prefix'>mechanism</xsl:with-param>
-                <xsl:with-param name='name' select='@mechanism'/>
-              </xsl:call-template>
-            </td>
-            <td>
-              <xsl:apply-templates select="radl:documentation"/>
-            </td>
-          </tr>
-        </xsl:for-each>
+          <xsl:for-each select="radl:identity-provider">
+            <tr>
+              <td>
+                <xsl:call-template name="a-href">
+                  <xsl:with-param name="prefix">mechanism</xsl:with-param>
+                  <xsl:with-param name="name" select="@mechanism"/>
+                </xsl:call-template>
+              </td>
+              <td>
+                <xsl:apply-templates select="radl:documentation"/>
+              </td>
+            </tr>
+          </xsl:for-each>
         </tbody>
       </table>
     </xsl:if>
@@ -733,8 +880,8 @@
   <xsl:template match="radl:mechanism">
     <dt>
       <xsl:call-template name="id">
-        <xsl:with-param name='prefix'>mechanism</xsl:with-param>
-        <xsl:with-param name='name' select='@name'/>
+        <xsl:with-param name="prefix">mechanism</xsl:with-param>
+        <xsl:with-param name="name" select="@name"/>
       </xsl:call-template>
       <xsl:value-of select="@name"/>
       <xsl:if test="@authentication-type != @name">
@@ -757,14 +904,17 @@
             <tr>
               <td>
                 <xsl:call-template name="id">
-                  <xsl:with-param name='prefix'>
-                    <xsl:value-of select="concat('mechanism-',ancestor::radl:scheme/@name,'-scheme-', @name)"/>
+                  <xsl:with-param name="prefix">
+                    <xsl:value-of
+                      select="concat('mechanism-',ancestor::radl:scheme/@name,'-scheme-', @name)"/>
                   </xsl:with-param>
-                  <xsl:with-param name='name' select='@name'/>
+                  <xsl:with-param name="name" select="@name"/>
                 </xsl:call-template>
                 <xsl:value-of select="@name"/>
               </td>
-              <td><xsl:apply-templates select="radl:documentation"/></td>
+              <td>
+                <xsl:apply-templates select="radl:documentation"/>
+              </td>
               <td>
                 <xsl:if test="radl:parameter">
                   <h3>Parameters:</h3>
@@ -787,8 +937,7 @@
     </dd>
   </xsl:template>
 
-  <xsl:template match="radl:identity-provider">
-  </xsl:template>
+  <xsl:template match="radl:identity-provider"> </xsl:template>
 
   <xsl:template name="no-authentication">
     <xsl:if test="//radl:authentication/radl:mechanism">
@@ -843,14 +992,16 @@
     <!-- If text occurs at the root level, wrap it in a <p/>; otherwise assume HTML elements -->
     <xsl:choose>
       <xsl:when test="text()[normalize-space()]">
-        <p><xsl:apply-templates/></p>
+        <p>
+          <xsl:apply-templates/>
+        </p>
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="html:*">
     <xsl:element name="{local-name()}">
       <xsl:for-each select="@*">
@@ -869,7 +1020,7 @@
       <a>
         <xsl:attribute name="href">#<xsl:value-of select="$mechanism"/></xsl:attribute>
         <xsl:value-of select="//radl:authentication/radl:mechanism[@id = $mechanism]/@name"/>
-        </a>.&#160; <xsl:apply-templates select="*"/>
+      </a>.&#160; <xsl:apply-templates select="*"/>
     </p>
   </xsl:template>
 
@@ -899,31 +1050,29 @@
         <xsl:call-template name="ref-by-id">
           <xsl:with-param name="id" select="$id"/>
           <xsl:with-param name="name"
-                          select="//radl:uri-parameters/radl:uri-parameter[@id = $id]/@name"/>
+            select="//radl:uri-parameters/radl:uri-parameter[@id = $id]/@name"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="@header">
         <xsl:variable name="id" select="@header"/>
         <xsl:call-template name="ref-by-id">
           <xsl:with-param name="id" select="$id"/>
-          <xsl:with-param name="name"
-                          select="//radl:headers/radl:header[@id = $id]/@name"/>
+          <xsl:with-param name="name" select="//radl:headers/radl:header[@id = $id]/@name"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="@mechanism">
         <xsl:variable name="id" select="@mechanism"/>
         <xsl:call-template name="ref-by-id">
           <xsl:with-param name="id" select="$id"/>
-          <xsl:with-param name="name"
-                          select="//radl:authentication/radl:mechanism[@id = $id]/@name"/>
+          <xsl:with-param name="name" select="//radl:authentication/radl:mechanism[@id = $id]/@name"
+          />
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="@media-type">
         <xsl:variable name="id" select="@media-type"/>
         <xsl:call-template name="ref-by-id">
           <xsl:with-param name="id" select="$id"/>
-          <xsl:with-param name="name"
-                          select="//radl:media-types/radl:media-type[@id = $id]/@name"/>
+          <xsl:with-param name="name" select="//radl:media-types/radl:media-type[@id = $id]/@name"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
@@ -979,7 +1128,7 @@
               </td>
               <td>
                 <xsl:apply-templates
-                    select="//radl:uri-parameters/radl:uri-parameter[@id = $id]/radl:documentation"/>
+                  select="//radl:uri-parameters/radl:uri-parameter[@id = $id]/radl:documentation"/>
               </td>
             </tr>
           </xsl:for-each>
@@ -989,57 +1138,57 @@
   </xsl:template>
 
   <xsl:template name="status-codes">
-      <hr/>
-      <h1 id="status-codes">Status Codes</h1>
+    <hr/>
+    <h1 id="status-codes">Status Codes</h1>
 
-      <xsl:choose>
-        <xsl:when test="//radl:conventions/radl:status-codes/radl:status-code">
+    <xsl:choose>
+      <xsl:when test="//radl:conventions/radl:status-codes/radl:status-code">
 
-          <xsl:for-each select="//radl:conventions/radl:status-codes/radl:status-code">
-            <xsl:sort select="@name"/>
-            <h3>
-              <xsl:call-template name="id">
-                <xsl:with-param name='prefix'>statuscode</xsl:with-param>
-                <xsl:with-param name='name' select='@name'/>
-              </xsl:call-template>
-              <code>
-                <xsl:value-of select="@name"/>
-              </code>
-            </h3>
-            <xsl:apply-templates/>
-          </xsl:for-each>
-        </xsl:when>
+        <xsl:for-each select="//radl:conventions/radl:status-codes/radl:status-code">
+          <xsl:sort select="@name"/>
+          <h3>
+            <xsl:call-template name="id">
+              <xsl:with-param name="prefix">statuscode</xsl:with-param>
+              <xsl:with-param name="name" select="@name"/>
+            </xsl:call-template>
+            <code>
+              <xsl:value-of select="@name"/>
+            </code>
+          </h3>
+          <xsl:apply-templates/>
+        </xsl:for-each>
+      </xsl:when>
 
-        <xsl:otherwise>
-          <p>No special use of status codes.</p>
-        </xsl:otherwise>
-      </xsl:choose>
+      <xsl:otherwise>
+        <p>No special use of status codes.</p>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template name="custom-headers">
-      <hr/>
-      <h1 id="headers">Headers</h1>
+    <hr/>
+    <h1 id="headers">Headers</h1>
 
-      <xsl:choose>
-        <xsl:when test="/radl:service/radl:conventions/radl:headers/radl:header">
+    <xsl:choose>
+      <xsl:when test="/radl:service/radl:conventions/radl:headers/radl:header">
 
-          <xsl:for-each select="/radl:service/radl:conventions/radl:headers/radl:header">
-            <xsl:sort select="@name"/>
-            <h2>
-              <xsl:call-template name="id">
-                <xsl:with-param name='prefix'>header</xsl:with-param>
-                <xsl:with-param name='name' select='@name'/>
-              </xsl:call-template>
-              <code><xsl:value-of select="@name"/></code>&#160;&#160;<span class="header-suffix"
-              >(<xsl:value-of select="@type"/>)</span>
-            </h2>
-            <xsl:apply-templates/>
-          </xsl:for-each>
-        </xsl:when>
-        <xsl:otherwise>
-          <p>No custom headers.</p>
-        </xsl:otherwise>
-      </xsl:choose>
+        <xsl:for-each select="/radl:service/radl:conventions/radl:headers/radl:header">
+          <xsl:sort select="@name"/>
+          <h2>
+            <xsl:call-template name="id">
+              <xsl:with-param name="prefix">header</xsl:with-param>
+              <xsl:with-param name="name" select="@name"/>
+            </xsl:call-template>
+            <code><xsl:value-of select="@name"/></code>&#160;&#160;<span class="header-suffix"
+                >(<xsl:value-of select="@type"/>)</span>
+          </h2>
+          <xsl:apply-templates/>
+        </xsl:for-each>
+      </xsl:when>
+      <xsl:otherwise>
+        <p>No custom headers.</p>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template name="media-types">
@@ -1096,8 +1245,8 @@
 
       <h2>
         <xsl:call-template name="id">
-          <xsl:with-param name='prefix'>mediatype</xsl:with-param>
-          <xsl:with-param name='name' select='$mediatype-name'/>
+          <xsl:with-param name="prefix">mediatype</xsl:with-param>
+          <xsl:with-param name="name" select="$mediatype-name"/>
         </xsl:call-template>
 
         <xsl:text>Media Type: </xsl:text>
@@ -1184,7 +1333,7 @@
       </xsl:attribute>
       <xsl:choose>
         <xsl:when test="text()">
-          <xsl:value-of select="text()"/>          
+          <xsl:value-of select="text()"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>Specification</xsl:text>
@@ -1224,42 +1373,44 @@
                       <p>(Transitions are not listed for the <code>self</code> link relation.)</p>
                     </xsl:when>
                     <xsl:otherwise>
-                  <ul>
-                    <xsl:for-each select="radl:transitions/radl:transition">
-                      <xsl:sort select="@name"/>
-                      <xsl:variable name="transition-name" select="@ref"/>
-                      <xsl:for-each select="//radl:states/radl:state[radl:transitions/radl:transition[@name=$transition-name]]">
-                        <xsl:sort select="@name"/>
-                        <li>
-                          <xsl:call-template name="a-href">
-                            <xsl:with-param name="prefix">transition</xsl:with-param>
-                            <xsl:with-param name="scope" select="@name"/>
-                            <xsl:with-param name="name" select="$transition-name"/>
-                          </xsl:call-template>
-                          <xsl:text> : </xsl:text>
-                          <xsl:call-template name="a-href">
-                            <xsl:with-param name="prefix">state</xsl:with-param>
-                            <xsl:with-param name="name" select="@name"/>
-                          </xsl:call-template>
-                          <xsl:variable name="previous" select="@name"/>
-                          <xsl:for-each select="radl:transitions/radl:transition[@name=$transition-name]/@to">
-                            <xsl:choose>
-                              <xsl:when test="position() = 1">
-                                <xsl:text> &#8594; </xsl:text>
-                              </xsl:when>
-                              <xsl:otherwise>
-                                <xsl:text>, </xsl:text>
-                              </xsl:otherwise>
-                            </xsl:choose>
-                            <xsl:call-template name="a-href">
-                              <xsl:with-param name="prefix">state</xsl:with-param>
-                              <xsl:with-param name="name" select="."/>
-                            </xsl:call-template>
+                      <ul>
+                        <xsl:for-each select="radl:transitions/radl:transition">
+                          <xsl:sort select="@name"/>
+                          <xsl:variable name="transition-name" select="@ref"/>
+                          <xsl:for-each
+                            select="//radl:states/radl:state[radl:transitions/radl:transition[@name=$transition-name]]">
+                            <xsl:sort select="@name"/>
+                            <li>
+                              <xsl:call-template name="a-href">
+                                <xsl:with-param name="prefix">transition</xsl:with-param>
+                                <xsl:with-param name="scope" select="@name"/>
+                                <xsl:with-param name="name" select="$transition-name"/>
+                              </xsl:call-template>
+                              <xsl:text> : </xsl:text>
+                              <xsl:call-template name="a-href">
+                                <xsl:with-param name="prefix">state</xsl:with-param>
+                                <xsl:with-param name="name" select="@name"/>
+                              </xsl:call-template>
+                              <xsl:variable name="previous" select="@name"/>
+                              <xsl:for-each
+                                select="radl:transitions/radl:transition[@name=$transition-name]/@to">
+                                <xsl:choose>
+                                  <xsl:when test="position() = 1">
+                                    <xsl:text> &#8594; </xsl:text>
+                                  </xsl:when>
+                                  <xsl:otherwise>
+                                    <xsl:text>, </xsl:text>
+                                  </xsl:otherwise>
+                                </xsl:choose>
+                                <xsl:call-template name="a-href">
+                                  <xsl:with-param name="prefix">state</xsl:with-param>
+                                  <xsl:with-param name="name" select="."/>
+                                </xsl:call-template>
+                              </xsl:for-each>
+                            </li>
                           </xsl:for-each>
-                        </li>
-                      </xsl:for-each>
-                    </xsl:for-each>
-                  </ul>
+                        </xsl:for-each>
+                      </ul>
                     </xsl:otherwise>
                   </xsl:choose>
                 </xsl:if>
@@ -1278,6 +1429,87 @@
 
   </xsl:template>
 
+  <xsl:template match="radl:property-group[exists(@ref)]">
+    <p>
+      <xsl:text>Property Group: </xsl:text>
+      <xsl:value-of select="@name"/> ( see <xsl:call-template name="a-href">
+        <xsl:with-param name="prefix">propertygroup</xsl:with-param>
+        <xsl:with-param name="name" select="@ref"/>
+      </xsl:call-template> ) </p>
+  </xsl:template>
+
+  <xsl:template match="radl:property-group[not(@ref)]">
+    <h2>
+      <xsl:call-template name="id">
+        <xsl:with-param name="prefix">propertygroup</xsl:with-param>
+        <xsl:with-param name="name" select="@name"/>
+      </xsl:call-template>
+      <xsl:text>Property Group: </xsl:text>
+      <xsl:value-of select="@name"/>
+
+      <xsl:if test="@uri"> (<a>
+          <xsl:attribute name="href">
+            <xsl:value-of select="@uri"/>
+          </xsl:attribute>
+          <code>
+            <xsl:value-of select="@uri"/>
+          </code></a> ) 
+      </xsl:if>
+    </h2>
+
+      <xsl:if test="radl:documentation">
+        <dd>
+          <xsl:apply-templates select="radl:documentation"/>
+        </dd>
+      </xsl:if>
+      <xsl:if test="radl:property | radl:property-group">
+        <dl>
+          <xsl:apply-templates select="radl:property | radl:property-group"/>
+        </dl>
+      </xsl:if>
+    
+  </xsl:template>
+
+  <xsl:template match="radl:property">
+    <p>
+      <xsl:value-of select="@name"/>
+      <xsl:if test="@uri"> (<a>
+          <xsl:attribute name="href">
+            <xsl:value-of select="@uri"/>
+          </xsl:attribute>
+          <code>
+            <xsl:value-of select="@uri"/>
+          </code>
+        </a> ) </xsl:if>
+      <xsl:if test="@type">
+        <xsl:text> - </xsl:text>
+        <xsl:value-of select="@type"/>
+      </xsl:if>
+    </p>
+    
+    <xsl:if test="radl:documentation">
+      <dd>
+        <xsl:apply-templates select="radl:documentation"/>
+      </dd>
+    </xsl:if>
+
+  </xsl:template>
+
+  <xsl:template name="property-groups">
+    <hr/>
+    <h1 id="property-groups">Property Groups</h1>
+    <xsl:choose>
+      <xsl:when test="//radl:property-groups">
+
+        <xsl:apply-templates select="//radl:property-groups/radl:property-group">
+          <xsl:sort select="@name"/>
+        </xsl:apply-templates>
+      </xsl:when>
+      <xsl:otherwise>No property groups</xsl:otherwise>
+    </xsl:choose>
+
+  </xsl:template>
+
   <xsl:template name="uri-parameters">
     <hr/>
     <h1 id="uri-parameters">URI Parameters</h1>
@@ -1285,7 +1517,8 @@
     <xsl:choose>
       <xsl:when test="/radl:service/radl:conventions//radl:uri-parameters/radl:uri-parameter">
 
-        <xsl:for-each select="/radl:service/radl:conventions//radl:uri-parameters/radl:uri-parameter[not(@ref)]">
+        <xsl:for-each
+          select="/radl:service/radl:conventions//radl:uri-parameters/radl:uri-parameter[not(@ref)]">
           <xsl:sort select="@name"/>
           <h2>
             <xsl:call-template name="id">
@@ -1302,15 +1535,27 @@
               <dl>
                 <xsl:if test="@datatype">
                   <dt>Datatype</dt>
-                  <dd><code><xsl:value-of select="@datatype"/></code></dd>
+                  <dd>
+                    <code>
+                      <xsl:value-of select="@datatype"/>
+                    </code>
+                  </dd>
                 </xsl:if>
                 <xsl:if test="radl:value-range">
                   <dt>Values</dt>
-                  <dd><code><xsl:value-of select="radl:value-range"/></code></dd>
+                  <dd>
+                    <code>
+                      <xsl:value-of select="radl:value-range"/>
+                    </code>
+                  </dd>
                 </xsl:if>
                 <xsl:if test="radl:default">
                   <dt>Default Value</dt>
-                  <dd><code><xsl:value-of select="radl:default"/></code></dd>
+                  <dd>
+                    <code>
+                      <xsl:value-of select="radl:default"/>
+                    </code>
+                  </dd>
                 </xsl:if>
                 <xsl:if test="radl:documentation">
                   <dt>Documentation</dt>
@@ -1379,17 +1624,19 @@
     <xsl:param name="scope" select="()"/>
     <xsl:param name="name"/>
 
-      <xsl:attribute name="href">
-        <xsl:choose>
-          <xsl:when test="$scope">
-            <!-- Replace spaces, :, +, or / (the latter two occur in media type names) -->
-            <xsl:value-of select="concat('#', $prefix, '-', replace($scope,' |/|\+|:','-'), '-', replace($name, ' ', '-'))"/>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="concat('#', $prefix, '-', replace($name, ' |/|\+|:', '-'))"/>
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:attribute>
+    <xsl:attribute name="href">
+      <xsl:choose>
+        <xsl:when test="$scope">
+          <!-- Replace spaces, :, +, or / (the latter two occur in media type names) -->
+          <xsl:value-of
+            select="concat('#', $prefix, '-', replace($scope,' |/|\+|:','-'), '-', replace($name, ' ', '-'))"
+          />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="concat('#', $prefix, '-', replace($name, ' |/|\+|:', '-'))"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:attribute>
   </xsl:template>
 
   <xsl:template name="id">
@@ -1400,7 +1647,9 @@
       <xsl:choose>
         <xsl:when test="$scope">
           <!-- Replace spaces, :, +, or / (the latter two occur in media type names) -->
-          <xsl:value-of select="concat($prefix, '-', replace($scope, ' |/|\+|:', '-'), '-', replace($name, ' ', '-'))"/>
+          <xsl:value-of
+            select="concat($prefix, '-', replace($scope, ' |/|\+|:', '-'), '-', replace($name, ' ', '-'))"
+          />
         </xsl:when>
         <xsl:otherwise>
           <xsl:value-of select="concat($prefix, '-', replace($name, ' |/|\+|:', '-'))"/>
@@ -1411,7 +1660,8 @@
 
   <xsl:template name="end-states-from-transitions" as="xs:string*">
     <xsl:param name="transitions" as="element()*"/>
-    <xsl:variable name="end-states" as="xs:string*" select="
+    <xsl:variable name="end-states" as="xs:string*"
+      select="
     for $transition in $transitions,
         $candidate-states in
            if ($transition/@from) then
@@ -1426,7 +1676,8 @@
 
   <xsl:template match="*">
     <div class="buggy">
-      <p>#### Not processed: element <xsl:value-of select="local-name(.)"/> in namespace <xsl:value-of select="namespace-uri()"/></p>
+      <p>#### Not processed: element <xsl:value-of select="local-name(.)"/> in namespace
+          <xsl:value-of select="namespace-uri()"/></p>
       <xsl:copy>
         <xsl:apply-templates/>
       </xsl:copy>
