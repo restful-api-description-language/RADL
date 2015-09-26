@@ -255,11 +255,11 @@ public class SpringCodeGeneratorTest {
 
   private void assertMethod(JavaCode javaSource, String method) {
     String arguments = "GET".equalsIgnoreCase(method) ? "" : "Object input";
-    String ret = "GET".equalsIgnoreCase(method) ? "return new Object(); " : "";
+    String ret = "GET".equalsIgnoreCase(method) ? "Object()" : "ResponseEntity<Void>(HttpStatus.OK)";
 
     assertEquals("Method arguments for " + method, arguments, javaSource.methodArguments(method));
     // Make sure the comment is not viewed as a to-do in this code base
-    assertEquals("Method body for " + method, ret + "// TO" + "DO: Implement", javaSource.methodBody(method));
+    assertEquals("Method body for " + method, "return new " + ret + "; // TO" + "DO: Implement", javaSource.methodBody(method));
   }
 
   private void assertType(String expectedName, Iterator<Code> actualSources) {
@@ -781,8 +781,14 @@ public class SpringCodeGeneratorTest {
     
     JavaCode controller2 = getType(sources, controllerName(state2));
     String controllerMethod2 = javaMethodName(httpMethod2);
-    assertEquals("Returns #2", "void", controller2.methodReturns(controllerMethod2));
+    assertTrue("Imports #2 contains ResponseEntity",
+        controller2.imports().contains("org.springframework.http.ResponseEntity"));
+    assertEquals("Returns #2", "ResponseEntity<Void>", controller2.methodReturns(controllerMethod2));
     assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
+    
+    JavaCode controllerHelper2 = getType(sources, controllerHelperName(state2));
+    assertTrue("Return helper #2", controllerHelper2.methodBody(controllerMethod2).contains(
+        "return new ResponseEntity<Void>(HttpStatus.OK)"));
   }
 
   // #45 Generated controllers should add links/forms to responses
@@ -842,7 +848,9 @@ public class SpringCodeGeneratorTest {
     JavaCode controllerHelper1 = getType(sources, controllerHelperName(state1));
     assertEquals("Controller helper #1 method", "return new " + dto1.typeName() + "(); // TODO: Implement",
         controllerHelper1.methodBody(controllerMethod1));
-    assertTrue("Controller helper #1 isLinkEnabled", controllerHelper1.methods().contains("isLinkEnabled"));
+    assertTrue("Controller helper #1 has isLinkEnabled", controllerHelper1.methods().contains("isLinkEnabled"));
+    assertTrue("Controller helper #1 isLinkEnabled",
+        controllerHelper1.methodBody("isLinkEnabled").startsWith("return true;"));
     
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerName2 = controllerName(state2);
@@ -852,8 +860,7 @@ public class SpringCodeGeneratorTest {
     assertTrue("Controller #1 doesn't import controller link builder",
         controller1.imports().contains("org.springframework.hateoas.mvc.ControllerLinkBuilder"));
     assertTrue("Controller #1 doesn't add link", controller1.methodBody(controllerMethod1).contains(
-        "methodOn(" + controllerName2 + ".class)"));
-    
+        "methodOn(" + controllerName2 + ".class)." + javaMethodName(httpMethod2) + "(new "));
   }
   
 }

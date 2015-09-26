@@ -36,7 +36,11 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private static final String DTO_SUFFIX = "Dto";
   private static final String UNKNOWN_TYPE = "Object";
-  private static final String NO_TYPE = "void";
+  private static final String NO_TYPE_PARAMETERLESS = "ResponseEntity";
+  private static final String NO_TYPE = NO_TYPE_PARAMETERLESS + "<Void>";
+  private static final String NO_TYPE_PACKAGE = "org.springframework.http";
+  private static final String STATUS_TYPE = "HttpStatus";
+  private static final String STATUS_TYPE_PACKAGE = NO_TYPE_PACKAGE;
   private static final String DEFAULT_HEADER = "Generated from RADL.";
   private static final String IMPL_PACKAGE = "impl";
   private static final String API_PACKAGE = "api";
@@ -352,8 +356,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     JavaCode result = new JavaCode();
     addPackage(IMPL_PACKAGE, result);
     result.add("");
-    result.add("import org.springframework.http.HttpStatus;");
-    result.add("import org.springframework.http.ResponseEntity;");
+    result.add("import %s.%s;", STATUS_TYPE_PACKAGE, STATUS_TYPE);
+    result.add("import %s.%s;", NO_TYPE_PACKAGE, NO_TYPE_PARAMETERLESS);
     result.add("import org.springframework.web.bind.annotation.ControllerAdvice;");
     result.add("import org.springframework.web.bind.annotation.ExceptionHandler;");
     result.add("");
@@ -377,7 +381,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     errorHandlingMethods.add(method);
     errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
     errorHandler.add("  public ResponseEntity<ErrorDto> %s(%s e) {", method, handledType);
-    errorHandler.add("    return error(e, HttpStatus.%s);", HTTP_STATUSES.get(statusCode));
+    errorHandler.add("    return error(e, %s.%s);", STATUS_TYPE, HTTP_STATUSES.get(statusCode));
     errorHandler.add("  }");
     errorHandler.add("");
   }
@@ -398,7 +402,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
   
   private Code endErrorHandler(JavaCode errorHandler) {
-    errorHandler.add("  private ResponseEntity<ErrorDto> error(Exception e, HttpStatus statusCode) {");
+    errorHandler.add("  private ResponseEntity<ErrorDto> error(Exception e, %s statusCode) {", STATUS_TYPE);
     errorHandler.add("    ErrorDto error = new ErrorDto();");
     errorHandler.add("    error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
     errorHandler.add("    error.title = e.getMessage();");
@@ -630,15 +634,11 @@ public class SpringCodeGenerator implements CodeGenerator {
     addReturnTypeImport(type, code);
     String javaMethod = httpToJavaMethod(method);
     code.add("  public %s %s(%s) {", type, javaMethod, parameters(consumes, radl, resource, method, argName));
-    if (NO_TYPE.equals(type)) {
-      code.add("    %s.%s(%s);", CONTROLLER_HELPER_NAME, javaMethod, argName);
-    } else {
-      code.add("    %s result = %s.%s(%s);", type, CONTROLLER_HELPER_NAME, javaMethod, argName);
-      if (hasHyperMediaTypes) {
-        addLinks(radl, resource, method, code);
-      }
-      code.add("    return result;");
+    code.add("    %s result = %s.%s(%s);", type, CONTROLLER_HELPER_NAME, javaMethod, argName);
+    if (hasHyperMediaTypes) {
+      addLinks(radl, resource, method, code);
     }
+    code.add("    return result;");
     code.add("  }");
     code.add("");
   }
@@ -660,13 +660,22 @@ public class SpringCodeGenerator implements CodeGenerator {
       ResourceMethod resourceMethod = radl.transitionMethod(transition);
       String controller = getControllerClassName(resourceMethod.getResource());
       String method = httpToJavaMethod(resourceMethod.getMethod());
+      String consumes = getConsumes(radl, resourceMethod.getResource(), resourceMethod.getMethod());
+      String argument = parameters(consumes, radl, resourceMethod.getResource(), resourceMethod.getMethod(), "");
+      if (!argument.isEmpty()) {
+        String type = argument.trim();
+        argument = "new " + type + "()";
+        if (type.endsWith(DTO_SUFFIX)) {
+          code.ensureImport(dtoPackage(type), type);
+        }
+      }
       code.ensureImport(packagePrefix + '.' + toPackage(resourceMethod.getResource()), controller);
       code.ensureImport("org.springframework.hateoas.mvc", "ControllerLinkBuilder");
       for (String linkRelation : radl.transitionImplementations(transition)) {
         String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
         code.add("    if (helper.isLinkEnabled(%s)) {", linkConstant);
         code.add("      result.add(ControllerLinkBuilder");
-        code.add("        .linkTo(ControllerLinkBuilder.methodOn(%s.class).%s())", controller, method);
+        code.add("        .linkTo(ControllerLinkBuilder.methodOn(%s.class).%s(%s))", controller, method, argument);
         code.add("        .withRel(%s));", linkConstant);
         code.add("    }");
       }
@@ -675,12 +684,18 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private void addReturnTypeImport(String type, JavaCode code) {
     if (type.endsWith(DTO_SUFFIX)) {
-      String packageName = join(packagePrefix, toPackage(type.substring(0, type.length() - DTO_SUFFIX.length())));
-      code.ensureImport(packageName, type);
+      code.ensureImport(dtoPackage(type), type);
+    } else if (NO_TYPE.equals(type)) {
+      code.ensureImport(NO_TYPE_PACKAGE, NO_TYPE_PARAMETERLESS);
+      code.ensureImport(STATUS_TYPE_PACKAGE, STATUS_TYPE);
     }
   }
 
-  private String returnType(String produces, RadlCode radl, String resource, String method) throws Exception {
+  private String dtoPackage(String dtoType) {
+    return join(packagePrefix, toPackage(dtoType.substring(0, dtoType.length() - DTO_SUFFIX.length())));
+  }
+
+  private String returnType(String produces, RadlCode radl, String resource, String method) {
     final String noType = produces.isEmpty() ? NO_TYPE : UNKNOWN_TYPE;
     String result = noType;
     for (String transition : radl.methodTransitions(resource, method)) {
@@ -699,7 +714,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result;
   }
 
-  protected String getOutputPropertyGroup(RadlCode radl, String transition) throws Exception {
+  protected String getOutputPropertyGroup(RadlCode radl, String transition) {
     String result = "";
     for (String state : radl.transitionEnds(transition)) {
       result = radl.statePropertyGroup(state);
@@ -834,11 +849,11 @@ public class SpringCodeGenerator implements CodeGenerator {
     builder.setCharAt(index, Character.toUpperCase(builder.charAt(index)));
   }
 
-  private String getConsumes(RadlCode radl, String resource, String method) throws Exception {
+  private String getConsumes(RadlCode radl, String resource, String method) {
     return getMediaTypes(radl.methodRequestRepresentations(resource, method), "consumes");
   }
 
-  private String getMediaTypes(Iterable<String> mediaTypes, String prefix) throws Exception {
+  private String getMediaTypes(Iterable<String> mediaTypes, String prefix) {
     Iterator<String> iterator = mediaTypes.iterator();
     if (!iterator.hasNext()) {
       return "";
@@ -860,7 +875,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result.toString();
   }
 
-  private String getProduces(RadlCode radl, String resource, String method) throws Exception {
+  private String getProduces(RadlCode radl, String resource, String method) {
     return getMediaTypes(radl.methodResponseRepresentations(resource, method), "produces");
   }
 
@@ -879,7 +894,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
     if (hasHyperMediaTypes) {
       result.add("  public boolean isLinkEnabled(String linkRelation) {");
-      addDummyReturnStatement("return true; ", result);
+      addDummyReturnStatement("true", result);
       result.add("  }");
       result.add("");
     }
@@ -898,14 +913,20 @@ public class SpringCodeGenerator implements CodeGenerator {
     String args = parameters(consumes, radl, resource, method, argName);
     String type = returnType(produces, radl, resource, method);
     addReturnTypeImport(type, code);
-    String returnStatement = type.equals(NO_TYPE) ? "" : "return new " + type + "(); ";
     code.add("  public %s %s(%s) {", type, httpToJavaMethod(method), args);
-    addDummyReturnStatement(returnStatement, code);
+    addDummyReturnStatement(type, code);
     code.add("  }");
     code.add("");
   }
 
-  private void addDummyReturnStatement(String returnStatement, JavaCode code) {
+  private void addDummyReturnStatement(String type, JavaCode code) {
+    String returnStatement;
+    if (Boolean.TRUE.toString().equals(type)) {
+      returnStatement = "return " + type + ";";
+    } else {
+      String arguments = NO_TYPE.equals(type) ? STATUS_TYPE + ".OK" : "";
+      returnStatement = "return new " + type + "(" + arguments + "); ";
+    }
     // Make sure the comment is not viewed as a to-do in *this* code base
     code.add("    %s// TO%s: Implement", returnStatement, "DO");
   }
