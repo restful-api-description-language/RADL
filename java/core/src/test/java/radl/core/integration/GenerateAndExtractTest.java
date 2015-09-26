@@ -94,7 +94,7 @@ public class GenerateAndExtractTest {
     File argumentsFile = extractionArgumentsFile(generatedSpringCodeDir, generatedRadlFile);
 
     generateCodeFromRadl(generatedSpringCodeDir, generatedSpringCodePackagePrefix, "");
-    extractRadlFromCode(argumentsFile);
+    extractRadlFromCode(argumentsFile.getPath());
     compareOriginalWithGeneratedRadl(generatedRadlFile);
   }
 
@@ -140,8 +140,9 @@ public class GenerateAndExtractTest {
     assertEquals("Exit code", 0, exitCode);
   }
 
-  private void extractRadlFromCode(File argumentsFile) throws Exception {
-    run(FromJavaRadlExtractor.class, "@" + argumentsFile.getPath());
+  private void extractRadlFromCode(String argumentsPath) throws Exception {
+    run(JavaCompiler.class, argumentsPath);
+    run(FromJavaRadlExtractor.class, "@" + argumentsPath);
   }
 
   private void compareOriginalWithGeneratedRadl(File generatedRadlFile) throws Exception {
