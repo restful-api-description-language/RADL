@@ -17,7 +17,7 @@ language: java
 jdk:
 - openjdk6
 install: true
-script: gradlew build
+script: ./gradlew build
 notifications:
   webhooks:
     urls:
