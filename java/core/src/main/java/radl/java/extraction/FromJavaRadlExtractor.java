@@ -1,7 +1,6 @@
 /*
  * Copyright (c) EMC Corporation. All rights reserved.
  */
-
 package radl.java.extraction;
 
 import java.io.File;
@@ -20,6 +19,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import javax.tools.JavaCompiler;
 
 import org.w3c.dom.Document;

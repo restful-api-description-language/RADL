@@ -4,11 +4,15 @@
 package radl.core.cli;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 
 
 /**
@@ -73,6 +77,25 @@ public class Arguments implements Iterator<String> {
    */
   public File file() {
     return new File(next());
+  }
+  
+  /**
+   * @return properties loaded from the file named by the next argument
+   */
+  public Properties properties() {
+    Properties result = new Properties();
+    InputStream stream;
+    try {
+      stream = new FileInputStream(file());
+      try {
+        result.load(stream);
+      } finally {
+        stream.close();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Error loading properties", e);
+    }
+    return result;
   }
 
   /**
