@@ -1417,12 +1417,12 @@
               </td>
               <td>
                 <xsl:if test="radl:specification">
-                  Specification: <a>
-                    <xsl:copy-of select="radl:specification/@href"/>
-                    <xsl:value-of select="radl:specification/@href"/>
-                  </a>.
+                  <p> Specification: <a>
+                      <xsl:copy-of select="radl:specification/@href"/>
+                      <xsl:value-of select="radl:specification/@href"/>
+                    </a>. <xsl:apply-templates select="radl:documentation"/>
+                  </p>
                 </xsl:if>
-                <xsl:apply-templates select="radl:documentation"/>
               </td>
             </tr>
           </xsl:for-each>
@@ -1438,7 +1438,9 @@
   <xsl:template match="radl:property-group[exists(@ref)]">
     <p>
       <xsl:text>Property Group: </xsl:text>
-      <xsl:value-of select="@name"/> ( see <xsl:call-template name="a-href">
+      <xsl:value-of select="@name"/>
+      <xsl:if test="@repeats">*</xsl:if>
+      ( see <xsl:call-template name="a-href">
         <xsl:with-param name="prefix">propertygroup</xsl:with-param>
         <xsl:with-param name="name" select="@ref"/>
       </xsl:call-template> ) </p>
@@ -1452,6 +1454,7 @@
       </xsl:call-template>
       <xsl:text>Property Group: </xsl:text>
       <xsl:value-of select="@name"/>
+      <xsl:if test="@repeats">*</xsl:if>      
 
       <xsl:if test="@uri"> (<a>
           <xsl:attribute name="href">
@@ -1459,26 +1462,26 @@
           </xsl:attribute>
           <code>
             <xsl:value-of select="@uri"/>
-          </code></a> ) 
-      </xsl:if>
+          </code></a> ) </xsl:if>
     </h2>
 
-      <xsl:if test="radl:documentation">
-        <dd>
-          <xsl:apply-templates select="radl:documentation"/>
-        </dd>
-      </xsl:if>
-      <xsl:if test="radl:property | radl:property-group">
-        <dl>
-          <xsl:apply-templates select="radl:property | radl:property-group"/>
-        </dl>
-      </xsl:if>
-    
+    <xsl:if test="radl:documentation">
+      <dd>
+        <xsl:apply-templates select="radl:documentation"/>
+      </dd>
+    </xsl:if>
+    <xsl:if test="radl:property | radl:property-group">
+      <dl>
+        <xsl:apply-templates select="radl:property | radl:property-group"/>
+      </dl>
+    </xsl:if>
+
   </xsl:template>
 
   <xsl:template match="radl:property">
     <p>
       <xsl:value-of select="@name"/>
+      <xsl:if test="@repeats">*</xsl:if>      
       <xsl:if test="@uri"> (<a>
           <xsl:attribute name="href">
             <xsl:value-of select="@uri"/>
@@ -1492,7 +1495,7 @@
         <xsl:value-of select="@type"/>
       </xsl:if>
     </p>
-    
+
     <xsl:if test="radl:documentation">
       <dd>
         <xsl:apply-templates select="radl:documentation"/>
