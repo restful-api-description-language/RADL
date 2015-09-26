@@ -1416,6 +1416,12 @@
                 </xsl:if>
               </td>
               <td>
+                <xsl:if test="radl:specification">
+                  Specification: <a>
+                    <xsl:copy-of select="radl:specification/@href"/>
+                    <xsl:value-of select="radl:specification/@href"/>
+                  </a>.
+                </xsl:if>
                 <xsl:apply-templates select="radl:documentation"/>
               </td>
             </tr>
