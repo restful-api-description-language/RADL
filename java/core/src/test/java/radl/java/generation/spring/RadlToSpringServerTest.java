@@ -3,6 +3,9 @@
  */
 package radl.java.generation.spring;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,6 +15,7 @@ import java.util.Collection;
 import java.util.Locale;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -24,10 +28,6 @@ import radl.java.code.JavaCode;
 import radl.test.RadlBuilder;
 import radl.test.RandomData;
 import radl.test.TestUtil;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 
 public class RadlToSpringServerTest {
@@ -78,7 +78,7 @@ public class RadlToSpringServerTest {
     File controller = find(files, upper + name + "Controller.java");
     assertNotNull("Missing controller: " + files, controller);
     String expectedPath = expectedFilePath(generatedSourceSetDir, packagePrefix, lower + name, controller);
-    assertEquals("Path: " + expectedPath + " vs. " + controller.getPath(), expectedPath, controller.getPath());
+    assertEquals("Controller path", expectedPath, controller.getAbsolutePath());
     JavaCode javaCode = toJava(controller);
     TestUtil.assertCollectionEquals("Header for " + controller.getName(), Arrays.asList(header),
         javaCode.fileComments());
@@ -86,7 +86,7 @@ public class RadlToSpringServerTest {
     File controllerHelper = find(files, upper + name + "ControllerHelper.java");
     assertNotNull("Missing controller helper: " + files, controllerHelper);
     expectedPath = expectedFilePath(mainSourceSetDir, packagePrefix, lower + name, controllerHelper);
-    assertEquals("Path: " + expectedPath + " vs. " + controllerHelper.getPath(), expectedPath, controllerHelper.getPath());
+    assertEquals("Controller helper path", expectedPath, controllerHelper.getAbsolutePath());
   }
 
   private JavaCode toJava(File file) {
@@ -127,9 +127,18 @@ public class RadlToSpringServerTest {
   }
 
   private String expectedFilePath(String sourceSetDir, String packagePrefix, String packageName, File type) {
-    return baseDir.getPath() + File.separator + sourceSetDir + File.separator
+    return baseDir.getAbsolutePath() + File.separator + sourceSetDir + File.separator
         + packagePrefix.replaceAll("\\.", '\\' + File.separator) + File.separator + packageName + File.separator
         + type.getName();
   }
 
+  private void assertEquals(String message, String expected, String actual) {
+    try {
+      Assert.assertEquals(message, expected, actual);
+    } catch (AssertionError e) {
+      System.err.println(e.getMessage()); // NOPMD
+      throw e;
+    }
+  }
+  
 }
