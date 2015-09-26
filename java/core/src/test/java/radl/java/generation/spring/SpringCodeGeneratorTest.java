@@ -255,7 +255,7 @@ public class SpringCodeGeneratorTest {
 
   private void assertMethod(JavaCode javaSource, String method) {
     String arguments = "GET".equalsIgnoreCase(method) ? "" : "Object input";
-    String ret = "GET".equalsIgnoreCase(method) ? "Object()" : "ResponseEntity<Void>(HttpStatus.OK)";
+    String ret = "GET".equalsIgnoreCase(method) ? "Object()" : "ResponseEntity<Void>(HttpStatus.NO_CONTENT)";
 
     assertEquals("Method arguments for " + method, arguments, javaSource.methodArguments(method));
     // Make sure the comment is not viewed as a to-do in this code base
@@ -788,7 +788,7 @@ public class SpringCodeGeneratorTest {
     
     JavaCode controllerHelper2 = getType(sources, controllerHelperName(state2));
     assertTrue("Return helper #2", controllerHelper2.methodBody(controllerMethod2).contains(
-        "return new ResponseEntity<Void>(HttpStatus.OK)"));
+        "return new ResponseEntity<Void>(HttpStatus.NO_CONTENT)"));
   }
 
   // #45 Generated controllers should add links/forms to responses

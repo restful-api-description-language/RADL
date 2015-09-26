@@ -924,7 +924,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     if (Boolean.TRUE.toString().equals(type)) {
       returnStatement = "return " + type + ";";
     } else {
-      String arguments = NO_TYPE.equals(type) ? STATUS_TYPE + ".OK" : "";
+      String arguments = NO_TYPE.equals(type) ? STATUS_TYPE + ".NO_CONTENT" : "";
       returnStatement = "return new " + type + "(" + arguments + "); ";
     }
     // Make sure the comment is not viewed as a to-do in *this* code base
