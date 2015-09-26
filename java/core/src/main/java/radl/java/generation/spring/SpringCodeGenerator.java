@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.w3c.dom.Document;
 
 import radl.core.code.Code;
@@ -148,8 +150,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
   }
 
-  protected String addDtosFor(PropertyGroup propertyGroup, boolean hasHyperMediaTypes, Collection<Code> sources)
-      throws Exception {
+  protected String addDtosFor(PropertyGroup propertyGroup, boolean hasHyperMediaTypes, Collection<Code> sources) {
     final JavaCode code = new JavaCode();
     addPackage(propertyGroup.name(), code);
     code.add("");
@@ -179,7 +180,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     return Java.toIdentifier(name) + DTO_SUFFIX;
   }
 
-  private void addDtoImports(PropertyGroups propertyGroup, final Code code) throws Exception {
+  private void addDtoImports(PropertyGroups propertyGroup, final Code code) {
     boolean added = false;
     for (String name : propertyGroup.names()) {
       String ref = propertyGroup.item(name).reference();
@@ -195,15 +196,15 @@ public class SpringCodeGenerator implements CodeGenerator {
     code.add("");
   }
 
-  private void addSemanticAnnotationImport(PropertyGroup propertyGroup, Code code) throws Exception {
-    if (defaultMediaType.isSemanticMediaType() && propertyGroup.hasSemantics()) {
+  private void addSemanticAnnotationImport(PropertyGroup propertyGroup, Code code) {
+    if (defaultMediaType != null && defaultMediaType.isSemanticMediaType() && propertyGroup.hasSemantics()) {
       code.add("import %s.%s;", SEMANTIC_ANNOTATION_PACKAGE, SEMANTIC_ANNOTATION);
       code.add("");
     }
   }
 
   private void addSemanticAnnotation(Property property, String indent, final Code result) {
-    if (defaultMediaType.isSemanticMediaType()) {
+    if (defaultMediaType != null && defaultMediaType.isSemanticMediaType()) {
       String uri = property.uri();
       if (!uri.isEmpty()) {
         result.add("%s@%s(\"%s\")", indent, SEMANTIC_ANNOTATION, Java.toString(uri));
@@ -211,17 +212,23 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
   }
 
-  private void addDtoFields(final boolean hasHyperMediaTypes, PropertyGroup propertyGroup, final Code dto, final Collection<Code> sources)
-      throws Exception {
+  private void addDtoFields(boolean hasHyperMediaTypes, PropertyGroup propertyGroup, JavaCode dto,
+      Collection<Code> sources) {
     for (String name : propertyGroup.propertyNames()) {
       Property property = propertyGroup.property(name);
       addSemanticAnnotation(property, "  ", dto);
-      dto.add("  public %s %s;", getType(property, hasHyperMediaTypes, sources), name);
+      String type = getType(property, hasHyperMediaTypes, sources);
+      int index = type.lastIndexOf('.');
+      if (index > 0) {
+        String simpleType = type.substring(index + 1);
+        dto.ensureImport(type.substring(0,  index), simpleType);
+        type = simpleType;
+      }
+      dto.add("  public %s %s;", type, name);
     }
   }
 
-  protected String getType(Property property, boolean hasHyperMediaTypes, Collection<Code> sources)
-      throws Exception {
+  protected String getType(Property property, boolean hasHyperMediaTypes, Collection<Code> sources) {
     String result = null;
     if (property instanceof PropertyGroup) {
       PropertyGroup propertyGroup = (PropertyGroup)property;
@@ -234,12 +241,22 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
     if (result == null) {
       String type = property.type();
-      result = type.isEmpty() ? "String" : type;
+      result = type.isEmpty() ? "String" : radlTypeToJavaType(type);
     }
     if (property.repeats()) {
       return result + "[]";
     }
     return result;
+  }
+
+  private String radlTypeToJavaType(String type) {
+    if ("xsd:dateTime".equals(type)) {
+      return XMLGregorianCalendar.class.getName();
+    }
+    if ("number".equals(type)) {
+      return "double";
+    }
+    return type;
   }
 
   private void generateSourcesForErrors(RadlCode radl, final Collection<Code> sources) throws Exception {

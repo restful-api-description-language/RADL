@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -861,6 +863,45 @@ public class SpringCodeGeneratorTest {
         controller1.imports().contains("org.springframework.hateoas.mvc.ControllerLinkBuilder"));
     assertTrue("Controller #1 doesn't add link", controller1.methodBody(controllerMethod1).contains(
         "methodOn(" + controllerName2 + ".class)." + javaMethodName(httpMethod2) + "(new "));
+  }
+
+  @Test
+  public void generatesDtoWithDateTimeField() {
+    String data = aName();
+    String property = aName();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withPropertyGroup()
+            .named(data)
+            .withProperty(property)
+                .as("xsd:dateTime")
+            .end()
+        .end()
+    .build();
+    
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode dto = getType(sources, dtoName(data));
+    assertEquals("Field type", XMLGregorianCalendar.class.getSimpleName(), dto.fieldType(property));
+    assertTrue("Imports", dto.imports().contains(XMLGregorianCalendar.class.getName()));
+  }
+  
+  @Test
+  public void generatesDtoWithNumberField() {
+    String data = aName();
+    String property = aName();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withPropertyGroup()
+            .named(data)
+            .withProperty(property)
+                .as("number")
+            .end()
+        .end()
+    .build();
+    
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode dto = getType(sources, dtoName(data));
+    assertEquals("Field type", "double", dto.fieldType(property));
   }
   
 }
