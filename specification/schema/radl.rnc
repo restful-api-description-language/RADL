@@ -44,7 +44,6 @@ any-attribute = attribute * { text? }
 public = attribute public { "true" | "false" }
 status = attribute status { "future" | "assigned" | "poc" | "partial" | "complete" | "passed" }
 required = attribute required {"true" | "false"}  # default is 'false'
-occurs = attribute occurs {"?" | "+" | "?" | "once"} # default is 'once'
 
 identity-provider-ref = attribute identity-provider { xsd:string }
 
