@@ -687,12 +687,12 @@ public class SpringCodeGenerator implements CodeGenerator {
         }
       }
       code.ensureImport(packagePrefix + '.' + toPackage(resourceMethod.getResource()), controller);
-      code.ensureImport("org.springframework.hateoas.mvc", "ControllerLinkBuilder");
+      code.ensureImport("de.escalon.hypermedia.spring", "AffordanceBuilder");
       for (String linkRelation : radl.transitionImplementations(transition)) {
         String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
         code.add("    if (helper.isLinkEnabled(%s)) {", linkConstant);
-        code.add("      result.add(ControllerLinkBuilder");
-        code.add("        .linkTo(ControllerLinkBuilder.methodOn(%s.class).%s(%s))", controller, method, argument);
+        code.add("      result.add(AffordanceBuilder");
+        code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, argument);
         code.add("        .withRel(%s));", linkConstant);
         code.add("    }");
       }
