@@ -27,7 +27,7 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
   private static final Collection<String> GENERATED_TYPES = Arrays.asList("Api", "CentralErrorHandler", "Identifiable",
       "Uris");
   private static final Collection<String> GENERATED_TYPE_SUFFIXES = Arrays.asList(
-      "Controller", "Dto", "Exception");
+      "Controller", "Resource", "Exception");
   
   private final CodeGenerator codeGenerator;
   private final String generatedSourceSetDir;

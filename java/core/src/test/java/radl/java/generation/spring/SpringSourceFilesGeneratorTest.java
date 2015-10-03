@@ -118,7 +118,7 @@ public class SpringSourceFilesGeneratorTest {
 
   @Test
   public void generatesGeneratedSourceFilesForErrorTypes() throws Exception {
-    assertGeneratedSourceFile("ErrorDto");
+    assertGeneratedSourceFile("ErrorResource");
     assertGeneratedSourceFile("CentralErrorHandler");
     assertGeneratedSourceFile("FooException");
     assertGeneratedSourceFile("Identifiable");

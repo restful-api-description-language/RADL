@@ -723,7 +723,7 @@ public class SpringCodeGeneratorTest {
   }
 
   private String dtoName(String name) {
-    return typeName(name, "Dto");
+    return typeName(name, "Resource");
   }
 
   @Test

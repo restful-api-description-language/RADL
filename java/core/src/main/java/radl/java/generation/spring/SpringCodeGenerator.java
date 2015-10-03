@@ -36,7 +36,7 @@ import radl.java.code.JavaCode;
  */
 public class SpringCodeGenerator implements CodeGenerator {
 
-  private static final String DTO_SUFFIX = "Dto";
+  private static final String DTO_SUFFIX = "Resource";
   private static final String UNKNOWN_TYPE = "Object";
   private static final String NO_TYPE_PARAMETERLESS = "ResponseEntity";
   private static final String NO_TYPE = NO_TYPE_PARAMETERLESS + "<Void>";
@@ -54,7 +54,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   private static final String API_TYPE = "Api";
   private static final String URIS_TYPE = "Uris";
   private static final String DEFAULT_STATUS_CODE = "400";
-  private static final String ERROR_DTO_TYPE = "ErrorDto";
+  private static final String ERROR_DTO_TYPE = "Error" + DTO_SUFFIX;
   private static final String IDENTIFIABLE_TYPE = "Identifiable";
   private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
   private static final Collection<String> FRAMEWORK_HANDLED_STATUSES = Arrays.asList("405", "406");
