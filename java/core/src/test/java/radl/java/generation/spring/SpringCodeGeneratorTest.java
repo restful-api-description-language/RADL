@@ -36,7 +36,7 @@ public class SpringCodeGeneratorTest {
   private static final int NAME_LENGTH = RANDOM.integer(3, 7);
   private static final String TYPE_API = "Api";
   private static final String TYPE_URIS = "Uris";
-  private static final String TYPE_ERROR_DTO = "ErrorDto";
+  private static final String TYPE_ERROR_DTO = "ErrorResource";
   private static final String JSON_LD = "application/ld+json";
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
@@ -93,7 +93,7 @@ public class SpringCodeGeneratorTest {
   private String typeName(String name, String suffix) {
     return Java.toIdentifier(name) + suffix;
   }
-  
+
   @Test
   public void addsRequestMappingForResourceLocation() {
     String name = aName();
@@ -497,10 +497,10 @@ public class SpringCodeGeneratorTest {
     .build();
 
     JavaCode errorDto = generateType(radl, TYPE_ERROR_DTO);
-    
+
     TestUtil.assertCollectionEquals("Fields", Arrays.asList("title", "type"), errorDto.fieldNames());
   }
-  
+
   // #39 Add error conditions to generated API
   @Test
   public void generatesExceptionsForErrors() {
@@ -528,12 +528,12 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
     JavaCode identifiable = getType(sources, "Identifiable");
-    
+
     assertExceptionType(name2, documentation2, "IllegalArgumentException", identifiable, sources);
     assertExceptionType(name3, documentation3, "RuntimeException", identifiable, sources);
     assertExceptionType(name4, documentation4, "IllegalArgumentException", identifiable, sources);
     assertExceptionType(name5, documentation5, "IllegalArgumentException", identifiable, sources);
-    
+
     JavaCode errorHandler = getType(sources, "CentralErrorHandler");
     TestUtil.assertCollectionEquals("Error handler annotations", Collections.singleton("@ControllerAdvice"),
         errorHandler.typeAnnotations());
@@ -568,7 +568,7 @@ public class SpringCodeGeneratorTest {
     assertEquals("Constructor", "super(\"" + documentation + "\");", exceptionType.constructorBody());
     assertEquals("Imports", Collections.<String>singleton(packagePrefix + ".api.Api"), exceptionType.imports());
   }
-  
+
   // #39 Add error conditions to generated API
   @Test
   public void stripsCommonPrefixFromExceptionClasses() {
@@ -581,7 +581,7 @@ public class SpringCodeGeneratorTest {
     .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
-    
+
     getType(sources, exceptionName(name));
   }
 
@@ -603,12 +603,12 @@ public class SpringCodeGeneratorTest {
     .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
-    
+
     JavaCode api = getType(sources, TYPE_API);
     String defaultMediaTypeConstant = "MEDIA_TYPE_DEFAULT";
     String mediaTypeToConstant = mediaTypeToConstant(mediaType, true);
     assertEquals("Default media type", mediaTypeToConstant, api.fieldValue(defaultMediaTypeConstant));
-    
+
     JavaCode controller = getType(sources, controllerName(resource));
     TestUtil.assertCollectionEquals("Method annotations", Collections.<String>singleton(
         "@RequestMapping(method = RequestMethod." + method + ", consumes = { Api." + defaultMediaTypeConstant
@@ -691,7 +691,7 @@ public class SpringCodeGeneratorTest {
     .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
-    
+
     JavaCode dto1 = getType(sources, dtoName(name1));
     assertEquals("Package", packagePrefix + '.' + name1, dto1.packageName());
     assertTrue("Annotations #1", dto1.typeAnnotations().isEmpty());
@@ -713,7 +713,7 @@ public class SpringCodeGeneratorTest {
     assertEquals("Field #5 type", dto1.typeName(), dto3.fieldType(property5));
     String nestedDtoName = dtoName(property6);
     assertEquals("Field #6 type", nestedDtoName, dto3.fieldType(property6));
-    
+
     JavaCode nestedDto = getType(sources, nestedDtoName);
     assertTrue("Imports #3 doesn't contain " + nestedDto.fullyQualifiedName(),
         dto3.imports().contains(nestedDto.fullyQualifiedName()));
@@ -775,19 +775,19 @@ public class SpringCodeGeneratorTest {
     .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
-    
+
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerMethod1 = javaMethodName(httpMethod1);
     assertEquals("Returns #1", dtoName(propertyGroup1), controller1.methodReturns(controllerMethod1));
     assertEquals("Args #1", "", controller1.methodArguments(controllerMethod1));
-    
+
     JavaCode controller2 = getType(sources, controllerName(state2));
     String controllerMethod2 = javaMethodName(httpMethod2);
     assertTrue("Imports #2 contains ResponseEntity",
         controller2.imports().contains("org.springframework.http.ResponseEntity"));
     assertEquals("Returns #2", "ResponseEntity<Void>", controller2.methodReturns(controllerMethod2));
     assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
-    
+
     JavaCode controllerHelper2 = getType(sources, controllerHelperName(state2));
     assertTrue("Return helper #2", controllerHelper2.methodBody(controllerMethod2).contains(
         "return new ResponseEntity<Void>(HttpStatus.NO_CONTENT)"));
@@ -842,10 +842,10 @@ public class SpringCodeGeneratorTest {
     .build();
 
     Iterable<Code> sources = generator.generateFrom(radl);
-    
+
     JavaCode dto1 = getType(sources, dtoName(propertyGroup1));
     assertEquals("DTO super class", "ResourceSupport", dto1.superTypeName());
-    
+
     String controllerMethod1 = javaMethodName(httpMethod1);
     JavaCode controllerHelper1 = getType(sources, controllerHelperName(state1));
     assertEquals("Controller helper #1 method", "return new " + dto1.typeName() + "(); // TODO: Implement",
@@ -853,7 +853,7 @@ public class SpringCodeGeneratorTest {
     assertTrue("Controller helper #1 has isLinkEnabled", controllerHelper1.methods().contains("isLinkEnabled"));
     assertTrue("Controller helper #1 isLinkEnabled",
         controllerHelper1.methodBody("isLinkEnabled").startsWith("return true;"));
-    
+
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerName2 = controllerName(state2);
     JavaCode controller2 = getType(sources, controllerName2);
@@ -877,14 +877,14 @@ public class SpringCodeGeneratorTest {
             .end()
         .end()
     .build();
-    
+
     Iterable<Code> sources = generator.generateFrom(radl);
-    
+
     JavaCode dto = getType(sources, dtoName(data));
     assertEquals("Field type", XMLGregorianCalendar.class.getSimpleName(), dto.fieldType(property));
     assertTrue("Imports", dto.imports().contains(XMLGregorianCalendar.class.getName()));
   }
-  
+
   @Test
   public void generatesDtoWithNumberField() {
     String data = aName();
@@ -897,11 +897,11 @@ public class SpringCodeGeneratorTest {
             .end()
         .end()
     .build();
-    
+
     Iterable<Code> sources = generator.generateFrom(radl);
-    
+
     JavaCode dto = getType(sources, dtoName(data));
     assertEquals("Field type", "double", dto.fieldType(property));
   }
-  
+
 }

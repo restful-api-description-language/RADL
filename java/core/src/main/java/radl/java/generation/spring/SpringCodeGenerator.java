@@ -1,5 +1,5 @@
 /*
- * Copyright © EMC Corporation. All rights reserved.
+ * Copyright (c) EMC Corporation. All rights reserved.
  */
 package radl.java.generation.spring;
 
@@ -29,7 +29,6 @@ import radl.core.code.RadlCode.ResourceMethod;
 import radl.core.generation.CodeGenerator;
 import radl.java.code.Java;
 import radl.java.code.JavaCode;
-
 
 /**
  * Generates Java code for the Spring framework from a RADL document.
@@ -221,7 +220,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       int index = type.lastIndexOf('.');
       if (index > 0) {
         String simpleType = type.substring(index + 1);
-        dto.ensureImport(type.substring(0,  index), simpleType);
+        dto.ensureImport(type.substring(0, index), simpleType);
         type = simpleType;
       }
       dto.add("  public %s %s;", type, name);
@@ -295,7 +294,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("}");
     return result;
   }
-  
+
   private Code generateIdentifiable() {
     Code result = new JavaCode();
     addPackage(IMPL_PACKAGE, result);
@@ -343,7 +342,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
     String path = uri.getPath();
     if (path.endsWith("/")) {
-      path = path.substring(0,  path.length() - 1);
+      path = path.substring(0, path.length() - 1);
     }
     return path.substring(path.lastIndexOf('/') + 1);
   }
@@ -384,7 +383,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("");
     return result;
   }
-  
+
   private void handleException(JavaCode exceptionType, String statusCode, Collection<String> errorHandlingMethods,
       JavaCode errorHandler) {
     if (FRAMEWORK_HANDLED_STATUSES.contains(statusCode)) {
@@ -397,7 +396,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
     errorHandlingMethods.add(method);
     errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
-    errorHandler.add("  public ResponseEntity<ErrorDto> %s(%s e) {", method, handledType);
+    errorHandler.add("  public ResponseEntity<%s> %s(%s e) {", ERROR_DTO_TYPE, method, handledType);
     errorHandler.add("    return error(e, %s.%s);", STATUS_TYPE, HTTP_STATUSES.get(statusCode));
     errorHandler.add("  }");
     errorHandler.add("");
@@ -417,13 +416,13 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.setCharAt(0, Character.toLowerCase(result.charAt(0)));
     return result.toString();
   }
-  
+
   private Code endErrorHandler(JavaCode errorHandler) {
-    errorHandler.add("  private ResponseEntity<ErrorDto> error(Exception e, %s statusCode) {", STATUS_TYPE);
-    errorHandler.add("    ErrorDto error = new ErrorDto();");
+    errorHandler.add("  private ResponseEntity<%s> error(Exception e, %s statusCode) {", ERROR_DTO_TYPE, STATUS_TYPE);
+    errorHandler.add("    %s error = new %s();", ERROR_DTO_TYPE, ERROR_DTO_TYPE);
     errorHandler.add("    error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
     errorHandler.add("    error.title = e.getMessage();");
-    errorHandler.add("    return new ResponseEntity<ErrorDto>(error, statusCode);");
+    errorHandler.add("    return new ResponseEntity<%s>(error, statusCode);", ERROR_DTO_TYPE);
     errorHandler.add("  }");
     errorHandler.add("");
     errorHandler.add("}");
@@ -503,8 +502,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     addConstants(linkRelationConstants, "Link relations", code);
   }
 
-  private void addLinkRelationConstants(RadlCode radl)
-      throws Exception {
+  private void addLinkRelationConstants(RadlCode radl) throws Exception {
     for (String value : radl.linkRelationNames()) {
       String[] segments = value.split("/");
       String name = segments[segments.length - 1];
@@ -516,6 +514,9 @@ public class SpringCodeGenerator implements CodeGenerator {
   private void addMediaTypes(Code code) {
     addConstants(mediaTypeConstants, "Media types", code);
     if (defaultMediaType != null) {
+      if (mediaTypeConstants.isEmpty()) {
+        addConstantsHeading("Media types", code);
+      }
       code.add("  String %s = \"%s\";", getLocalMediaTypeConstant(defaultMediaType.name()), defaultMediaType.name());
       code.add("  String %s = %s;", DEFAULT_MEDIA_TYPE_CONSTANT, getLocalMediaTypeConstant(defaultMediaType.name()));
     }
@@ -523,10 +524,7 @@ public class SpringCodeGenerator implements CodeGenerator {
 
   private void addConstants(Map<String, Constant> constants, String heading, Code code) {
     if (!constants.isEmpty()) {
-      code.add("");
-      code.add("");
-      code.add("  // %s", heading);
-      code.add("");
+      addConstantsHeading(heading, code);
       for (Entry<String, Constant> entry : constants.entrySet()) {
         Constant constant = entry.getValue();
         if (constant.getComments().length > 0) {
@@ -539,6 +537,13 @@ public class SpringCodeGenerator implements CodeGenerator {
         code.add("  String %s = \"%s\";", constant.getName(), entry.getKey());
       }
     }
+  }
+
+  private void addConstantsHeading(String heading, Code code) {
+    code.add("");
+    code.add("");
+    code.add("  // %s", heading);
+    code.add("");
   }
 
   private void addPackage(String name, Code code) {
@@ -590,8 +595,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     return join(packagePrefix, IMPL_PACKAGE, URIS_TYPE);
   }
 
-  private Code generateController(RadlCode radl, String resource, final boolean hasHyperMediaTypes, String startTransition)
-      throws Exception {
+  private Code generateController(RadlCode radl, String resource, final boolean hasHyperMediaTypes,
+      String startTransition) throws Exception {
     final JavaCode result = new JavaCode();
     String name = resource;
     addPackage(name, result);
@@ -616,7 +621,7 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("@RestController");
     if (uri != null) {
       Constant constant = ensureConstant(namePrefix, constantName, uri, null, uriConstants);
-      result.add(String.format("@RequestMapping(%s.%s)", type,  constant.getName()));
+      result.add(String.format("@RequestMapping(%s.%s)", type, constant.getName()));
     }
     result.add("public class %s {", getControllerClassName(resource));
     result.add("");
@@ -641,12 +646,13 @@ public class SpringCodeGenerator implements CodeGenerator {
     return false;
   }
 
-  private void addControllerMethod(RadlCode radl, String resource, String method, boolean hasHyperMediaTypes, JavaCode code) throws Exception {
+  private void addControllerMethod(RadlCode radl, String resource, String method, boolean hasHyperMediaTypes,
+      JavaCode code) throws Exception {
     String consumes = getConsumes(radl, resource, method);
     String produces = getProduces(radl, resource, method);
     String argName = parameterName(consumes);
-    code.add("  @RequestMapping(method = RequestMethod.%s%s%s)", method.toUpperCase(Locale.getDefault()),
-        consumes, produces);
+    code.add("  @RequestMapping(method = RequestMethod.%s%s%s)", method.toUpperCase(Locale.getDefault()), consumes,
+        produces);
     String type = returnType(produces, radl, resource, method);
     addReturnTypeImport(type, code);
     String javaMethod = httpToJavaMethod(method);
@@ -774,8 +780,8 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String getLocalMediaTypeConstant(String mediaType) {
-    String name = mediaType.startsWith(DEFAULT_MEDIA_TYPE) ? mediaType.substring(DEFAULT_MEDIA_TYPE.length())
-        : mediaType;
+    String name =
+        mediaType.startsWith(DEFAULT_MEDIA_TYPE) ? mediaType.substring(DEFAULT_MEDIA_TYPE.length()) : mediaType;
     return ensureConstant(MEDIA_TYPE_CONSTANT_PREFIX, name, mediaType, null, mediaTypeConstants).getName();
   }
 
@@ -811,7 +817,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     return result.toString();
   }
 
-  private void addControllerImports(RadlCode radl, String resource, boolean addUris, Code controllerClass) throws Exception {
+  private void addControllerImports(RadlCode radl, String resource, boolean addUris, Code controllerClass)
+      throws Exception {
     controllerClass.add("import org.springframework.beans.factory.annotation.Autowired;");
     boolean hasMethod = radl.methodNames(resource).iterator().hasNext();
     if (hasMethod || !radl.resourceLocation(resource).isEmpty()) {
@@ -876,8 +883,7 @@ public class SpringCodeGenerator implements CodeGenerator {
       return "";
     }
     String mediaType = iterator.next();
-    if (!iterator.hasNext() && defaultMediaType != null
-        && mediaType.equals(defaultMediaType.name())) {
+    if (!iterator.hasNext() && defaultMediaType != null && mediaType.equals(defaultMediaType.name())) {
       // Explicit use of default media type
       mediaType = API_TYPE + '.' + DEFAULT_MEDIA_TYPE_CONSTANT;
     } else {
@@ -923,7 +929,8 @@ public class SpringCodeGenerator implements CodeGenerator {
     return getControllerClassName(resource) + "Helper";
   }
 
-  private void addControllerHelperMethod(RadlCode radl, String resource, String method, JavaCode code) throws Exception {
+  private void addControllerHelperMethod(RadlCode radl, String resource, String method, JavaCode code)
+      throws Exception {
     String consumes = getConsumes(radl, resource, method);
     String produces = getProduces(radl, resource, method);
     String argName = parameterName(consumes);
@@ -947,7 +954,6 @@ public class SpringCodeGenerator implements CodeGenerator {
     // Make sure the comment is not viewed as a to-do in *this* code base
     code.add("    %s// TO%s: Implement", returnStatement, "DO");
   }
-
 
   private static class Constant {
 
