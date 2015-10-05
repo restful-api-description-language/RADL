@@ -163,7 +163,7 @@
       <property name="size" uri="http://schema.org/height"/>
       <property name="milk" uri="http://www.productontology.org/doc/Milk"/>
       <property name="price" uri="http://schema.org/price" type="number"/>
-      <property name="currency" uri="http://schema.org/priceCurrency" type="number"/>
+      <property name="currency" uri="http://schema.org/priceCurrency"/>
     </property-group>
 
     <property-group name="menu" uri="http://schema.org/menu">
@@ -174,7 +174,7 @@
       <property-group name="item" ref="item" repeats="true"/>
       <property name="customer" uri="http://schema.org/customer"/>
       <property name="total" uri="http://schema.org/totalPrice" type="number"/>
-      <property name="currency" uri="http://schema.org/priceCurrency" type="number"/>
+      <property name="currency" uri="http://schema.org/priceCurrency"/>
     </property-group>
 
     <property-group name="receipt" uri="http://schema.org/Order">
@@ -182,13 +182,13 @@
       <property name="shop" uri="http://schema.org/seller"/>
       <property-group name="item" ref="item" repeats="true"/>
       <property name="total" uri="http://schema.org/totalPrice" type="number"/>
-      <property name="currency" uri="http://schema.org/priceCurrency" type="number"/>
+      <property name="currency" uri="http://schema.org/priceCurrency"/>
       <property name="paymentMethod" uri="http://schema.org/acceptedPaymentMethod"/>
     </property-group>
 
     <property-group name="payment" uri="http://reference.data.gov.uk/def/payment#payment">
       <property name="amount" uri="http://schema.org/totalPrice" type="number"/>
-      <property name="currency" uri="http://schema.org/priceCurrency" type="number"/>
+      <property name="currency" uri="http://schema.org/priceCurrency"/>
       <property name="paymentMethod" uri="http://schema.org/acceptedPaymentMethod"/>
       <property name="cardholderName" uri="https://w3id.org/creditcard/v1/name"/>
       <property name="cardNumber" uri="https://w3id.org/creditcard/v1/number"/>
