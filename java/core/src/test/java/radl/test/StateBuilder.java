@@ -19,7 +19,9 @@ public class StateBuilder {
   }
 
   public StatesBuilder end() {
-    builder().end();
+    while (!"states".equals(builder().getCurrent().getLocalName())) {
+      builder().end();
+    }
     return parent;
   }
 
@@ -28,6 +30,9 @@ public class StateBuilder {
   }
 
   public TransitionBuilder withTransition(String name, String state) {
+    if (!"transitions".equals(builder().getCurrent().getLocalName())) {
+      builder().element("transitions");
+    }
     return new TransitionBuilder(this, name, state);
   }
 

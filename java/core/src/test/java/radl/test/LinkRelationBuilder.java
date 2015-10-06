@@ -23,12 +23,14 @@ public class LinkRelationBuilder {
     return parent;
   }
 
-  public LinkRelationBuilder implementing(String transition) {
-    builder().element("transitions")
-        .element("transition")
-            .attribute("ref", transition)
-        .end()
-    .end();
+  public LinkRelationBuilder implementing(String... transitions) {
+    builder().element("transitions");
+    for (String transition : transitions) {
+      builder().element("transition")
+          .attribute("ref", transition)
+      .end();
+    }
+    builder().end();
     return this;
   }
 

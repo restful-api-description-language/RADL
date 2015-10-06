@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -36,7 +37,9 @@ import radl.java.code.JavaCode;
 public class SpringCodeGenerator implements CodeGenerator {
 
   private static final String DTO_SUFFIX = "Resource";
-  private static final String UNKNOWN_TYPE = "Object";
+  private static final String UNKNOWN_INPUT_TYPE = "Object";
+  private static final String UNKNOWN_OUTPUT_TYPE = "ResourceSupport";
+  private static final String UNKNOWN_OUTPUT_TYPE_PACKAGE = "org.springframework.hateoas";
   private static final String NO_TYPE_PARAMETERLESS = "ResponseEntity";
   private static final String NO_TYPE = NO_TYPE_PARAMETERLESS + "<Void>";
   private static final String NO_TYPE_PACKAGE = "org.springframework.http";
@@ -679,6 +682,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private void addLinks(RadlCode radl, String state, JavaCode code) {
+    Collection<String> addedLinkRelations = new HashSet<String>();
     for (String transition : radl.stateTransitionNames(state)) {
       ResourceMethod resourceMethod = radl.transitionMethod(transition);
       String controller = getControllerClassName(resourceMethod.getResource());
@@ -695,12 +699,14 @@ public class SpringCodeGenerator implements CodeGenerator {
       code.ensureImport(packagePrefix + '.' + toPackage(resourceMethod.getResource()), controller);
       code.ensureImport("de.escalon.hypermedia.spring", "AffordanceBuilder");
       for (String linkRelation : radl.transitionImplementations(transition)) {
-        String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
-        code.add("    if (helper.isLinkEnabled(%s)) {", linkConstant);
-        code.add("      result.add(AffordanceBuilder");
-        code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, argument);
-        code.add("        .withRel(%s));", linkConstant);
-        code.add("    }");
+        if (addedLinkRelations.add(linkRelation)) {
+          String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
+          code.add("    if (helper.isLinkEnabled(%s)) {", linkConstant);
+          code.add("      result.add(AffordanceBuilder");
+          code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, argument);
+          code.add("        .withRel(%s));", linkConstant);
+          code.add("    }");
+        }
       }
     }
   }
@@ -710,7 +716,8 @@ public class SpringCodeGenerator implements CodeGenerator {
       code.ensureImport(dtoPackage(type), type);
     } else if (NO_TYPE.equals(type)) {
       code.ensureImport(NO_TYPE_PACKAGE, NO_TYPE_PARAMETERLESS);
-      code.ensureImport(STATUS_TYPE_PACKAGE, STATUS_TYPE);
+    } else if (UNKNOWN_OUTPUT_TYPE.equals(type)) {
+      code.ensureImport(UNKNOWN_OUTPUT_TYPE_PACKAGE, UNKNOWN_OUTPUT_TYPE);
     }
   }
 
@@ -719,7 +726,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String returnType(String produces, RadlCode radl, String resource, String method) {
-    final String noType = produces.isEmpty() ? NO_TYPE : UNKNOWN_TYPE;
+    final String noType = produces.isEmpty() ? NO_TYPE : UNKNOWN_OUTPUT_TYPE;
     String result = noType;
     for (String transition : radl.methodTransitions(resource, method)) {
       String propertyGroup = getOutputPropertyGroup(radl, transition);
@@ -730,7 +737,7 @@ public class SpringCodeGenerator implements CodeGenerator {
         if (noType.equals(result)) {
           result = dto;
         } else if (!result.equals(dto)) {
-          result = UNKNOWN_TYPE;
+          result = UNKNOWN_OUTPUT_TYPE;
         }
       }
     }
@@ -753,7 +760,7 @@ public class SpringCodeGenerator implements CodeGenerator {
   }
 
   private String parameterType(String consumes, RadlCode radl, String resource, String method) {
-    final String noType = consumes.isEmpty() ? NO_TYPE : UNKNOWN_TYPE;
+    final String noType = consumes.isEmpty() ? NO_TYPE : UNKNOWN_INPUT_TYPE;
     String result = noType;
     for (String transition : radl.methodTransitions(resource, method)) {
       String propertyGroup = radl.transitionPropertyGroup(transition);
@@ -764,7 +771,7 @@ public class SpringCodeGenerator implements CodeGenerator {
         if (noType.equals(result)) {
           result = dto;
         } else if (!result.equals(dto)) {
-          result = UNKNOWN_TYPE;
+          result = UNKNOWN_INPUT_TYPE;
         }
       }
     }
@@ -948,8 +955,15 @@ public class SpringCodeGenerator implements CodeGenerator {
     if (Boolean.TRUE.toString().equals(type)) {
       returnStatement = "return " + type + ";";
     } else {
-      String arguments = NO_TYPE.equals(type) ? STATUS_TYPE + ".NO_CONTENT" : "";
-      returnStatement = "return new " + type + "(" + arguments + "); ";
+      if (NO_TYPE.equals(type)) {
+        returnStatement = "return new " + type + "(" + STATUS_TYPE + ".NO_CONTENT); ";
+        code.ensureImport(STATUS_TYPE_PACKAGE, STATUS_TYPE);
+      } else if (UNKNOWN_OUTPUT_TYPE.equals(type)) {
+        returnStatement = "return new " + type + "(); ";
+        code.ensureImport(UNKNOWN_OUTPUT_TYPE_PACKAGE, UNKNOWN_OUTPUT_TYPE);
+      } else {
+        returnStatement = "return new " + type + "(); ";
+      }
     }
     // Make sure the comment is not viewed as a to-do in *this* code base
     code.add("    %s// TO%s: Implement", returnStatement, "DO");

@@ -165,7 +165,8 @@ public class SpringCodeGeneratorTest {
     assertEquals("Method annotations", Collections.singleton(methodAnnotation).toString(),
         source.methodAnnotations(method).toString());
     assertEquals("Method arguments", "Object input", source.methodArguments(method));
-    assertEquals("Method return type", "Object", source.methodReturns(method));
+    assertEquals("Method return type", "ResourceSupport", source.methodReturns(method));
+    assertTrue("Doesn't import ResourceSupport", source.imports().contains("org.springframework.hateoas.ResourceSupport"));
     assertTrue("Method body calls helper", source.methodBody(method).contains(
         String.format("helper.%s(input);", method)));
   }
@@ -257,7 +258,7 @@ public class SpringCodeGeneratorTest {
 
   private void assertMethod(JavaCode javaSource, String method) {
     String arguments = "GET".equalsIgnoreCase(method) ? "" : "Object input";
-    String ret = "GET".equalsIgnoreCase(method) ? "Object()" : "ResponseEntity<Void>(HttpStatus.NO_CONTENT)";
+    String ret = "GET".equalsIgnoreCase(method) ? "ResourceSupport()" : "ResponseEntity<Void>(HttpStatus.NO_CONTENT)";
 
     assertEquals("Method arguments for " + method, arguments, javaSource.methodArguments(method));
     // Make sure the comment is not viewed as a to-do in this code base
@@ -904,4 +905,68 @@ public class SpringCodeGeneratorTest {
     assertEquals("Field type", "double", dto.fieldType(property));
   }
 
+  @Test
+  public void generatedControllerAddsLinkOnlyOnce() {
+    String state1 = aName();
+    String state2 = aName();
+    String state3 = aName();
+    String transition12 = aName();
+    String transition13 = aName();
+    String linkRel = aUri();
+    String httpMethod = aMethod();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withStates()
+            .startingAt(state1)
+            .withState(state1)
+                .withTransition(transition12, state2)
+                .end()
+                .withTransition(transition13, state3)
+                .end()
+            .end()
+            .withState(state2)
+            .end()
+            .withState(state3)
+            .end()
+        .end()
+        .withLinkRelations()
+            .withLinkRelation(linkRel, null)
+                .implementing(transition12, transition13)
+            .end()
+        .end()
+        .withMediaTypes(true, JSON_LD)
+        .withResource()
+            .named(state1)
+            .withMethod(httpMethod)
+                .transitioningTo("Start")
+                .producing()
+            .end()
+        .end()
+        .withResource()
+            .named(state2)
+            .withMethod(httpMethod)
+                .transitioningTo(transition12)
+                .producing()
+            .end()
+        .end()
+        .withResource()
+            .named(state3)
+            .withMethod(httpMethod)
+                .transitioningTo(transition13)
+                .producing()
+            .end()
+        .end()
+    .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode controller1 = getType(sources, controllerName(state1));
+    int numLinks = 0;
+    for (String line : controller1.methodBody(javaMethodName(httpMethod)).split("\n")) {
+      if (line.trim().startsWith("if (helper.isLinkEnabled(")) {
+        numLinks++;
+      }
+    }
+    assertEquals("#links", 1, numLinks);
+  }
+  
 }

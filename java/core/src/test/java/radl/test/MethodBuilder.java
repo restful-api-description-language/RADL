@@ -65,12 +65,14 @@ public class MethodBuilder {
     return parent;
   }
 
-  public MethodBuilder transitioningTo(String name) {
-    builder().element("transitions")
-        .element("transition")
-            .attribute("ref", name)
-        .end()
-    .end();
+  public MethodBuilder transitioningTo(String... names) {
+    builder().element("transitions");
+    for (String name : names) {
+      builder().element("transition")
+          .attribute("ref", name)
+      .end();
+    }
+    builder().end();
     return this;
   }
 
