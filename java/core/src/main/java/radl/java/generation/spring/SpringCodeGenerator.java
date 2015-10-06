@@ -189,13 +189,12 @@ public class SpringCodeGenerator implements CodeGenerator {
       if (ref.isEmpty()) {
         ref = name;
       }
-      if (!added) {
-        added = true;
-        code.add("");
-      }
       code.add("import %s.%s.%s;", packagePrefix, toPackage(ref), getDtoClass(ref));
+      added = true;
     }
-    code.add("");
+    if (added) {
+      code.add("");
+    }
   }
 
   private void addSemanticAnnotationImport(PropertyGroup propertyGroup, Code code) {
