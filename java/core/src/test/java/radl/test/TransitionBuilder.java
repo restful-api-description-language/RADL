@@ -8,10 +8,9 @@ public class TransitionBuilder {
 
   public TransitionBuilder(StateBuilder parent, String name, String state) {
     this.parent = parent;
-    builder().element("transitions")
-      .element("transition")
-          .attribute("name", name)
-          .attribute("to", state);
+    builder().element("transition")
+        .attribute("name", name)
+        .attribute("to", state);
   }
 
   private DocumentBuilder builder() {
@@ -19,7 +18,7 @@ public class TransitionBuilder {
   }
 
   public StateBuilder end() {
-    builder().end().end();
+    builder().end();
     return parent;
   }
 
