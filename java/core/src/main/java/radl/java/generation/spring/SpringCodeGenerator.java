@@ -420,7 +420,9 @@ public class SpringCodeGenerator implements CodeGenerator {
   private Code endErrorHandler(JavaCode errorHandler) {
     errorHandler.add("  private ResponseEntity<%s> error(Exception e, %s statusCode) {", ERROR_DTO_TYPE, STATUS_TYPE);
     errorHandler.add("    %s error = new %s();", ERROR_DTO_TYPE, ERROR_DTO_TYPE);
-    errorHandler.add("    error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
+    errorHandler.add("    if (e instanceof %s) {", IDENTIFIABLE_TYPE);
+    errorHandler.add("      error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
+    errorHandler.add("    }");
     errorHandler.add("    error.title = e.getMessage();");
     errorHandler.add("    return new ResponseEntity<%s>(error, statusCode);", ERROR_DTO_TYPE);
     errorHandler.add("  }");
