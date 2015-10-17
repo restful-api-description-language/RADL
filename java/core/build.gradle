@@ -17,7 +17,8 @@ dependencies {
       // TODO: Java 7 only   'jgraphx:jgraphx:3.0.1.1', 
       'isorelax:isorelax:20030108', 
       'commons-lang:commons-lang:2.6',
-      'org.jsoup:jsoup:1.8.2'
+      'org.jsoup:jsoup:1.8.2',
+      'org.atteo:evo-inflector:1.2.1'
   compile('com.thaiopensource:jing:20091111') {
     exclude module: 'xml-apis'
     exclude module: 'saxon', group: 'net.sf.saxon'

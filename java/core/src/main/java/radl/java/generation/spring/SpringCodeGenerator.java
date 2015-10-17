@@ -18,8 +18,10 @@ import java.util.TreeMap;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.atteo.evo.inflector.English;
 import org.w3c.dom.Document;
 
+import radl.common.StringUtil;
 import radl.core.code.Code;
 import radl.core.code.MediaType;
 import radl.core.code.Property;
@@ -167,12 +169,14 @@ public class SpringCodeGenerator implements CodeGenerator {
     addSemanticAnnotationImport(propertyGroup, code);
     addDtoImports(propertyGroup, code);
     code.add("");
-    addSemanticAnnotation(propertyGroup, "", code);
+    String annotation = getSemanticAnnotation(propertyGroup, "");
+    if (annotation != null) {
+      code.add(annotation);
+    }
     String result = getDtoClass(propertyGroup.name());
     code.add("public class %s %s{", result, superType);
     code.add("");
     addDtoFields(hasHyperMediaTypes, propertyGroup, code, sources);
-    code.add("");
     code.add("}");
     sources.add(code);
     return result;
@@ -204,20 +208,23 @@ public class SpringCodeGenerator implements CodeGenerator {
     }
   }
 
-  private void addSemanticAnnotation(Property property, String indent, final Code result) {
+  private String getSemanticAnnotation(Property property, String indent) {
+    String result = null;
     if (defaultMediaType != null && defaultMediaType.isSemanticMediaType()) {
       String uri = property.uri();
       if (!uri.isEmpty()) {
-        result.add("%s@%s(\"%s\")", indent, SEMANTIC_ANNOTATION, Java.toString(uri));
+        result = String.format("%s@%s(\"%s\")", indent, SEMANTIC_ANNOTATION, Java.toString(uri));
       }
     }
+    return result;
   }
 
   private void addDtoFields(boolean hasHyperMediaTypes, PropertyGroup propertyGroup, JavaCode dto,
       Collection<Code> sources) {
-    for (String name : propertyGroup.propertyNames()) {
-      Property property = propertyGroup.property(name);
-      addSemanticAnnotation(property, "  ", dto);
+    Collection<JavaBeanProperty> properties = new ArrayList<JavaBeanProperty>();
+    for (String propertyName : propertyGroup.propertyNames()) {
+      Property property = propertyGroup.property(propertyName);
+      String annotation = getSemanticAnnotation(property, "  ");
       String type = getType(property, hasHyperMediaTypes, sources);
       int index = type.lastIndexOf('.');
       if (index > 0) {
@@ -225,8 +232,10 @@ public class SpringCodeGenerator implements CodeGenerator {
         dto.ensureImport(type.substring(0, index), simpleType);
         type = simpleType;
       }
-      dto.add("  public %s %s;", type, name);
+      String fieldName = property.repeats() ? English.plural(propertyName) : propertyName;
+      properties.add(new JavaBeanProperty(fieldName, type, annotation));
     }
+    addProperties(dto, properties);
   }
 
   protected String getType(Property property, boolean hasHyperMediaTypes, Collection<Code> sources) {
@@ -290,11 +299,35 @@ public class SpringCodeGenerator implements CodeGenerator {
     result.add("");
     result.add("public class %s {", ERROR_DTO_TYPE);
     result.add("");
-    result.add("  public String title;");
-    result.add("  public String type;");
-    result.add("");
+    addProperties(result, Arrays.asList(new JavaBeanProperty("title"), new JavaBeanProperty("type")));
     result.add("}");
     return result;
+  }
+
+  private void addProperties(Code code, Iterable<JavaBeanProperty> properties) {
+    if (!properties.iterator().hasNext()) {
+      return;
+    }
+    for (JavaBeanProperty property : properties) {
+      if (property.getAnnotation() != null) {
+        code.add("%s", property.getAnnotation());
+      }
+      code.add("  private %s %s;", property.getType(), property.getName());
+    }
+    code.add("");
+    for (JavaBeanProperty property : properties) {
+      String type = property.getType();
+      String name = property.getName();
+      String capName = StringUtil.initCap(name);
+      code.add("  public %s get%s() {", type, capName);
+      code.add("    return %s;", name);
+      code.add("  }");
+      code.add("");
+      code.add("  public void set%s(%s %s) {", capName, type, name);
+      code.add("    this.%s = %s;", name, name);
+      code.add("  }");
+      code.add("");
+    }
   }
 
   private Code generateIdentifiable() {
@@ -423,9 +456,9 @@ public class SpringCodeGenerator implements CodeGenerator {
     errorHandler.add("  private ResponseEntity<%s> error(Exception e, %s statusCode) {", ERROR_DTO_TYPE, STATUS_TYPE);
     errorHandler.add("    %s error = new %s();", ERROR_DTO_TYPE, ERROR_DTO_TYPE);
     errorHandler.add("    if (e instanceof %s) {", IDENTIFIABLE_TYPE);
-    errorHandler.add("      error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
+    errorHandler.add("      error.setType(((%s)e).getId());", IDENTIFIABLE_TYPE);
     errorHandler.add("    }");
-    errorHandler.add("    error.title = e.getMessage();");
+    errorHandler.add("    error.setTitle(e.getMessage());");
     errorHandler.add("    return new ResponseEntity<%s>(error, statusCode);", ERROR_DTO_TYPE);
     errorHandler.add("  }");
     errorHandler.add("");

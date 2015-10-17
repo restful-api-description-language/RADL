@@ -27,8 +27,8 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 
+import radl.common.StringUtil;
 import radl.core.Log;
-import radl.core.extraction.StringUtil;
 
 
 /**

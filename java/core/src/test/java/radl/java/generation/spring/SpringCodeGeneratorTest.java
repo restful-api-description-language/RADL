@@ -696,10 +696,10 @@ public class SpringCodeGeneratorTest {
     JavaCode dto1 = getType(sources, dtoName(name1));
     assertEquals("Package", packagePrefix + '.' + name1, dto1.packageName());
     assertTrue("Annotations #1", dto1.typeAnnotations().isEmpty());
-    TestUtil.assertCollectionEquals("Fields #1", Arrays.asList(property1, property2, property3), dto1.fieldNames());
+    TestUtil.assertCollectionEquals("Fields #1", Arrays.asList(property1, property2, property3 + 's'), dto1.fieldNames());
     assertEquals("Field #1 type", "String", dto1.fieldType(property1));
     assertEquals("Field #2 type", property2Type, dto1.fieldType(property2));
-    assertEquals("Field #3 type", "String[]", dto1.fieldType(property3));
+    assertEquals("Field #3 type", "String[]", dto1.fieldType(property3 + 's'));
 
     JavaCode dto2 = getType(sources, dtoName(name2));
     assertTrue("Missing import on Expose", dto2.imports().contains("de.escalon.hypermedia.hydra.mapping.Expose"));
@@ -968,5 +968,5 @@ public class SpringCodeGeneratorTest {
     }
     assertEquals("#links", 1, numLinks);
   }
-  
+
 }

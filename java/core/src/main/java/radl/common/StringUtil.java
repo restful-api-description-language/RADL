@@ -1,7 +1,7 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.extraction;
+package radl.common;
 
 
 /**
@@ -22,6 +22,10 @@ public final class StringUtil {
       return value.substring(1, value.length() - 1);
     }
     return value;
+  }
+
+  public static String initCap(String text) {
+    return Character.toUpperCase(text.charAt(0)) + text.substring(1);
   }
 
 }

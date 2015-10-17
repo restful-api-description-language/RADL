@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import radl.common.StringUtil;
+
 
 /**
  * Information about a method in RADL.
