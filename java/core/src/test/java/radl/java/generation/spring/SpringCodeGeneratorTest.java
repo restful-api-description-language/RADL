@@ -21,6 +21,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import radl.common.StringUtil;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
 import radl.java.code.Java;
@@ -76,9 +77,9 @@ public class SpringCodeGeneratorTest {
     assertEquals("Package", packagePrefix + '.' + expectedClassName.replaceAll("\\-", ""),
         javaSource.packageName());
 
-    String fieldName = "helper";
+    String fieldName = "support";
     TestUtil.assertCollectionEquals("Fields", Arrays.asList(fieldName), javaSource.fieldNames());
-    assertEquals("Field type", controllerHelperName(expectedClassName), javaSource.fieldType(fieldName));
+    assertEquals("Field type", controllerSupportName(expectedClassName), javaSource.fieldType(fieldName));
     assertEquals("Field annotation", Arrays.asList("@Autowired"), javaSource.fieldAnnotations(fieldName));
   }
 
@@ -167,8 +168,8 @@ public class SpringCodeGeneratorTest {
     assertEquals("Method arguments", "Object input", source.methodArguments(method));
     assertEquals("Method return type", "ResourceSupport", source.methodReturns(method));
     assertTrue("Doesn't import ResourceSupport", source.imports().contains("org.springframework.hateoas.ResourceSupport"));
-    assertTrue("Method body calls helper", source.methodBody(method).contains(
-        String.format("helper.%s(input);", method)));
+    assertTrue("Method body calls support", source.methodBody(method).contains(
+        String.format("support.%s(input);", method)));
   }
 
   private String javaMethodName(String httpMethod) {
@@ -231,18 +232,18 @@ public class SpringCodeGeneratorTest {
     assertTrue("Missing controller", sources.hasNext());
     sources.next();
     assertTrue("Missing service", sources.hasNext());
-    assertControllerHelper(resource, sources.next(), method1, method2);
+    assertControllerSupport(resource, sources.next(), method1, method2);
     assertType(TYPE_API, sources);
     assertType(TYPE_URIS, sources);
     assertFalse("Extra source", sources.hasNext());
   }
 
-  private void assertControllerHelper(String expectedClassName, Code source, String... methods) {
+  private void assertControllerSupport(String expectedClassName, Code source, String... methods) {
     assertEquals("Source type", JavaCode.class, source.getClass());
     JavaCode javaSource = (JavaCode)source;
 
     assertFileComments(javaSource);
-    assertEquals("Class name", controllerHelperName(expectedClassName), javaSource.typeName());
+    assertEquals("Class name", controllerSupportName(expectedClassName), javaSource.typeName());
     assertEquals("Class annotations", Arrays.asList("@Service"), javaSource.typeAnnotations());
     assertImports(Arrays.asList("org.springframework.stereotype.Service"), javaSource);
     assertEquals("Package", packagePrefix + '.' + expectedClassName, javaSource.packageName());
@@ -252,8 +253,8 @@ public class SpringCodeGeneratorTest {
     }
   }
 
-  private String controllerHelperName(String resourceName) {
-    return typeName(resourceName, "ControllerHelper");
+  private String controllerSupportName(String resourceName) {
+    return typeName(resourceName, "ControllerSupport");
   }
 
   private void assertMethod(JavaCode javaSource, String method) {
@@ -789,8 +790,8 @@ public class SpringCodeGeneratorTest {
     assertEquals("Returns #2", "ResponseEntity<Void>", controller2.methodReturns(controllerMethod2));
     assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
 
-    JavaCode controllerHelper2 = getType(sources, controllerHelperName(state2));
-    assertTrue("Return helper #2", controllerHelper2.methodBody(controllerMethod2).contains(
+    JavaCode controllerSupport2 = getType(sources, controllerSupportName(state2));
+    assertTrue("Return support #2", controllerSupport2.methodBody(controllerMethod2).contains(
         "return new ResponseEntity<Void>(HttpStatus.NO_CONTENT)"));
   }
 
@@ -848,12 +849,14 @@ public class SpringCodeGeneratorTest {
     assertEquals("DTO super class", "ResourceSupport", dto1.superTypeName());
 
     String controllerMethod1 = javaMethodName(httpMethod1);
-    JavaCode controllerHelper1 = getType(sources, controllerHelperName(state1));
-    assertEquals("Controller helper #1 method", "return new " + dto1.typeName() + "(); // TODO: Implement",
-        controllerHelper1.methodBody(controllerMethod1));
-    assertTrue("Controller helper #1 has isLinkEnabled", controllerHelper1.methods().contains("isLinkEnabled"));
-    assertTrue("Controller helper #1 isLinkEnabled",
-        controllerHelper1.methodBody("isLinkEnabled").startsWith("return true;"));
+    JavaCode controllerSupport1 = getType(sources, controllerSupportName(state1));
+    assertEquals("Controller support #1 method", "return new " + dto1.typeName() + "(); // TODO: Implement",
+        controllerSupport1.methodBody(controllerMethod1));
+    
+    String transitionEnabledMethodName = "can" + StringUtil.initCap(transition);
+    assertTrue("Controller support #1 has isLinkEnabled", controllerSupport1.methods().contains(transitionEnabledMethodName));
+    assertTrue("Controller support #1 isLinkEnabled",
+        controllerSupport1.methodBody(transitionEnabledMethodName).startsWith("return true;"));
 
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerName2 = controllerName(state2);
@@ -862,8 +865,12 @@ public class SpringCodeGeneratorTest {
         controller1.imports().contains(controller2.fullyQualifiedName()));
     assertTrue("Controller #1 doesn't import controller link builder",
         controller1.imports().contains("de.escalon.hypermedia.spring.AffordanceBuilder"));
-    assertTrue("Controller #1 doesn't add link", controller1.methodBody(controllerMethod1).contains(
+    
+    String methodBody = controller1.methodBody(controllerMethod1);
+    assertTrue("Controller #1 doesn't add link", methodBody.contains(
         "methodOn(" + controllerName2 + ".class)." + javaMethodName(httpMethod2) + "(new "));
+    assertTrue("Controller doesn't check transition enabled",
+        methodBody.contains("support." + transitionEnabledMethodName + "()"));
   }
 
   @Test
@@ -962,7 +969,7 @@ public class SpringCodeGeneratorTest {
     JavaCode controller1 = getType(sources, controllerName(state1));
     int numLinks = 0;
     for (String line : controller1.methodBody(javaMethodName(httpMethod)).split("\n")) {
-      if (line.trim().startsWith("if (helper.isLinkEnabled(")) {
+      if (line.trim().startsWith("if (support.can")) {
         numLinks++;
       }
     }
