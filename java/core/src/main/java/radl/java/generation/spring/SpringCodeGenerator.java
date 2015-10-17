@@ -746,7 +746,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private String transitionEnabledMethodName(String transition) {
-    return "can" + Java.toIdentifier(transition);
+    return "can" + StringUtil.initCap(Java.toIdentifier(transition));
   }
 
   private void addReturnTypeImport(String type, JavaCode code) {

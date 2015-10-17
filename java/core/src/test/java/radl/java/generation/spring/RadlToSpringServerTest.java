@@ -83,10 +83,10 @@ public class RadlToSpringServerTest {
     TestUtil.assertCollectionEquals("Header for " + controller.getName(), Arrays.asList(header),
         javaCode.fileComments());
 
-    File controllerHelper = find(files, upper + name + "ControllerHelper.java");
-    assertNotNull("Missing controller helper: " + files, controllerHelper);
-    expectedPath = expectedFilePath(mainSourceSetDir, packagePrefix, lower + name, controllerHelper);
-    assertEquals("Controller helper path", expectedPath, controllerHelper.getAbsolutePath());
+    File controllerSupport = find(files, upper + name + "ControllerSupport.java");
+    assertNotNull("Missing controller support: " + files, controllerSupport);
+    expectedPath = expectedFilePath(mainSourceSetDir, packagePrefix, lower + name, controllerSupport);
+    assertEquals("Controller support path", expectedPath, controllerSupport.getAbsolutePath());
   }
 
   private JavaCode toJava(File file) {
