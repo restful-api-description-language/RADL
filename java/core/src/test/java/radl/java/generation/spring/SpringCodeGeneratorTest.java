@@ -165,7 +165,7 @@ public class SpringCodeGeneratorTest {
         httpMethod, mediaTypeToConstant(mediaType1, false), mediaTypeToConstant(mediaType2, false));
     assertEquals("Method annotations", Collections.singleton(methodAnnotation).toString(),
         source.methodAnnotations(method).toString());
-    assertEquals("Method arguments", "Object input", source.methodArguments(method));
+    assertEquals("Method arguments", "@RequestBody Object input", source.methodArguments(method));
     assertEquals("Method return type", "ResourceSupport", source.methodReturns(method));
     assertTrue("Doesn't import ResourceSupport", source.imports().contains("org.springframework.hateoas.ResourceSupport"));
     assertTrue("Method body calls support", source.methodBody(method).contains(
@@ -781,7 +781,7 @@ public class SpringCodeGeneratorTest {
     assertTrue("Imports #2 contains ResponseEntity",
         controller2.imports().contains("org.springframework.http.ResponseEntity"));
     assertEquals("Returns #2", "ResponseEntity<Void>", controller2.methodReturns(controllerMethod2));
-    assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
+    assertEquals("Args #2", "@RequestBody " + dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
 
     JavaCode controllerSupport2 = getType(sources, controllerSupportName(state2));
     assertTrue("Missing method #2: " + controllerSupport2.methods(),

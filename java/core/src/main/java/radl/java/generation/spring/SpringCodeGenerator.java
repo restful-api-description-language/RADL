@@ -774,7 +774,13 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     boolean hasReturn = !NO_TYPE.equals(type);
     addReturnTypeImport(type, code);
     String javaMethod = httpToJavaMethod(method);
-    code.add("  public %s %s(%s) {", type, javaMethod, parameters(consumes, radl, resource, method, argName));
+    if (argName.isEmpty()) {
+      code.add("  public %s %s(%s) {", type, javaMethod, parameters(consumes, radl, resource, method, argName));
+    } else {
+      code.add("  public %s %s(@RequestBody %s) {", type, javaMethod, parameters(consumes, radl, resource, method,
+          argName));
+      code.ensureImport("org.springframework.web.bind.annotation", "RequestBody");
+    }
     if (hasReturn) {
       code.add("    %s<%s> %s = %s.%s(%s);", PERMITTED_ACTIONS_TYPE, type, PERMITTED_ACTIONS_VAR, CONTROLLER_SUPPORT_VAR,
           javaMethod, argName);
