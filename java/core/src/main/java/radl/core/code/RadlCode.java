@@ -22,6 +22,7 @@ import radl.core.Radl;
  */
 public class RadlCode extends XmlCode {
 
+  private static final String START_STATE = "";
   private static final String STATES_PATH = "//radl:states/radl:state";
   private static final String TRANSITION_PATH = "//radl:states/radl:*/radl:transitions/radl:transition";
   private static final String LINK_RELATIONS_PATH = "//radl:link-relations/radl:link-relation";
@@ -74,7 +75,7 @@ public class RadlCode extends XmlCode {
     if (result == null) {
       result = elementsName(STATES_PATH);
       if (multiple("//radl:states/radl:start-state", Element.class).iterator().hasNext()) {
-        result = combine(result, "");
+        result = combine(result, START_STATE);
       }
       states = result;
     }
@@ -86,6 +87,10 @@ public class RadlCode extends XmlCode {
     collection.add(second);
     Collections.sort(collection);
     return collection;
+  }
+  
+  public boolean isStartState(String state) {
+    return START_STATE.equals(state);
   }
 
   public Iterable<String> stateTransitionNames(String state) {
@@ -104,7 +109,7 @@ public class RadlCode extends XmlCode {
   
   private String optional(Iterable<String> values) {
     Iterator<String> result = values.iterator();
-    return result.hasNext() ? result.next() : "";
+    return result.hasNext() ? result.next() : START_STATE;
   }
 
   public Iterable<String> transitionEnds(String transition) {
@@ -138,7 +143,7 @@ public class RadlCode extends XmlCode {
       }
     }
     found = elementsAttribute("uri-template", xpath, resource).iterator();
-    return found.hasNext() ? found.next() : "";
+    return found.hasNext() ? found.next() : START_STATE;
   }
 
   public Iterable<String> methodRequestRepresentations(String resource, String method) {

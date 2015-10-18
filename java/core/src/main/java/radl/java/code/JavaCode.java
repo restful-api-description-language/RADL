@@ -83,6 +83,10 @@ public class JavaCode extends Code {
     }
     return result;
   }
+  
+  public boolean isClass() {
+    return CLASS_NAME_PATTERN.matcher(text()).matches();
+  }
 
   /**
    * @return The annotations on the class defined in this code, or an empty collection if there are none
@@ -269,7 +273,7 @@ public class JavaCode extends Code {
   }
   
   public String fullyQualifiedName() {
-    return String.format("%s.%s", packageName(), typeName());
+    return String.format("%s.%s", packageName(), simpleTypeName());
   }
 
   /**
@@ -518,6 +522,10 @@ public class JavaCode extends Code {
 
   private String statement(String keyword, String fullyQualifiedName) {
     return keyword + ' ' + fullyQualifiedName + ';';
+  }
+
+  public String simpleTypeName() {
+    return stripGenerics(typeName());
   }
 
 }

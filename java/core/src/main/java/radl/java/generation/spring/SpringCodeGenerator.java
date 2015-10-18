@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -64,12 +65,18 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final Collection<String> FRAMEWORK_HANDLED_STATUSES = Arrays.asList("405", "406");
   private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
   private static final String SEMANTIC_ANNOTATION = "Expose";
-  private static final String CONTROLLER_SUPPORT_NAME = "support";
+  private static final String PERMITTED_ACTIONS_VAR = "permittedActions";
+  private static final String PERMITTED_ACTIONS_TYPE = StringUtil.initCap(PERMITTED_ACTIONS_VAR);
+  private static final String CONTROLLER_SUPPORT_VAR = "support";
+  private static final String ACTIONS_TYPE = "Actions";
+  private static final String TRANSITITION_CHECK_NAME = "contains";
+  private static final String TRANSITITION_DENY_NAME = "exclude";
 
   private final String packagePrefix;
   private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> linkRelationConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
+  private final Map<String, Constant> transitionConstants = new TreeMap<String, Constant>();
   private final Map<String, Constant> uriConstants = new TreeMap<String, Constant>();
   private final String header;
   private MediaType defaultMediaType;
@@ -435,6 +442,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     errorHandler.add("    return error(e, %s.%s);", STATUS_TYPE, HTTP_STATUSES.get(statusCode));
     errorHandler.add("  }");
     errorHandler.add("");
+    errorHandler.ensureImport(NO_TYPE_PACKAGE, "ResponseEntity");
   }
 
   private String handledExceptionType(JavaCode exceptionType) {
@@ -466,20 +474,88 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return errorHandler;
   }
 
-  private void generateSourcesForResources(RadlCode radl, final boolean hasHyperMediaTypes,
-      final Collection<Code> sources) throws Exception {
+  private void generateSourcesForResources(RadlCode radl, boolean hasHyperMediaTypes, Collection<Code> sources) {
     Iterator<String> startTransitions = radl.stateTransitionNames("").iterator();
     String startTransition = startTransitions.hasNext() ? startTransitions.next() : null;
+    sources.add(generatePermittedActions());
+    sources.add(generateActions(radl, hasHyperMediaTypes));
     for (String resource : radl.resourceNames()) {
       sources.add(generateController(radl, resource, hasHyperMediaTypes, startTransition));
-      sources.add(generateControllerSupport(radl, hasHyperMediaTypes, resource));
+      sources.add(generateControllerSupport(radl, resource));
     }
     sources.add(generateApi(radl));
     sources.add(generateUris());
   }
 
-  private Code generateUris() {
+  private Code generatePermittedActions() {
     Code result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("import java.util.ArrayList;");
+    result.add("import java.util.Collection;");
+    result.add("");
+    result.add("");
+    result.add("public class %s<T> {", PERMITTED_ACTIONS_TYPE);
+    result.add("");
+    result.add("  private final T target;");
+    result.add("  private final Collection<String> excludedActions = new ArrayList<String>();");
+    result.add("");
+    result.add("  public %s(T target) {", PERMITTED_ACTIONS_TYPE);
+    result.add("    this.target = target;");
+    result.add("  }");
+    result.add("");
+    result.add("  public T getTarget() {");
+    result.add("    return target;");
+    result.add("  }");
+    result.add("");
+    result.add("  public void %s(String action) {", TRANSITITION_DENY_NAME);
+    result.add("    excludedActions.add(action);");
+    result.add("  }");
+    result.add("");
+    result.add("  public boolean %s(String action) {", TRANSITITION_CHECK_NAME);
+    result.add("    return !excludedActions.contains(action);");
+    result.add("  }");
+    result.add("");
+    result.add("}");
+    return result;
+  }
+
+  private Code generateActions(RadlCode radl, boolean hasHyperMediaTypes) {
+    JavaCode result = new JavaCode();
+    addPackage(IMPL_PACKAGE, result);
+    result.add("");
+    result.add("");
+    result.add("public interface %s {", ACTIONS_TYPE);
+    if (hasHyperMediaTypes) {
+      addTransitionConstants(radl, result);
+      result.add("");
+    }
+    result.add("}");
+    return result;
+  }
+
+  private void addTransitionConstants(RadlCode radl, JavaCode code) {
+    for (String transition : getTransitions(radl)) {
+      ensureConstant("", transition, transition, null, transitionConstants);
+    }
+    addConstants(transitionConstants, "", code);
+  }
+
+  private Iterable<String> getTransitions(RadlCode radl) {
+    Collection<String> result = new TreeSet<String>();
+    for (String state : radl.stateNames()) {
+      if (radl.isStartState(state)) {
+        continue;
+      }
+      for (String transition : radl.stateTransitionNames(state)) {
+        result.add(transition);
+      }
+    }
+    return result;
+  }
+
+  private Code generateUris() {
+    JavaCode result = new JavaCode();
     addPackage(IMPL_PACKAGE, result);
     result.add("");
     result.add("");
@@ -490,12 +566,12 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private void addUris(Code code) {
+  private void addUris(JavaCode code) {
     addConstants(filter(uriConstants, CONSTANT_PREFIX_URL + BILLBOARD_URL, false), "Resource locations", code);
   }
 
-  private Code generateApi(RadlCode radl) throws Exception {
-    Code result = new JavaCode();
+  private Code generateApi(RadlCode radl) {
+    JavaCode result = new JavaCode();
     addPackage(API_PACKAGE, result);
     result.add("");
     result.add("");
@@ -509,20 +585,20 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private void addErrors(RadlCode radl, Code code) throws Exception {
+  private void addErrors(RadlCode radl, JavaCode code) {
     addErrorConstants(radl);
     addConstants(errorConstants, "Error conditions", code);
   }
 
-  private void addErrorConstants(RadlCode radl) throws Exception {
+  private void addErrorConstants(RadlCode radl) {
     for (String value : radl.errors()) {
       String documentation = radl.errorDocumentation(value);
       errorConstants.put(value, ensureConstant("ERROR_", getErrorName(value), value, documentation, errorConstants));
     }
   }
 
-  private void addBillboardUri(Code code) {
-    addConstants(filter(uriConstants, CONSTANT_PREFIX_URL + BILLBOARD_URL, true), "Entry point", code);
+  private void addBillboardUri(JavaCode code) {
+    addConstants(filter(uriConstants, CONSTANT_PREFIX_URL + BILLBOARD_URL, true), "", code);
   }
 
   private Map<String, Constant> filter(Map<String, Constant> values, String value, boolean include) {
@@ -535,11 +611,11 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private void addLinkRelations(Code code) throws Exception {
+  private void addLinkRelations(JavaCode code) {
     addConstants(linkRelationConstants, "Link relations", code);
   }
 
-  private void addLinkRelationConstants(RadlCode radl) throws Exception {
+  private void addLinkRelationConstants(RadlCode radl) {
     for (String value : radl.linkRelationNames()) {
       String[] segments = value.split("/");
       String name = segments[segments.length - 1];
@@ -548,7 +624,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     }
   }
 
-  private void addMediaTypes(Code code) {
+  private void addMediaTypes(JavaCode code) {
     addConstants(mediaTypeConstants, "Media types", code);
     if (defaultMediaType != null) {
       if (mediaTypeConstants.isEmpty()) {
@@ -559,8 +635,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     }
   }
 
-  private void addConstants(Map<String, Constant> constants, String heading, Code code) {
+  private void addConstants(Map<String, Constant> constants, String heading, JavaCode code) {
     if (!constants.isEmpty()) {
+      String scope = code.isClass() ? "public static " : "";
       addConstantsHeading(heading, code);
       for (Entry<String, Constant> entry : constants.entrySet()) {
         Constant constant = entry.getValue();
@@ -571,13 +648,16 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
           }
           code.add("   */");
         }
-        code.add("  String %s = \"%s\";", constant.getName(), entry.getKey());
+        code.add("  %sString %s = \"%s\";", scope, constant.getName(), entry.getKey());
       }
     }
   }
 
   private void addConstantsHeading(String heading, Code code) {
     code.add("");
+    if (heading.isEmpty()) {
+      return;
+    }
     code.add("");
     code.add("  // %s", heading);
     code.add("");
@@ -633,7 +713,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private Code generateController(RadlCode radl, String resource, final boolean hasHyperMediaTypes,
-      String startTransition) throws Exception {
+      String startTransition) {
     final JavaCode result = new JavaCode();
     String name = resource;
     addPackage(name, result);
@@ -663,7 +743,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     result.add("public class %s {", getControllerClassName(resource));
     result.add("");
     result.add("  @Autowired");
-    result.add("  private %s %s;", getControllerSupportClassName(resource), CONTROLLER_SUPPORT_NAME);
+    result.add("  private %s %s;", getControllerSupportClassName(resource), CONTROLLER_SUPPORT_VAR);
     result.add("");
     for (String method : radl.methodNames(resource)) {
       addControllerMethod(radl, resource, method, hasHyperMediaTypes, result);
@@ -672,7 +752,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private boolean transitionsToStart(RadlCode radl, final String startTransition, String resource) throws Exception {
+  private boolean transitionsToStart(RadlCode radl, final String startTransition, String resource) {
     for (String method : radl.methodNames(resource)) {
       for (String transition : radl.methodTransitions(resource, method)) {
         if (transition.equals(startTransition)) {
@@ -684,21 +764,28 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private void addControllerMethod(RadlCode radl, String resource, String method, boolean hasHyperMediaTypes,
-      JavaCode code) throws Exception {
+      JavaCode code) {
     String consumes = getConsumes(radl, resource, method);
     String produces = getProduces(radl, resource, method);
     String argName = parameterName(consumes);
     code.add("  @RequestMapping(method = RequestMethod.%s%s%s)", method.toUpperCase(Locale.getDefault()), consumes,
         produces);
     String type = returnType(produces, radl, resource, method);
+    boolean hasReturn = !NO_TYPE.equals(type);
     addReturnTypeImport(type, code);
     String javaMethod = httpToJavaMethod(method);
     code.add("  public %s %s(%s) {", type, javaMethod, parameters(consumes, radl, resource, method, argName));
-    code.add("    %s result = %s.%s(%s);", type, CONTROLLER_SUPPORT_NAME, javaMethod, argName);
-    if (hasHyperMediaTypes) {
-      addLinks(radl, resource, method, code);
+    if (hasReturn) {
+      code.add("    %s<%s> %s = %s.%s(%s);", PERMITTED_ACTIONS_TYPE, type, PERMITTED_ACTIONS_VAR, CONTROLLER_SUPPORT_VAR,
+          javaMethod, argName);
+      code.add("    %s result = %s.getTarget();", type, PERMITTED_ACTIONS_VAR);
+      if (hasHyperMediaTypes) {
+        addLinks(radl, resource, method, code);
+      }
+      code.add("    return result;");
+    } else {
+      code.add("    return %s.%s(%s);", CONTROLLER_SUPPORT_VAR, javaMethod, argName);
     }
-    code.add("    return result;");
     code.add("  }");
     code.add("");
   }
@@ -735,18 +822,16 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       for (String linkRelation : radl.transitionImplementations(transition)) {
         if (addedLinkRelations.add(linkRelation)) {
           String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
-          code.add("    if (support.%s()) {", transitionEnabledMethodName(transition));
+          code.add("    if (%s.%s(%s.%s)) {", PERMITTED_ACTIONS_VAR, TRANSITITION_CHECK_NAME, ACTIONS_TYPE,
+              transitionConstants.get(transition).getName());
           code.add("      result.add(AffordanceBuilder");
           code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, argument);
           code.add("        .withRel(%s));", linkConstant);
           code.add("    }");
+          code.ensureImport(packagePrefix + '.' + IMPL_PACKAGE, ACTIONS_TYPE);
         }
       }
     }
-  }
-
-  private String transitionEnabledMethodName(String transition) {
-    return "can" + StringUtil.initCap(Java.toIdentifier(transition));
   }
 
   private void addReturnTypeImport(String type, JavaCode code) {
@@ -756,6 +841,8 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       code.ensureImport(NO_TYPE_PACKAGE, NO_TYPE_PARAMETERLESS);
     } else if (UNKNOWN_OUTPUT_TYPE.equals(type)) {
       code.ensureImport(UNKNOWN_OUTPUT_TYPE_PACKAGE, UNKNOWN_OUTPUT_TYPE);
+    } else if (PERMITTED_ACTIONS_TYPE.equals(type)) {
+      code.ensureImport(packagePrefix + '.' + IMPL_PACKAGE, PERMITTED_ACTIONS_TYPE);
     }
   }
 
@@ -834,36 +921,14 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       Map<String, Constant> constants) {
     Constant result = constants.get(value);
     if (result == null) {
-      String contantName = namePrefix + toJava(name.replace('/', '_').toUpperCase(Locale.getDefault()));
+      String contantName = namePrefix + Java.toName(name.replace('/', '_').toUpperCase(Locale.getDefault()));
       result = new Constant(contantName, documentation);
       constants.put(value, result);
     }
     return result;
   }
 
-  private String toJava(String value) {
-    StringBuilder result = new StringBuilder(value);
-    int i = 0;
-    boolean nonJava = false;
-    while (i < result.length()) {
-      if (Character.isJavaIdentifierPart(result.charAt(i))) {
-        nonJava = false;
-        i++;
-      } else {
-        if (nonJava) {
-          result.delete(i, i + 1);
-        } else {
-          result.setCharAt(i, '_');
-          nonJava = true;
-          i++;
-        }
-      }
-    }
-    return result.toString();
-  }
-
-  private void addControllerImports(RadlCode radl, String resource, boolean addUris, Code controllerClass)
-      throws Exception {
+  private void addControllerImports(RadlCode radl, String resource, boolean addUris, Code controllerClass) {
     controllerClass.add("import org.springframework.beans.factory.annotation.Autowired;");
     boolean hasMethod = radl.methodNames(resource).iterator().hasNext();
     if (hasMethod || !radl.resourceLocation(resource).isEmpty()) {
@@ -877,6 +942,10 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     controllerClass.add("import %s;", apiType());
     if (addUris) {
       controllerClass.add("import %s;", urisType());
+    }
+    controllerClass.add("");
+    if (hasMethod) {
+      controllerClass.add("import %s.%s.%s;", packagePrefix, IMPL_PACKAGE, PERMITTED_ACTIONS_TYPE);
     }
     controllerClass.add("");
     controllerClass.add("");
@@ -947,11 +1016,13 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return getMediaTypes(radl.methodResponseRepresentations(resource, method), "produces");
   }
 
-  private Code generateControllerSupport(RadlCode radl, boolean hasHyperMediaTypes, String resource) throws Exception {
+  private Code generateControllerSupport(RadlCode radl, String resource) {
     final JavaCode result = new JavaCode();
     addPackage(resource, result);
     result.add("");
     result.add("import org.springframework.stereotype.Service;");
+    result.add("");
+    result.add("import %s.%s.%s;", packagePrefix, IMPL_PACKAGE, ACTIONS_TYPE);
     result.add("");
     result.add("");
     result.add("@Service");
@@ -959,62 +1030,55 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     result.add("");
     for (String method : radl.methodNames(resource)) {
       addControllerSupportMethod(radl, resource, method, result);
-      if (hasHyperMediaTypes) {
-        addTransitionEnabledMethods(radl, resource, method, result);
-      }
     }
     result.add("}");
     return result;
-  }
-
-  private void addTransitionEnabledMethods(RadlCode radl, String resource, String method, final JavaCode result) {
-    for (String transition : radl.methodTransitions(resource, method)) {
-      for (String state : radl.transitionEnds(transition)) {
-        for (String outgoing : radl.stateTransitionNames(state)) {
-          result.add("  public boolean %s() {", transitionEnabledMethodName(outgoing));
-          addDummyReturnStatement("true", result);
-          result.add("  }");
-          result.add("");
-        }
-      }
-    }
   }
 
   private String getControllerSupportClassName(String resource) {
     return getControllerClassName(resource) + "Support";
   }
 
-  private void addControllerSupportMethod(RadlCode radl, String resource, String method, JavaCode code)
-      throws Exception {
+  private void addControllerSupportMethod(RadlCode radl, String resource, String method, JavaCode code) {
     String consumes = getConsumes(radl, resource, method);
     String produces = getProduces(radl, resource, method);
     String argName = parameterName(consumes);
     String args = parameters(consumes, radl, resource, method, argName);
     String type = returnType(produces, radl, resource, method);
+    boolean hasReturn = !NO_TYPE.equals(type);
     addReturnTypeImport(type, code);
-    code.add("  public %s %s(%s) {", type, httpToJavaMethod(method), args);
-    addDummyReturnStatement(type, code);
+    if (hasReturn) {
+      addReturnTypeImport(PERMITTED_ACTIONS_TYPE, code);
+    }
+    if (hasReturn) {
+      code.add("  public %s<%s> %s(%s) {", PERMITTED_ACTIONS_TYPE, type, httpToJavaMethod(method), args);
+      code.add("    %s result = %s", type, getDummyReturnStatement(type, code));
+      code.add("    // result.setXxx();");
+      code.add("    %1$s<%2$s> %3$s = new %1$s<%2$s>(result);", PERMITTED_ACTIONS_TYPE, type, PERMITTED_ACTIONS_VAR);
+      code.add("    // %s.exclude(Actions.YYY);", PERMITTED_ACTIONS_VAR);
+      code.add("    return %s;", PERMITTED_ACTIONS_VAR);
+    } else {
+      code.add("  public %s %s(%s) {", type, httpToJavaMethod(method), args);
+      code.add("    return %s", getDummyReturnStatement(type, code));
+    }
     code.add("  }");
     code.add("");
   }
 
-  private void addDummyReturnStatement(String type, JavaCode code) {
-    String returnStatement;
+  private String getDummyReturnStatement(String type, JavaCode code) {
+    String result;
     if (Boolean.TRUE.toString().equals(type)) {
-      returnStatement = "return " + type + ";";
+      result = type + ";";
+    } else if (NO_TYPE.equals(type)) {
+      result = "new " + type + "(" + STATUS_TYPE + ".NO_CONTENT);";
+      code.ensureImport(STATUS_TYPE_PACKAGE, STATUS_TYPE);
+    } else if (UNKNOWN_OUTPUT_TYPE.equals(type)) {
+      result = "new " + type + "();";
+      code.ensureImport(UNKNOWN_OUTPUT_TYPE_PACKAGE, UNKNOWN_OUTPUT_TYPE);
     } else {
-      if (NO_TYPE.equals(type)) {
-        returnStatement = "return new " + type + "(" + STATUS_TYPE + ".NO_CONTENT);";
-        code.ensureImport(STATUS_TYPE_PACKAGE, STATUS_TYPE);
-      } else if (UNKNOWN_OUTPUT_TYPE.equals(type)) {
-        returnStatement = "return new " + type + "();";
-        code.ensureImport(UNKNOWN_OUTPUT_TYPE_PACKAGE, UNKNOWN_OUTPUT_TYPE);
-      } else {
-        returnStatement = "return new " + type + "();";
-      }
+      result = "new " + type + "();";
     }
-    // Make sure the comment is not viewed as a to-do in *this* code base
-    code.add("    %s // TO%s: Implement", returnStatement, "DO");
+    return result;
   }
 
   private static class Constant {

@@ -69,6 +69,7 @@ public class SpringSourceFilesGeneratorTest {
     JavaCode result = mock(JavaCode.class);
     when(result.packageName()).thenReturn(packageName);
     when(result.typeName()).thenReturn(className);
+    when(result.simpleTypeName()).thenReturn(className);
     return result;
   }
 
@@ -122,6 +123,12 @@ public class SpringSourceFilesGeneratorTest {
     assertGeneratedSourceFile("CentralErrorHandler");
     assertGeneratedSourceFile("FooException");
     assertGeneratedSourceFile("Identifiable");
+  }
+
+  @Test
+  public void generatesGeneratedSourceFileForBaseControllerSupport() throws Exception {
+    assertGeneratedSourceFile("Actions");
+    assertGeneratedSourceFile("PermittedActions");
   }
 
 }

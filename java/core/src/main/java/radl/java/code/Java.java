@@ -189,4 +189,25 @@ public final class Java {
     return value.replaceAll("\n", "\\\\n").replaceAll("\"", "\\\\\"");
   }
 
+  public static String toName(String value) {
+    StringBuilder result = new StringBuilder(value);
+    int i = 0;
+    boolean nonJava = false;
+    while (i < result.length()) {
+      if (Character.isJavaIdentifierPart(result.charAt(i))) {
+        nonJava = false;
+        i++;
+      } else {
+        if (nonJava) {
+          result.delete(i, i + 1);
+        } else {
+          result.setCharAt(i, '_');
+          nonJava = true;
+          i++;
+        }
+      }
+    }
+    return result.toString();
+  }
+
 }

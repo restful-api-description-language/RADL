@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Locale;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -21,7 +20,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import radl.common.StringUtil;
 import radl.core.code.Code;
 import radl.core.generation.CodeGenerator;
 import radl.java.code.Java;
@@ -35,10 +33,12 @@ public class SpringCodeGeneratorTest {
 
   private static final RandomData RANDOM = new RandomData();
   private static final int NAME_LENGTH = RANDOM.integer(3, 7);
+  private static final String JSON_LD = "application/ld+json";
   private static final String TYPE_API = "Api";
   private static final String TYPE_URIS = "Uris";
   private static final String TYPE_ERROR_DTO = "ErrorResource";
-  private static final String JSON_LD = "application/ld+json";
+  private static final String TYPE_ACTIONS = "Actions";
+  private static final String TRANSITION_ENABLED_METHOD = "permittedActions.contains";
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
   private final CodeGenerator generator = new SpringCodeGenerator(packagePrefix);
@@ -52,19 +52,17 @@ public class SpringCodeGeneratorTest {
         .end()
     .build();
 
-    Iterator<Code> sources = generator.generateFrom(radl).iterator();
+    Iterable<Code> sources = generator.generateFrom(radl);
 
-    assertTrue("Missing source", sources.hasNext());
-    assertController(resource, sources.next());
+    assertController(resource, sources);
   }
 
   private String aName() {
     return RANDOM.string(NAME_LENGTH) + 'q';
   }
 
-  private void assertController(String expectedClassName, Code source) {
-    assertEquals("Source type", JavaCode.class, source.getClass());
-    JavaCode javaSource = (JavaCode)source;
+  private void assertController(String expectedClassName, Iterable<Code> sources) {
+    JavaCode javaSource = getType(sources, controllerName(expectedClassName));
 
     assertFileComments(javaSource);
     assertEquals("Class name", controllerName(expectedClassName), javaSource.typeName());
@@ -141,12 +139,14 @@ public class SpringCodeGeneratorTest {
 
   @Test
   public void addsControllerMethodsForResourceMethods() {
+    String resource = aName();
     String httpMethod = aMethod();
     String mediaType1 = aMediaType();
     String mediaType2 = aMediaType();
     Document radl = RadlBuilder.aRadlDocument()
         .withMediaTypes(mediaType1, mediaType2)
         .withResource()
+            .named(resource)
             .withMethod(httpMethod)
                 .consuming(mediaType1)
                 .producing(mediaType2)
@@ -155,7 +155,7 @@ public class SpringCodeGeneratorTest {
     .build();
     String method = javaMethodName(httpMethod);
 
-    JavaCode source = generateController(radl);
+    JavaCode source = generateController(radl, resource);
 
     assertImports(Arrays.asList("org.springframework.web.bind.annotation.RequestMapping",
         "org.springframework.web.bind.annotation.RequestMethod"), source);
@@ -176,8 +176,9 @@ public class SpringCodeGeneratorTest {
     return httpMethod.toLowerCase(Locale.getDefault());
   }
 
-  private JavaCode generateController(Document radl) {
-    return (JavaCode)generator.generateFrom(radl).iterator().next();
+  private JavaCode generateController(Document radl, String resourceName) {
+    Iterable<Code> sources = generator.generateFrom(radl);
+    return getType(sources, controllerName(resourceName));
   }
 
   private String mediaTypeToConstant(String mediaType, boolean local) {
@@ -207,7 +208,7 @@ public class SpringCodeGeneratorTest {
   }
 
   @Test
-  public void generatesServicePerResource() {
+  public void generatesControllerSupportPerResource() {
     String resource = aName();
     String httpMethod1 = "GET";
     String httpMethod2 = "POST";
@@ -227,23 +228,19 @@ public class SpringCodeGeneratorTest {
     String method1 = javaMethodName(httpMethod1);
     String method2 = javaMethodName(httpMethod2);
 
-    Iterator<Code> sources = generator.generateFrom(radl).iterator();
+    Iterable<Code> sources = generator.generateFrom(radl);
 
-    assertTrue("Missing controller", sources.hasNext());
-    sources.next();
-    assertTrue("Missing service", sources.hasNext());
-    assertControllerSupport(resource, sources.next(), method1, method2);
-    assertType(TYPE_API, sources);
-    assertType(TYPE_URIS, sources);
-    assertFalse("Extra source", sources.hasNext());
+    getType(sources, TYPE_API);
+    getType(sources, TYPE_ACTIONS);
+    getType(sources, controllerName(resource));
+    assertControllerSupport(resource, sources, method1, method2);
+    getType(sources, TYPE_URIS);
   }
 
-  private void assertControllerSupport(String expectedClassName, Code source, String... methods) {
-    assertEquals("Source type", JavaCode.class, source.getClass());
-    JavaCode javaSource = (JavaCode)source;
+  private void assertControllerSupport(String expectedClassName, Iterable<Code> sources, String... methods) {
+    JavaCode javaSource = getType(sources, controllerSupportName(expectedClassName));
 
     assertFileComments(javaSource);
-    assertEquals("Class name", controllerSupportName(expectedClassName), javaSource.typeName());
     assertEquals("Class annotations", Arrays.asList("@Service"), javaSource.typeAnnotations());
     assertImports(Arrays.asList("org.springframework.stereotype.Service"), javaSource);
     assertEquals("Package", packagePrefix + '.' + expectedClassName, javaSource.packageName());
@@ -263,12 +260,8 @@ public class SpringCodeGeneratorTest {
 
     assertEquals("Method arguments for " + method, arguments, javaSource.methodArguments(method));
     // Make sure the comment is not viewed as a to-do in this code base
-    assertEquals("Method body for " + method, "return new " + ret + "; // TO" + "DO: Implement", javaSource.methodBody(method));
-  }
-
-  private void assertType(String expectedName, Iterator<Code> actualSources) {
-    assertTrue("Missing " + expectedName, actualSources.hasNext());
-    assertEquals("Type name", expectedName, ((JavaCode)actualSources.next()).typeName());
+    String methodBody = javaSource.methodBody(method);
+    assertTrue("Method body for " + method + ":\n" + methodBody, methodBody.contains("new " + ret));
   }
 
   @Test
@@ -791,8 +784,10 @@ public class SpringCodeGeneratorTest {
     assertEquals("Args #2", dtoName(propertyGroup2) + " input", controller2.methodArguments(controllerMethod2));
 
     JavaCode controllerSupport2 = getType(sources, controllerSupportName(state2));
+    assertTrue("Missing method #2: " + controllerSupport2.methods(),
+        controllerSupport2.methods().contains(controllerMethod2));
     assertTrue("Return support #2", controllerSupport2.methodBody(controllerMethod2).contains(
-        "return new ResponseEntity<Void>(HttpStatus.NO_CONTENT)"));
+        "new ResponseEntity<Void>(HttpStatus.NO_CONTENT)"));
   }
 
   // #45 Generated controllers should add links/forms to responses
@@ -850,13 +845,13 @@ public class SpringCodeGeneratorTest {
 
     String controllerMethod1 = javaMethodName(httpMethod1);
     JavaCode controllerSupport1 = getType(sources, controllerSupportName(state1));
-    assertEquals("Controller support #1 method", "return new " + dto1.typeName() + "(); // TODO: Implement",
-        controllerSupport1.methodBody(controllerMethod1));
-    
-    String transitionEnabledMethodName = "can" + StringUtil.initCap(transition);
-    assertTrue("Controller support #1 has isLinkEnabled", controllerSupport1.methods().contains(transitionEnabledMethodName));
-    assertTrue("Controller support #1 isLinkEnabled",
-        controllerSupport1.methodBody(transitionEnabledMethodName).startsWith("return true;"));
+    assertTrue("Controller doesn't support method",
+        controllerSupport1.methodBody(controllerMethod1).contains("new " + dto1.typeName() + "();"));
+
+    JavaCode actions = getType(sources, TYPE_ACTIONS);
+    String transitionConstant = transition.toUpperCase(Locale.getDefault());
+    assertTrue("Support doesn't have constant for transition",
+        actions.fieldNames().contains(transitionConstant));
 
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerName2 = controllerName(state2);
@@ -870,7 +865,7 @@ public class SpringCodeGeneratorTest {
     assertTrue("Controller #1 doesn't add link", methodBody.contains(
         "methodOn(" + controllerName2 + ".class)." + javaMethodName(httpMethod2) + "(new "));
     assertTrue("Controller doesn't check transition enabled",
-        methodBody.contains("support." + transitionEnabledMethodName + "()"));
+        methodBody.contains(TRANSITION_ENABLED_METHOD + "(" + actions.typeName() + '.' + transitionConstant));
   }
 
   @Test
@@ -966,10 +961,10 @@ public class SpringCodeGeneratorTest {
 
     Iterable<Code> sources = generator.generateFrom(radl);
     
-    JavaCode controller1 = getType(sources, controllerName(state1));
+    JavaCode controller = getType(sources, controllerName(state1));
     int numLinks = 0;
-    for (String line : controller1.methodBody(javaMethodName(httpMethod)).split("\n")) {
-      if (line.trim().startsWith("if (support.can")) {
+    for (String line : controller.methodBody(javaMethodName(httpMethod)).split("\n")) {
+      if (line.trim().startsWith("if (" + TRANSITION_ENABLED_METHOD)) {
         numLinks++;
       }
     }

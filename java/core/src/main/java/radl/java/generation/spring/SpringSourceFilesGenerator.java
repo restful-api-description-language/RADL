@@ -27,7 +27,7 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
   private static final Collection<String> GENERATED_TYPES = Arrays.asList("Api", "CentralErrorHandler", "Identifiable",
       "Uris");
   private static final Collection<String> GENERATED_TYPE_SUFFIXES = Arrays.asList(
-      "Controller", "Resource", "Exception");
+      "Actions", "Controller", "Resource", "Exception");
   
   private final CodeGenerator codeGenerator;
   private final String generatedSourceSetDir;
@@ -81,7 +81,7 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
   }
 
   private boolean isGenerated(JavaCode code) {
-    String type = code.typeName();
+    String type = code.simpleTypeName();
     if (GENERATED_TYPES.contains(type)) {
       return true;
     }
@@ -94,7 +94,7 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
   }
 
   private String fileFor(JavaCode code) {
-    return String.format("%s.java", code.typeName());
+    return String.format("%s.java", code.simpleTypeName());
   }
 
 }
