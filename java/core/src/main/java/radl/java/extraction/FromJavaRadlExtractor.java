@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -93,7 +92,7 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     resourceModel.configure(configuration);
     Document radl = extractFrom(options.getServiceName(), options.getBaseDir(), new FromJavaExtractOptions(
         options.getExtraSource(), options.getClasspath(), options.getExtraProcessors(), options.getJavaVersion(),
-        annotationProcessorOptions));
+        annotationProcessorOptions, options.isSerializeModel()));
     writeRadl(radl, options.getRadlFile(), options.getScm());
     Log.info("-> RADL extraction took " + timer);
     return 0;
@@ -124,8 +123,9 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     classpath = getClasspath(arguments, baseDir);
     String javaVersion = arguments.next("1.7");
     String scmId = arguments.next("default");
+    boolean serializeModel = arguments.logical(true);
     return new RunOptions(serviceName, baseDir, configurationFileName, extraSource, classpath, extraProcessors,
-        radlFile, javaVersion, scmId);
+        radlFile, javaVersion, scmId, serializeModel);
   }
 
   private Collection<File> getExtraSource(Arguments arguments) {
@@ -171,8 +171,9 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     String extraProcessors = properties.getProperty("extra.processors", "");
     String javaVersion = properties.getProperty("java.version", "1.6");
     String scmId = properties.getProperty("source.code.management.system", "default");
+    boolean serializeModel = Boolean.parseBoolean(properties.getProperty("serialize.model", Boolean.toString(true)));
     return new RunOptions(serviceName, baseDir, configurationFileName, extraSource, classpath, extraProcessors,
-        radlFile, javaVersion, scmId);
+        radlFile, javaVersion, scmId, serializeModel);
   }
 
   private String getProcessors(Arguments arguments) {
@@ -289,19 +290,19 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     if (compilerOptions.exists()) {
       compilerOptions.delete();
     }
-    File resourceModelFile = new File("resourceModel-" + UUID.randomUUID().toString());
-    if (resourceModelFile.exists()) {
-      resourceModelFile.delete();
+    File resourceModelFile = null;
+    String processorOptions = null;
+    if (extractOptions.isSerializeModel()) {
+      resourceModelFile = newResourceModelFile();
+      ResourceModelSerializer.serializeModelToFile(resourceModel, resourceModelFile);
+      processorOptions = String.format("-A%s=%s",
+          ProcessorOptions.RESOURCE_MODEL_FILE, resourceModelFile.getAbsolutePath());
     }
-    ResourceModelSerializer.serializeModelToFile(resourceModel, resourceModelFile);
-
-    String resourceModelFileArg = String.format("-A%s=%s",
-        ProcessorOptions.RESOURCE_MODEL_FILE, resourceModelFile.getAbsolutePath());
     try {
       try {
         PrintWriter writer = new PrintWriter(compilerOptions, "UTF8");
         try {
-          writer.println(resourceModelFileArg);
+          writer.println(processorOptions);
           writeOptions(extractOptions, writer);
           writeSources(javaFiles, writer);
           writeClasses(javaFiles, writer);
@@ -315,14 +316,20 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
       if (compiler.run(null, null, null, String.format("@%s", compilerOptions.getAbsoluteFile())) != 0) {
         throw new IllegalArgumentException("Compilation failed");
       }
-
-      if (!resourceModel.isCompleted()) {
+      if (extractOptions.isSerializeModel() && !resourceModel.isCompleted()) {
         resourceModel = ResourceModelSerializer.deserializeModelFromFile(resourceModelFile);
       }
-
     } finally {
       IO.delete(compilerOptions);
       IO.delete(resourceModelFile);
+    }
+  }
+
+  private File newResourceModelFile() {
+    try {
+      return File.createTempFile("radl", "resource-model");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -551,9 +558,11 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     private final String javaVersion;
     private final Collection<File> extraSource;
     private final String scmId;
+    private final boolean serializeModel;
 
-    public RunOptions(String serviceName, File baseDir, String configurationFileName, Collection<File> extraSource,
-        Collection<File> classpath, String extraProcessors, File radlFile, String javaVersion, String scmId) {
+    public RunOptions(String serviceName, File baseDir, String configurationFileName, // NOPMD ExcessiveParameterList
+        Collection<File> extraSource, Collection<File> classpath, String extraProcessors, File radlFile,
+        String javaVersion, String scmId, boolean serializeModel) {
       this.serviceName = serviceName;
       this.baseDir = baseDir;
       this.configurationFileName = configurationFileName;
@@ -563,6 +572,11 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
       this.radlFile = radlFile;
       this.javaVersion = javaVersion;
       this.scmId = scmId;
+      this.serializeModel = serializeModel;
+    }
+
+    public boolean isSerializeModel() {
+      return serializeModel;
     }
 
     public SourceCodeManagementSystem getScm() {

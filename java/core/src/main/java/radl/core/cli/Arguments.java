@@ -78,7 +78,7 @@ public class Arguments implements Iterator<String> {
   public File file() {
     return new File(next());
   }
-  
+
   /**
    * @return properties loaded from the file named by the next argument
    */
@@ -103,6 +103,10 @@ public class Arguments implements Iterator<String> {
    */
   public void prev() {
     index--;
+  }
+
+  public boolean logical(boolean defaultValue) {
+    return Boolean.parseBoolean(next(Boolean.toString(defaultValue)));
   }
 
 }

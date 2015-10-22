@@ -25,7 +25,7 @@ public final class IO {
   }
 
   public static void delete(File root) {
-    if (!root.exists()) {
+    if (root == null || !root.exists()) {
       return;
     }
     if (root.isDirectory()) {

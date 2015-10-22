@@ -21,14 +21,16 @@ public class FromJavaExtractOptions implements ExtractOptions {
   private final String javaVersion;
   private final String annotationProcessorOptions;
   private final Collection<File> extraSource;
+  private final boolean serializeModel;
 
   public FromJavaExtractOptions(Collection<File> extraSource, Collection<File> classpath, String extraProcessors,
-      String javaVersion, String annotationProcessorOptions) {
+      String javaVersion, String annotationProcessorOptions, boolean serializeModel) {
     this.extraSource = extraSource;
     this.classpath = classpath;
     this.extraProcessors = extraProcessors;
     this.javaVersion = javaVersion;
     this.annotationProcessorOptions = annotationProcessorOptions;
+    this.serializeModel = serializeModel;
   }
 
   public Collection<File> getClasspath() {
@@ -58,6 +60,10 @@ public class FromJavaExtractOptions implements ExtractOptions {
 
   public Collection<File> getExtraSource() {
     return extraSource;
+  }
+
+  public boolean isSerializeModel() {
+    return serializeModel;
   }
 
 }
