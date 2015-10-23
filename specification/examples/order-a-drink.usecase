@@ -1,0 +1,156 @@
+<use-case name="Order a drink" service="restbucks.radl">
+  <documentation>
+    In this example we'll follow a customer named Chrissy as she buys a drink at RESTBucks.
+  </documentation>
+
+  <step>
+    <documentation>
+      Any RESTful interaction always starts with the client requesting the billboard URI to jumpstart the
+      URI discovery process:
+    </documentation>
+    <request transition="Arrive"/>
+    <documentation>The server responds with a representation of the <ref resource="Home"/> resource:</documentation>
+    <response/>
+    <documentation>
+      The response contains a <html:code>Cache-Control</html:code> header. The <html:code>max-age</html:code>
+      parameter in this header tells the client that the response is valid for a whole day, so the client won't 
+      have to request it again in the following interactions. The response is also marked as
+      <html:code>public</html:code>, which means it's valid for all users, even if authentication is used.
+    </documentation>
+    <documentation>
+      From the JSON-LD context the client can see that it is dealing with a
+      <html:code>http://schema.org/CafeOrCoffeeShop</html:code> that offers a
+      <html:code>http://schema.org/menu</html:code>, since the default vocabulary is from
+      <html:code>schema.org</html:code>. Typing RESTBucks as a coffee shop enables interaction with clients that 
+      don't even know the billboard URI and happen to stumble upon the store. For instance, a spider program
+      could try random IP addresses or follow random links and recognize the result as a coffee shop.
+    </documentation>
+  </step>
+
+  <step>
+    <documentation>
+      Since the client is programmed to understand the <html:code>http://schema.org/menu</html:code> concept, it knows
+      how to read the menu:
+    </documentation>
+    <request transition="Read menu"/>
+    <documentation>The server responds with a representation of the <ref resource="Menu"/> resource:</documentation>
+    <response/>
+    <documentation>
+      The server doesn't expect the menu to change more than once a day, as indicated by the
+      <html:code>Cache-Control</html:code> header. So the client (or a intermediary proxy) can cache it for future use
+      and reduce the load on the server. Every server response will contain a <html:code>Link</html:code> header
+      pointing to the JSON-LD context, but we can re-use the cached context from the previous response. Even if the
+      client doesn't do the caching, we can insert a caching proxy on the server side to reduce the load on the server
+      doing the actual work.
+    </documentation>
+    <documentation>
+      The bulk of the menu representation is the collection of items. We could have made each item its own resource, 
+      following the Collection pattern, but that doesn't quite fit the way we think about the problem. Perhaps more
+      importantly, it would mean that the client has to perform a whole host of additional calls to request all the
+      items, since it can't make a decision about what to order without their details.
+    </documentation>
+    <documentation>
+      The client also understands from the <html:code>http://schema.org/acceptedPaymentMethod</html:code> property
+			that this offer can only be paid using a credit card. If it can't handle that, it can abort the ordering
+			process.
+    </documentation>
+    <documentation>
+			The final part of the representation is a form that allows the client to place an order composed of the
+			items on the menu. It lists the URI and HTTP method to use and what the request body should look
+			like. The client discovers all this information at runtime, so it doesn't have to be programmed with this
+			knowledge and won't break if the server changes it.
+    </documentation>
+  </step>
+
+  <step>
+    <documentation>
+      Since the client is programmed to understand the concepts <html:code>http://schema.org/Order</html:code> and
+			<html:code>http://schema.org/OrderAction</html:code>, it can place an order. The expected contents of the request
+			body is specified in the response: the client must supply <html:code>item</html:code>s and
+			<html:code>customer</html:code> properties. The JSON-LD context tells the client that the items are in a Hydra
+			collection, so the client knows how to format it. The context also indicates that the customer is a 
+			<html:code>http://schema.org/customer</html:code>, which the client is programmed to understand:
+    </documentation>
+    <request transition="Place order" input="latte"/>
+    <documentation>
+      The server responds with a representation of the created <ref resource="Order"/> resource:
+    </documentation>
+    <response/>
+    <documentation>
+      The response contains the items, their total, and a form for paying the order. Note that
+      <html:code>amount</html:code>, <html:code>currency</html:code>, and <html:code>paymentMethod</html:code> are not 
+      required because there are decent defaults: the total and currency of the order, and
+      <html:code>creditcard</html:code>, respectively.
+    </documentation>
+  </step>    
+    
+  <step>
+    <documentation>The client uses the form to pay the order:</documentation>
+    <request transition="Pay" input="latte"/>
+    <documentation>
+      After processing the credit card, the server responds by redirecting the client to the <ref resource="Receipt"/> 
+      resource, since the payment is no longer interesting:
+    </documentation>
+    <response/>
+  </step>
+  
+  <step>
+    <documentation>
+      The client follows the redirection to the <ref resource="Receipt">receipt</ref>. Browsers do this automatically, 
+      and most HTTP libraries can be instructed to do the same.
+    </documentation>
+    <request follow="redirect"/>
+    <response/>
+  </step>
+  
+  <step>
+    <documentation>
+      The client understands from the JSON-LD context that the <html:code>serving</html:code> property contains a URI 
+      that points to the <ref resource="Serving">serving</ref> it is waiting for:
+    </documentation>
+    <request transition="Take receipt"/>
+    <documentation>
+      The response will depend on how fast the barista works, but in general the client will have to wait a bit:
+    </documentation>
+    <response/>
+    <documentation>
+      The response doesn't contain any link for the customer to take her serving, which shows that the barista
+			is still busy preparing it. The response contains the <html:code>Retry-After</html:code> header, which gives the 
+			client an approximation of the time (in seconds) it still has to wait. This could be based on historical data
+			about how fast baristas prepare similar orders, or it could simply be a fixed value. This value is only an advice,
+			and the client is free to ignore it. But that most likely isn't going to speed the server up, so there is little
+			point. If all clients follow the advice, the server has more time to handle useful requests and everybody will be
+			better off.
+	  </documentation>
+  </step>
+
+  <step>
+    <documentation>
+      After waiting a while, the client will try again. The response may be the same a couple of times, especially
+			if the server doesn't use historical data to predict the retry time or the client doesn't wait for the retry time:
+    </documentation>
+    <request transition="Wait"/>
+    <response/>
+  </step>
+  
+  <step>
+	  <documentation>
+			Eventually the barista is done and the customer "gets notified" that the <ref resource="Serving">serving</ref> is 
+			ready:
+	  </documentation>
+	  <request transition="Receive notification"/>
+	  <response/>
+	  <documentation>
+	    Since the serving is now ready, there is an operation to take it, as indicated by the
+	    <html:code>http://schema.org/TakeAction</html:code> operation.
+	  </documentation>
+  </step>
+
+  <step>
+    <documentation>The client finally takes the serving:</documentation>
+    <request transition="Take serving"/>
+    <documentation>To which the server responds that the process is done:</documentation>
+    <response/>
+  </step>
+  
+</use-case>
