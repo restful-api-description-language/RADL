@@ -130,7 +130,7 @@ property-group-top = element property-group {
 }
 structured-examples = element examples { documentation*, structured-example* }
 structured-example = element example { name, documentation*, property-value* }
-property-value = element property { name, (value | example-ref) }
+property-value = element property { name, (value | example-ref | property-value*) }
 example-ref = attribute example { string }
 property-group-internal-ref =  attribute ref { xsd:string }
 property-group = element property-group {
