@@ -141,6 +141,7 @@ class RadlPlugin implements Plugin<Project> {
           }
           writer.println "java.version = $project.sourceCompatibility"
           writer.println "source.code.management.system = $project.radl.scm"
+          writer.println "serialize.model = $project.radl.serializeModel"
         }
       }
       doLast {
