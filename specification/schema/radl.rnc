@@ -107,7 +107,7 @@ from = attribute from { xsd:string }
 to = attribute to { xsd:string }
 transition-input = element input { property-group-ref }
 
-transition-ref =  attribute ref { xsd:string }
+transition-ref = attribute ref { xsd:string }
 transition-ref-element =
   element transition {
     transition-ref,
@@ -119,14 +119,19 @@ method-transitions = element transitions { transition-ref-element* }
 linkrel-transitions  = element transitions { transition-ref-element* }
 
 #
-# Properties / data-models  / classes
+# Properties
 #
 
 property-groups = element property-groups { property-group-top* }
 property-group-top = element property-group {
   uri?,
-  (property-group-internal-ref | (name, documentation?, (property | property-group )*))
+  (property-group-internal-ref | (name, documentation?, (property | property-group )*)), 
+  structured-examples?
 }
+structured-examples = element examples { documentation*, structured-example* }
+structured-example = element example { name, documentation*, property-value* }
+property-value = element property { name, (value | example-ref) }
+example-ref = attribute example { string }
 property-group-internal-ref =  attribute ref { xsd:string }
 property-group = element property-group {
   name,

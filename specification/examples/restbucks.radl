@@ -164,10 +164,24 @@
       <property name="milk" uri="http://www.productontology.org/doc/Milk"/>
       <property name="price" uri="http://schema.org/price" type="number"/>
       <property name="currency" uri="http://schema.org/priceCurrency"/>
+      <examples>
+        <example name="latte">
+          <property name="name" value="caffe latte"/>
+          <property name="size" value="grande"/>
+          <property name="milk" value="whole"/>
+          <property name="price" value="2.75"/>
+          <property name="currency" value="USD"/>
+        </example>
+      </examples>
     </property-group>
 
     <property-group name="menu" uri="http://schema.org/menu">
       <property-group name="item" ref="item" repeats="true"/>
+      <examples>
+        <example name="latte">
+          <property name="item" example="latte"/>
+        </example>
+      </examples>
     </property-group>
 
     <property-group name="order" uri="http://schema.org/Order">
@@ -175,6 +189,14 @@
       <property name="customer" uri="http://schema.org/customer"/>
       <property name="total" uri="http://schema.org/totalPrice" type="number"/>
       <property name="currency" uri="http://schema.org/priceCurrency"/>
+      <examples>
+        <example name="latte">
+          <property name="item" example="latte"/>
+          <property name="customer" value="Chrissy"/>
+          <property name="price" value="2.75"/>
+          <property name="currency" value="USD"/>
+        </example>
+      </examples>
     </property-group>
 
     <property-group name="receipt" uri="http://schema.org/Order">
@@ -184,6 +206,16 @@
       <property name="total" uri="http://schema.org/totalPrice" type="number"/>
       <property name="currency" uri="http://schema.org/priceCurrency"/>
       <property name="paymentMethod" uri="http://schema.org/acceptedPaymentMethod"/>
+      <examples>
+        <example name="latte">
+          <property name="dateTime" value="2015-10-23T15:31:00+2:00"/>
+          <property name="shop" value="RESTBuck"/>
+          <property name="item" example="latte"/>
+          <property name="total" value="2.75"/>
+          <property name="currency" value="USD"/>
+          <property name="paymentMethod" value="creditcard"/>
+        </example>
+      </examples>
     </property-group>
 
     <property-group name="payment" uri="http://reference.data.gov.uk/def/payment#payment">
@@ -195,6 +227,18 @@
       <property name="expiryMonth" uri="https://w3id.org/creditcard/v1/expiryMonth" type="number"/>
       <property name="expiryYear" uri="https://w3id.org/creditcard/v1/expiryYear" type="number"/>
       <property name="cardSecurityCode" uri="https://w3id.org/creditcard/v1/verificationCode"/>
+      <examples>
+        <example name="latte">
+          <property name="amount" value="2.75"/>
+          <property name="currency" value="USD"/>
+          <property name="paymentMethod" value="creditcard"/>
+          <property name="cardholderName" value="C.C. Conway"/>
+          <property name="cardNumber" value="5525366617069778"/>
+          <property name="expiryMonth" value="6"/>
+          <property name="expiryYear" value="2019"/>
+          <property name="cardSecurityCode" value="836"/>
+        </example>
+      </examples>
     </property-group>
 
     <property-group name="serving" uri="http://schema.org/Order"/>
@@ -359,4 +403,5 @@
       </methods>
     </resource>
   </resources>
+  
 </service>
