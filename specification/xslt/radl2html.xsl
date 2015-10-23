@@ -323,7 +323,7 @@
       <p>See <xsl:call-template name="a-href">
           <xsl:with-param name="prefix">propertygroup</xsl:with-param>
           <xsl:with-param name="name" select="@property-group"/>
-        </xsl:call-template>
+        </xsl:call-template>.
       </p>
     </xsl:if>
     <xsl:apply-templates/>
@@ -646,7 +646,7 @@
                   </xsl:call-template>
                 </code>
               </xsl:for-each>
-              <xsl:text> )</xsl:text>
+              <xsl:text>)</xsl:text>
             </xsl:if>
           </li>
         </xsl:for-each>
@@ -1440,10 +1440,10 @@
       <xsl:text>Property Group: </xsl:text>
       <xsl:value-of select="@name"/>
       <xsl:if test="@repeats">*</xsl:if>
-      ( see <xsl:call-template name="a-href">
+      (see <xsl:call-template name="a-href">
         <xsl:with-param name="prefix">propertygroup</xsl:with-param>
         <xsl:with-param name="name" select="@ref"/>
-      </xsl:call-template> ) </p>
+      </xsl:call-template>) </p>
   </xsl:template>
 
   <xsl:template match="radl:property-group[not(@ref)]">
@@ -1462,7 +1462,7 @@
           </xsl:attribute>
           <code>
             <xsl:value-of select="@uri"/>
-          </code></a> ) </xsl:if>
+          </code></a>) </xsl:if>
     </h2>
 
     <xsl:if test="radl:documentation">
@@ -1489,7 +1489,7 @@
           <code>
             <xsl:value-of select="@uri"/>
           </code>
-        </a> ) </xsl:if>
+        </a>) </xsl:if>
       <xsl:if test="@type">
         <xsl:text> - </xsl:text>
         <xsl:value-of select="@type"/>
