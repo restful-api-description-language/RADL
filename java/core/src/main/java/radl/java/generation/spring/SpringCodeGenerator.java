@@ -319,22 +319,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       if (property.getAnnotation() != null) {
         code.add("%s", property.getAnnotation());
       }
-      code.add("  private %s %s;", property.getType(), property.getName());
+      code.add("  public %s %s;", property.getType(), property.getName());
     }
     code.add("");
-    for (JavaBeanProperty property : properties) {
-      String type = property.getType();
-      String name = property.getName();
-      String capName = StringUtil.initCap(name);
-      code.add("  public %s get%s() {", type, capName);
-      code.add("    return %s;", name);
-      code.add("  }");
-      code.add("");
-      code.add("  public void set%s(%s %s) {", capName, type, name);
-      code.add("    this.%s = %s;", name, name);
-      code.add("  }");
-      code.add("");
-    }
   }
 
   private Code generateIdentifiable() {
@@ -464,9 +451,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     errorHandler.add("  private ResponseEntity<%s> error(Exception e, %s statusCode) {", ERROR_DTO_TYPE, STATUS_TYPE);
     errorHandler.add("    %s error = new %s();", ERROR_DTO_TYPE, ERROR_DTO_TYPE);
     errorHandler.add("    if (e instanceof %s) {", IDENTIFIABLE_TYPE);
-    errorHandler.add("      error.setType(((%s)e).getId());", IDENTIFIABLE_TYPE);
+    errorHandler.add("      error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
     errorHandler.add("    }");
-    errorHandler.add("    error.setTitle(e.getMessage());");
+    errorHandler.add("    error.title = e.getMessage();");
     errorHandler.add("    return new ResponseEntity<%s>(error, statusCode);", ERROR_DTO_TYPE);
     errorHandler.add("  }");
     errorHandler.add("");
