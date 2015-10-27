@@ -18,6 +18,10 @@ public class ErrorBuilder {
     this.parent = parent;
   }
 
+  public ErrorBuilder error(String name) {
+    return error(name, null);
+  }
+
   public ErrorBuilder error(String name, String documentation) {
     return error(name, documentation, Error.UNDEFINED_STATUS_CODE);
   }
@@ -27,6 +31,10 @@ public class ErrorBuilder {
     return this;
   }
 
+  public ErrorBuilder error(String name, int statusCode) {
+    return error(name, null, statusCode);
+  }
+  
   public RadlBuilder end() {
     parent.setErrors(errors);
     return parent;

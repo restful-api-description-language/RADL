@@ -444,8 +444,8 @@ public class SpringCodeGeneratorTest {
     Document radl = RadlBuilder.aRadlDocument()
         .withErrors()
             .error(name1, docPart1 + "\n\t " + docPart2)
-            .error(name2, null)
-            .error(uri, null)
+            .error(name2)
+            .error(uri)
         .end()
     .build();
 
@@ -516,7 +516,7 @@ public class SpringCodeGeneratorTest {
             // These should be ignored
             .error('t' + RANDOM.string(5), "", 405)
             .error('u' + RANDOM.string(5), "", 406)
-            // This should be mapped unto IllegalStateException
+            // This should not be mapped
             .error('v' + RANDOM.string(5), "", 500)
         .end()
     .build();
@@ -537,9 +537,10 @@ public class SpringCodeGeneratorTest {
         "org.springframework.http.ResponseEntity",
         "org.springframework.web.bind.annotation.ControllerAdvice",
         "org.springframework.web.bind.annotation.ExceptionHandler"), errorHandler.imports());
-    TestUtil.assertCollectionEquals("Error handler methods",
-        Arrays.asList("error", "illegalArgument", "illegalState", name3),
-        errorHandler.methods());
+    Collection<String> methods = errorHandler.methods();
+    for (String method : Arrays.asList("error", "illegalArgument", "internalError", name3)) {
+      assertTrue("Missing method: " + method, methods.contains(method));
+    }
     TestUtil.assertCollectionEquals("Error handler annotations",
         Collections.<String>singleton("@ExceptionHandler({ IllegalArgumentException.class })"),
         errorHandler.methodAnnotations("illegalArgument"));

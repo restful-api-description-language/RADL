@@ -242,9 +242,10 @@ public class RadlCode extends XmlCode {
     return elementsName(ERRORS_PATH);
   }
 
-  public String errorStatus(String name) {
+  public int errorStatus(String name) {
     Element errorElement = one(errorPath(name), Element.class);
-    return errorElement.getAttributeNS(null, "status-code");
+    String result = errorElement.getAttributeNS(null, "status-code");
+    return result.isEmpty() ? -1 : Integer.parseInt(result);
   }
 
   private String errorPath(String name) {

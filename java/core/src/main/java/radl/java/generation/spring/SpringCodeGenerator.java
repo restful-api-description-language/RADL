@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.atteo.evo.inflector.English;
+import org.springframework.http.HttpStatus;
 import org.w3c.dom.Document;
 
 import radl.common.StringUtil;
@@ -58,11 +59,12 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final String DEFAULT_MEDIA_TYPE_CONSTANT = MEDIA_TYPE_CONSTANT_PREFIX + "DEFAULT";
   private static final String API_TYPE = "Api";
   private static final String URIS_TYPE = "Uris";
-  private static final String DEFAULT_STATUS_CODE = "400";
+  private static final int DEFAULT_STATUS_CODE = HttpStatus.BAD_REQUEST.value();
   private static final String ERROR_DTO_TYPE = "Error" + DTO_SUFFIX;
   private static final String IDENTIFIABLE_TYPE = "Identifiable";
-  private static final Map<String, String> HTTP_STATUSES = new HashMap<String, String>();
-  private static final Collection<String> FRAMEWORK_HANDLED_STATUSES = Arrays.asList("405", "406");
+  private static final Map<Integer, String> HTTP_STATUSES = new HashMap<Integer, String>();
+  private static final Collection<Integer> FRAMEWORK_HANDLED_STATUSES = Arrays.asList(
+      HttpStatus.METHOD_NOT_ALLOWED.value(), HttpStatus.NOT_ACCEPTABLE.value());
   private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
   private static final String SEMANTIC_ANNOTATION = "Expose";
   private static final String PERMITTED_ACTIONS_VAR = "permittedActions";
@@ -92,43 +94,43 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private void initHttpStatuses() {
-    HTTP_STATUSES.put("400", "BAD_REQUEST");
-    HTTP_STATUSES.put("401", "UNAUTHORIZED");
-    HTTP_STATUSES.put("402", "PAYMENT_REQUIRED");
-    HTTP_STATUSES.put("403", "FORBIDDEN");
-    HTTP_STATUSES.put("404", "NOT_FOUND");
-    HTTP_STATUSES.put("405", "METHOD_NOT_ALLOWED");
-    HTTP_STATUSES.put("406", "NOT_ACCEPTABLE");
-    HTTP_STATUSES.put("407", "PROXY_AUTHENTICATION_REQUIRED");
-    HTTP_STATUSES.put("408", "REQUEST_TIMEOUT");
-    HTTP_STATUSES.put("409", "CONFLICT");
-    HTTP_STATUSES.put("410", "GONE");
-    HTTP_STATUSES.put("411", "LENGTH_REQUIRED");
-    HTTP_STATUSES.put("412", "PRECONDITION_FAILED");
-    HTTP_STATUSES.put("413", "PAYLOAD_TOO_LARGE");
-    HTTP_STATUSES.put("414", "URI_TOO_LONG");
-    HTTP_STATUSES.put("415", "UNSUPPORTED_MEDIA_TYPE");
-    HTTP_STATUSES.put("416", "REQUESTED_RANGE_NOT_SATISFIABLE");
-    HTTP_STATUSES.put("417", "EXPECTATION_FAILED");
-    HTTP_STATUSES.put("422", "UNPROCESSABLE_ENTITY");
-    HTTP_STATUSES.put("423", "LOCKED");
-    HTTP_STATUSES.put("424", "FAILED_DEPENDENCY");
-    HTTP_STATUSES.put("426", "UPGRADE_REQUIRED");
-    HTTP_STATUSES.put("428", "PRECONDITION_REQUIRED");
-    HTTP_STATUSES.put("429", "TOO_MANY_REQUESTS");
-    HTTP_STATUSES.put("431", "REQUEST_HEADER_FIELDS_TOO_LARGE");
-    HTTP_STATUSES.put("500", "INTERNAL_SERVER_ERROR");
-    HTTP_STATUSES.put("501", "NOT_IMPLEMENTED");
-    HTTP_STATUSES.put("502", "BAD_GATEWAY");
-    HTTP_STATUSES.put("503", "SERVICE_UNAVAILABLE");
-    HTTP_STATUSES.put("504", "GATEWAY_TIMEOUT");
-    HTTP_STATUSES.put("505", "HTTP_VERSION_NOT_SUPPORTED");
-    HTTP_STATUSES.put("506", "VARIANT_ALSO_NEGOTIATES");
-    HTTP_STATUSES.put("507", "INSUFFICIENT_STORAGE");
-    HTTP_STATUSES.put("508", "LOOP_DETECTED");
-    HTTP_STATUSES.put("509", "BANDWIDTH_LIMIT_EXCEEDED");
-    HTTP_STATUSES.put("510", "NOT_EXTENDED");
-    HTTP_STATUSES.put("511", "NETWORK_AUTHENTICATION_REQUIRED");
+    HTTP_STATUSES.put(400, "BAD_REQUEST");
+    HTTP_STATUSES.put(401, "UNAUTHORIZED");
+    HTTP_STATUSES.put(402, "PAYMENT_REQUIRED");
+    HTTP_STATUSES.put(403, "FORBIDDEN");
+    HTTP_STATUSES.put(404, "NOT_FOUND");
+    HTTP_STATUSES.put(405, "METHOD_NOT_ALLOWED");
+    HTTP_STATUSES.put(406, "NOT_ACCEPTABLE");
+    HTTP_STATUSES.put(407, "PROXY_AUTHENTICATION_REQUIRED");
+    HTTP_STATUSES.put(408, "REQUEST_TIMEOUT");
+    HTTP_STATUSES.put(409, "CONFLICT");
+    HTTP_STATUSES.put(410, "GONE");
+    HTTP_STATUSES.put(411, "LENGTH_REQUIRED");
+    HTTP_STATUSES.put(412, "PRECONDITION_FAILED");
+    HTTP_STATUSES.put(413, "PAYLOAD_TOO_LARGE");
+    HTTP_STATUSES.put(414, "URI_TOO_LONG");
+    HTTP_STATUSES.put(415, "UNSUPPORTED_MEDIA_TYPE");
+    HTTP_STATUSES.put(416, "REQUESTED_RANGE_NOT_SATISFIABLE");
+    HTTP_STATUSES.put(417, "EXPECTATION_FAILED");
+    HTTP_STATUSES.put(422, "UNPROCESSABLE_ENTITY");
+    HTTP_STATUSES.put(423, "LOCKED");
+    HTTP_STATUSES.put(424, "FAILED_DEPENDENCY");
+    HTTP_STATUSES.put(426, "UPGRADE_REQUIRED");
+    HTTP_STATUSES.put(428, "PRECONDITION_REQUIRED");
+    HTTP_STATUSES.put(429, "TOO_MANY_REQUESTS");
+    HTTP_STATUSES.put(431, "REQUEST_HEADER_FIELDS_TOO_LARGE");
+    HTTP_STATUSES.put(500, "INTERNAL_SERVER_ERROR");
+    HTTP_STATUSES.put(501, "NOT_IMPLEMENTED");
+    HTTP_STATUSES.put(502, "BAD_GATEWAY");
+    HTTP_STATUSES.put(503, "SERVICE_UNAVAILABLE");
+    HTTP_STATUSES.put(504, "GATEWAY_TIMEOUT");
+    HTTP_STATUSES.put(505, "HTTP_VERSION_NOT_SUPPORTED");
+    HTTP_STATUSES.put(506, "VARIANT_ALSO_NEGOTIATES");
+    HTTP_STATUSES.put(507, "INSUFFICIENT_STORAGE");
+    HTTP_STATUSES.put(508, "LOOP_DETECTED");
+    HTTP_STATUSES.put(509, "BANDWIDTH_LIMIT_EXCEEDED");
+    HTTP_STATUSES.put(510, "NOT_EXTENDED");
+    HTTP_STATUSES.put(511, "NETWORK_AUTHENTICATION_REQUIRED");
   }
 
   @Override
@@ -287,8 +289,8 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     final Collection<String> errorHandlingMethods = new ArrayList<String>();
     do {
       String name = errors.next();
-      String statusCode = radl.errorStatus(name);
-      if (statusCode.isEmpty()) {
+      int statusCode = radl.errorStatus(name);
+      if (statusCode < 0) {
         statusCode = DEFAULT_STATUS_CODE;
       }
       String documentation = radl.errorDocumentation(name);
@@ -337,7 +339,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  protected JavaCode generateException(String name, String statusCode, String documentation) {
+  private JavaCode generateException(String name, int statusCode, String documentation) {
     JavaCode result = new JavaCode();
     addPackage(IMPL_PACKAGE, result);
     result.add("");
@@ -387,14 +389,12 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return Java.toString(documentation.trim());
   }
 
-  private String getBaseException(String statusCode) {
-    if ("400".equals(statusCode)) {
-      return IllegalArgumentException.class.getSimpleName();
+  private String getBaseException(int statusCode) {
+    switch (HttpStatus.valueOf(statusCode)) {
+      case BAD_REQUEST: return IllegalArgumentException.class.getSimpleName();
+      case INTERNAL_SERVER_ERROR: return IllegalStateException.class.getSimpleName();
+      default: return RuntimeException.class.getSimpleName();
     }
-    if ("500".equals(statusCode)) {
-      return IllegalStateException.class.getSimpleName();
-    }
-    return RuntimeException.class.getSimpleName();
   }
 
   private JavaCode startErrorHandler() {
@@ -413,17 +413,25 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private void handleException(JavaCode exceptionType, String statusCode, Collection<String> errorHandlingMethods,
+  private void handleException(JavaCode exceptionType, int statusCode, Collection<String> errorHandlingMethods,
       JavaCode errorHandler) {
     if (FRAMEWORK_HANDLED_STATUSES.contains(statusCode)) {
       return;
     }
-    String handledType = handledExceptionType(exceptionType);
-    String method = exceptionTypeToMethod(handledType);
+    String handledType;
+    String method;
+    if (HttpStatus.INTERNAL_SERVER_ERROR.value() == statusCode) {
+      handledType = Throwable.class.getSimpleName();
+      method = "internalError";
+    } else {
+      handledType = handledExceptionType(exceptionType);
+      method = exceptionTypeToMethod(handledType);
+    }
     if (errorHandlingMethods.contains(method)) {
       return;
     }
     errorHandlingMethods.add(method);
+    
     errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
     errorHandler.add("  public ResponseEntity<%s> %s(%s e) {", ERROR_DTO_TYPE, method, handledType);
     errorHandler.add("    return error(e, %s.%s);", STATUS_TYPE, HTTP_STATUSES.get(statusCode));
@@ -434,7 +442,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
 
   private String handledExceptionType(JavaCode exceptionType) {
     String result = exceptionType.superTypeName();
-    if ("RuntimeException".equals(result)) {
+    if (RuntimeException.class.getSimpleName().equals(result)) {
       result = exceptionType.typeName();
     }
     return result;
@@ -448,15 +456,52 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private Code endErrorHandler(JavaCode errorHandler) {
-    errorHandler.add("  private ResponseEntity<%s> error(Exception e, %s statusCode) {", ERROR_DTO_TYPE, STATUS_TYPE);
+    errorHandler.add("  private ResponseEntity<%s> error(Throwable t, %s statusCode) {", ERROR_DTO_TYPE, STATUS_TYPE);
     errorHandler.add("    %s error = new %s();", ERROR_DTO_TYPE, ERROR_DTO_TYPE);
-    errorHandler.add("    if (e instanceof %s) {", IDENTIFIABLE_TYPE);
-    errorHandler.add("      error.type = ((%s)e).getId();", IDENTIFIABLE_TYPE);
+    errorHandler.add("    if (t instanceof %s) {", IDENTIFIABLE_TYPE);
+    errorHandler.add("      error.type = ((%s)t).getId();", IDENTIFIABLE_TYPE);
     errorHandler.add("    }");
-    errorHandler.add("    error.title = e.getMessage();");
+    errorHandler.add("    error.title = getNonRevealingMessage(t);");
     errorHandler.add("    return new ResponseEntity<%s>(error, statusCode);", ERROR_DTO_TYPE);
     errorHandler.add("  }");
     errorHandler.add("");
+    errorHandler.add("  private String getNonRevealingMessage(Throwable t) {");
+    errorHandler.add("    StringBuilder result = new StringBuilder(64);");
+    errorHandler.add("    result.append(t.getMessage());");
+    errorHandler.add("    int index = result.indexOf(\"Exception\");");
+    errorHandler.add("    while (index >= 0) {");
+    errorHandler.add("      int start = findIdentifierEnd(result, index, -1);");
+    errorHandler.add("      int end = findIdentifierEnd(result, index, +1);");
+    errorHandler.add("      result.delete(start + 1, end);");
+    errorHandler.add("      index = result.indexOf(\"Exception\", start + 1);");
+    errorHandler.add("    }");
+    errorHandler.add("    return result.toString();");
+    errorHandler.add("  }");
+    errorHandler.add("");
+    errorHandler.add("  private int findIdentifierEnd(StringBuilder text, int start, int delta) {");
+    errorHandler.add("    int index = start;");
+    errorHandler.add("    while (!isAtEnd(text, index, delta)");
+    errorHandler.add("        && (Character.isJavaIdentifierPart(text.charAt(index)) || text.charAt(index) == '.')) {");
+    errorHandler.add("      index += delta;");
+    errorHandler.add("    }");
+    errorHandler.add("    while (!isAtEnd(text, index, delta) && isNonWord(text.charAt(index))) {");
+    errorHandler.add("      index += delta;");
+    errorHandler.add("    }");
+    errorHandler.add("    return index;");
+    errorHandler.add("  }");
+    errorHandler.add("  ");
+    errorHandler.add("  private boolean isAtEnd(StringBuilder text, int index, int delta) {");
+    errorHandler.add("    return delta < 0 ? index < 0 : index == text.length();");
+    errorHandler.add("  }");
+    errorHandler.add("  ");
+    errorHandler.add("  private boolean isNonWord(char ch) {");
+    errorHandler.add("    return Character.isWhitespace(ch) || isPunctuation(ch);");
+    errorHandler.add("  }");
+    errorHandler.add("  ");
+    errorHandler.add("  private boolean isPunctuation(char ch) {");
+    errorHandler.add("    return ch == '.' || ch == ';' || ch == ':' || ch == '-';");
+    errorHandler.add("  }");
+    errorHandler.add("  ");
     errorHandler.add("}");
     return errorHandler;
   }
