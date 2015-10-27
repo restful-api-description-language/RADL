@@ -20,7 +20,6 @@ import java.util.TreeSet;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.atteo.evo.inflector.English;
-import org.springframework.http.HttpStatus;
 import org.w3c.dom.Document;
 
 import radl.common.StringUtil;
@@ -59,12 +58,13 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final String DEFAULT_MEDIA_TYPE_CONSTANT = MEDIA_TYPE_CONSTANT_PREFIX + "DEFAULT";
   private static final String API_TYPE = "Api";
   private static final String URIS_TYPE = "Uris";
-  private static final int DEFAULT_STATUS_CODE = HttpStatus.BAD_REQUEST.value();
+  private static final int BAD_REQUEST = 400;
+  private static final int DEFAULT_STATUS_CODE = BAD_REQUEST;
+  private static final int INTERNAL_SERVER_ERROR = 500;
   private static final String ERROR_DTO_TYPE = "Error" + DTO_SUFFIX;
   private static final String IDENTIFIABLE_TYPE = "Identifiable";
   private static final Map<Integer, String> HTTP_STATUSES = new HashMap<Integer, String>();
-  private static final Collection<Integer> FRAMEWORK_HANDLED_STATUSES = Arrays.asList(
-      HttpStatus.METHOD_NOT_ALLOWED.value(), HttpStatus.NOT_ACCEPTABLE.value());
+  private static final Collection<Integer> FRAMEWORK_HANDLED_STATUSES = Arrays.asList(405, 406);
   private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
   private static final String SEMANTIC_ANNOTATION = "Expose";
   private static final String PERMITTED_ACTIONS_VAR = "permittedActions";
@@ -390,7 +390,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private String getBaseException(int statusCode) {
-    switch (HttpStatus.valueOf(statusCode)) {
+    switch (statusCode) {
       case BAD_REQUEST: return IllegalArgumentException.class.getSimpleName();
       case INTERNAL_SERVER_ERROR: return IllegalStateException.class.getSimpleName();
       default: return RuntimeException.class.getSimpleName();
@@ -420,7 +420,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     }
     String handledType;
     String method;
-    if (HttpStatus.INTERNAL_SERVER_ERROR.value() == statusCode) {
+    if (statusCode == INTERNAL_SERVER_ERROR) {
       handledType = Throwable.class.getSimpleName();
       method = "internalError";
     } else {
