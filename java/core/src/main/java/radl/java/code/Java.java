@@ -136,11 +136,17 @@ public final class Java {
    * @return The converted Java identifier
    */
   public static String toIdentifier(String value) {
+    return toIdentifier(value, true);
+  }
+  
+  public static String toIdentifier(String value, boolean initCap) {
     StringBuilder result = new StringBuilder(value);
     while (!Character.isJavaIdentifierStart(result.charAt(0))) {
       result.delete(0, 1);
     }
-    upcase(result, 0);
+    if (initCap) {
+      upcase(result, 0);
+    }
     int index = 1;
     while (index < result.length()) {
       if (!Character.isJavaIdentifierPart(result.charAt(index))) {

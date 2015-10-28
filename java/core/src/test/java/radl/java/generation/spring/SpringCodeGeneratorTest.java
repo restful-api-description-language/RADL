@@ -972,4 +972,27 @@ public class SpringCodeGeneratorTest {
     assertEquals("#links", 1, numLinks);
   }
 
+  @Test
+  public void generatesPathVariableForUriTemplateVariable() {
+    String name = aName();
+    String param = aName();
+    String uriTemplate = aLocalUri() + '{' + param + "}/";
+    String httpMethod = aMethod();
+    Document radl = RadlBuilder.aRadlDocument()
+        .withResource()
+            .named(name)
+            .locatedAtTemplate(uriTemplate)
+            .withMethod(httpMethod)
+            .end()
+        .end()
+        .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode controller = getType(sources, controllerName(name));
+    String method = javaMethodName(httpMethod);
+    assertEquals("Method arguments", "@PathVariable(\"" + param + "\") String " + param,
+        controller.methodArguments(method));
+  }
+  
 }

@@ -143,7 +143,7 @@ public class RadlCode extends XmlCode {
       }
     }
     found = elementsAttribute("uri-template", xpath, resource).iterator();
-    return found.hasNext() ? found.next() : START_STATE;
+    return found.hasNext() ? found.next() : "";
   }
 
   public Iterable<String> methodRequestRepresentations(String resource, String method) {

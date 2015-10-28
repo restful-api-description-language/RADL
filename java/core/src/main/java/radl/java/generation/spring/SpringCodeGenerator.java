@@ -191,7 +191,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private String getDtoClass(String name) {
+  private static String getDtoClass(String name) {
     return Java.toIdentifier(name) + DTO_SUFFIX;
   }
 
@@ -806,55 +806,77 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     boolean hasReturn = !NO_TYPE.equals(type);
     addReturnTypeImport(type, code);
     String javaMethod = httpToJavaMethod(method);
-    if (argName.isEmpty()) {
-      code.add("  public %s %s(%s) {", type, javaMethod, parameters(consumes, radl, resource, method, argName));
-    } else {
-      code.add("  public %s %s(@RequestBody %s) {", type, javaMethod, parameters(consumes, radl, resource, method,
-          argName));
+    String parameters = ParametersType.CONTROLLER.parameters(consumes, radl, resource, method, argName);
+    if (parameters.contains("PathVariable")) {
+      code.ensureImport("org.springframework.web.bind.annotation", "PathVariable");
+    }
+    if (!argName.isEmpty()) {
       code.ensureImport("org.springframework.web.bind.annotation", "RequestBody");
     }
+    code.add("  public %s %s(%s) {", type, javaMethod, parameters);
+    parameters = stripParameterTypes(parameters);
     if (hasReturn) {
-      code.add("    %s<%s> %s = %s.%s(%s);", PERMITTED_ACTIONS_TYPE, type, PERMITTED_ACTIONS_VAR, CONTROLLER_SUPPORT_VAR,
-          javaMethod, argName);
+      code.add("    %s<%s> %s = %s.%s(%s);", PERMITTED_ACTIONS_TYPE, type, PERMITTED_ACTIONS_VAR,
+          CONTROLLER_SUPPORT_VAR, javaMethod, parameters);
       code.add("    %s result = %s.getTarget();", type, PERMITTED_ACTIONS_VAR);
       if (hasHyperMediaTypes) {
-        addLinks(radl, resource, method, code);
+        addLinks(radl, resource, method, code, parameters, argName);
       }
       code.add("    return result;");
     } else {
-      code.add("    return %s.%s(%s);", CONTROLLER_SUPPORT_VAR, javaMethod, argName);
+      code.add("    return %s.%s(%s);", CONTROLLER_SUPPORT_VAR, javaMethod, parameters);
     }
     code.add("  }");
     code.add("");
+  }
+
+  private String stripParameterTypes(String parameters) {
+    if (parameters.isEmpty()) {
+      return parameters;
+    }
+    StringBuilder result = new StringBuilder();
+    String prefix = "";
+    for (String parameter : parameters.split(",")) {
+      result.append(prefix).append(parameter.substring(parameter.lastIndexOf(' ')).trim());
+      prefix = ", ";
+    }
+    return result.toString();
   }
 
   private String httpToJavaMethod(String httpMethod) {
     return httpMethod.toLowerCase(Locale.getDefault());
   }
 
-  private void addLinks(RadlCode radl, String resource, String method, JavaCode code) {
+  private void addLinks(RadlCode radl, String resource, String method, JavaCode code, String parameters,
+      String argName) {
+    Collection<String> parameterList = toCollection(parameters);
+    if (!argName.isEmpty()) {
+      parameterList.add(argName);
+    }
     for (String transition : radl.methodTransitions(resource, method)) {
       for (String state : radl.transitionEnds(transition)) {
-        addLinks(radl, state, code);
+        addLinks(radl, state, code, parameterList);
       }
     }
   }
 
-  private void addLinks(RadlCode radl, String state, JavaCode code) {
+  private Collection<String> toCollection(String parameters) {
+    Collection<String> result = new ArrayList<String>();
+    for (String parameter : parameters.split(",")) {
+      result.add(parameter.trim());
+    }
+    return result;
+  }
+
+  private void addLinks(RadlCode radl, String state, JavaCode code, Collection<String> callerParameters) {
     Collection<String> addedLinkRelations = new HashSet<String>();
     for (String transition : radl.stateTransitionNames(state)) {
       ResourceMethod resourceMethod = radl.transitionMethod(transition);
       String controller = getControllerClassName(resourceMethod.getResource());
       String method = httpToJavaMethod(resourceMethod.getMethod());
       String consumes = getConsumes(radl, resourceMethod.getResource(), resourceMethod.getMethod());
-      String argument = parameters(consumes, radl, resourceMethod.getResource(), resourceMethod.getMethod(), "");
-      if (!argument.isEmpty()) {
-        String type = argument.trim();
-        argument = "new " + type + "()";
-        if (type.endsWith(DTO_SUFFIX)) {
-          code.ensureImport(dtoPackage(type), type);
-        }
-      }
+      String arguments = getArguments(consumes, radl, resourceMethod.getResource(), resourceMethod.getMethod(),
+          callerParameters);
       code.ensureImport(packagePrefix + '.' + toPackage(resourceMethod.getResource()), controller);
       code.ensureImport("de.escalon.hypermedia.spring", "AffordanceBuilder");
       for (String linkRelation : radl.transitionImplementations(transition)) {
@@ -863,13 +885,32 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
           code.add("    if (%s.%s(%s.%s)) {", PERMITTED_ACTIONS_VAR, TRANSITITION_CHECK_NAME, ACTIONS_TYPE,
               transitionConstants.get(transition).getName());
           code.add("      result.add(AffordanceBuilder");
-          code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, argument);
+          code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, arguments);
           code.add("        .withRel(%s));", linkConstant);
           code.add("    }");
           code.ensureImport(packagePrefix + '.' + IMPL_PACKAGE, ACTIONS_TYPE);
         }
       }
     }
+  }
+
+  private String getArguments(String consumes, RadlCode radl, String resource, String method,
+      Collection<String> availableParameters) {
+    StringBuilder result = new StringBuilder();
+    String prefix = "";
+    String requiredParameters = stripParameterTypes(ParametersType.SUPPORT.parameters(consumes, radl, resource, method,
+        "null"));
+    for (String param : requiredParameters.split(",")) {
+      String parameter = param.trim();
+      result.append(prefix);
+      if (availableParameters.contains(parameter)) {
+        result.append(parameter);
+      } else {
+        result.append("null");
+      }
+      prefix = ", ";
+    }
+    return result.toString();
   }
 
   private void addReturnTypeImport(String type, JavaCode code) {
@@ -916,29 +957,6 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       }
     }
     return "";
-  }
-
-  private String parameters(String consumes, RadlCode radl, String resource, String method, String argName) {
-    return consumes.isEmpty() ? "" : parameterType(consumes, radl, resource, method) + ' ' + argName;
-  }
-
-  private String parameterType(String consumes, RadlCode radl, String resource, String method) {
-    final String noType = consumes.isEmpty() ? NO_TYPE : UNKNOWN_INPUT_TYPE;
-    String result = noType;
-    for (String transition : radl.methodTransitions(resource, method)) {
-      String propertyGroup = radl.transitionPropertyGroup(transition);
-      if (propertyGroup.isEmpty()) {
-        result = noType;
-      } else {
-        String dto = getDtoClass(propertyGroup);
-        if (noType.equals(result)) {
-          result = dto;
-        } else if (!result.equals(dto)) {
-          result = UNKNOWN_INPUT_TYPE;
-        }
-      }
-    }
-    return result;
   }
 
   private String parameterName(String consumes) {
@@ -1081,7 +1099,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     String consumes = getConsumes(radl, resource, method);
     String produces = getProduces(radl, resource, method);
     String argName = parameterName(consumes);
-    String args = parameters(consumes, radl, resource, method, argName);
+    String args = ParametersType.SUPPORT.parameters(consumes, radl, resource, method, argName);
     String type = returnType(produces, radl, resource, method);
     boolean hasReturn = !NO_TYPE.equals(type);
     addReturnTypeImport(type, code);
@@ -1135,6 +1153,68 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
 
     public String[] getComments() {
       return comments == null ? new String[0] : comments.split("\n");
+    }
+
+  }
+
+  private enum ParametersType {
+    
+    CONTROLLER(true, true), SUPPORT(true, false), NONE(false, false);
+  
+    private final boolean addPath;
+    private final boolean addAnnotations;
+
+    private ParametersType(boolean addPath, boolean addAnnotations) {
+      this.addPath = addPath;
+      this.addAnnotations = addAnnotations;
+    }
+    
+    public String parameters(String consumes, RadlCode radl, String resource, String method, String argName) {
+      StringBuilder result = new StringBuilder();
+      String prefix = "";
+      if (addPath) {
+        String location = radl.resourceLocation(resource);
+        if (location.contains("{")) {
+          for (String segment : location.split("/")) {
+            if (segment.startsWith("{") && segment.endsWith("}")) {
+              result.append(prefix);
+              String templateVariableName = segment.substring(1, segment.length() - 1);
+              if (addAnnotations) {
+                result.append("@PathVariable(\"").append(templateVariableName).append("\") ");
+              }
+              result.append("String ").append(Java.toIdentifier(templateVariableName, false));
+              prefix = ", ";
+            }
+          }
+        }
+      }
+      if (!consumes.isEmpty()) {
+        result.append(prefix);
+        if (addAnnotations) {
+          result.append("@RequestBody ");
+        }
+        result.append(parameterType(consumes, radl, resource, method)).append(' ').append(argName);
+      }
+      return result.toString();
+    }
+  
+    private String parameterType(String consumes, RadlCode radl, String resource, String method) {
+      final String noType = consumes.isEmpty() ? NO_TYPE : UNKNOWN_INPUT_TYPE;
+      String result = noType;
+      for (String transition : radl.methodTransitions(resource, method)) {
+        String propertyGroup = radl.transitionPropertyGroup(transition);
+        if (propertyGroup.isEmpty()) {
+          result = noType;
+        } else {
+          String dto = getDtoClass(propertyGroup);
+          if (noType.equals(result)) {
+            result = dto;
+          } else if (!result.equals(dto)) {
+            result = UNKNOWN_INPUT_TYPE;
+          }
+        }
+      }
+      return result;
     }
 
   }
