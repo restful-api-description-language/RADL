@@ -864,7 +864,7 @@ public class SpringCodeGeneratorTest {
     
     String methodBody = controller1.methodBody(controllerMethod1);
     assertTrue("Controller #1 doesn't add link", methodBody.contains(
-        "methodOn(" + controllerName2 + ".class)." + javaMethodName(httpMethod2) + "(new "));
+        "methodOn(" + controllerName2 + ".class)." + javaMethodName(httpMethod2) + "("));
     assertTrue("Controller doesn't check transition enabled",
         methodBody.contains(TRANSITION_ENABLED_METHOD + "(" + actions.typeName() + '.' + transitionConstant));
   }
