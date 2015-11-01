@@ -38,7 +38,7 @@ public class SpringCodeGeneratorTest {
   private static final String TYPE_URIS = "Uris";
   private static final String TYPE_ERROR_DTO = "ErrorResource";
   private static final String TYPE_ACTIONS = "Actions";
-  private static final String TRANSITION_ENABLED_METHOD = "permittedActions.contains";
+  private static final String TRANSITION_ENABLED_METHOD = "response.allows";
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
   private final CodeGenerator generator = new SpringCodeGenerator(packagePrefix);
@@ -993,6 +993,56 @@ public class SpringCodeGeneratorTest {
     String method = javaMethodName(httpMethod);
     assertEquals("Method arguments", "@PathVariable(\"" + param + "\") String " + param,
         controller.methodArguments(method));
+  }
+
+  @Test
+  public void getMissingControllerMethodVariablesFromResponse() {
+    String state1 = aName();
+    String httpMethod1 = aMethod();
+    String transition = aName();
+    String state2 = aName();
+    String httpMethod2 = aMethod();
+    String linkRel = aUri();
+    String param = aName();
+    String uriTemplate = aLocalUri() + '{' + param + "}/";
+    Document radl = RadlBuilder.aRadlDocument()
+        .withStates()
+            .startingAt(state1)
+            .withState(state1)
+                .withTransition(transition, state2)
+                .end()
+            .end()
+            .withState(state2)
+            .end()
+        .end()
+        .withLinkRelations()
+            .withLinkRelation(linkRel, null)
+                .implementing(transition)
+            .end()
+        .end()
+        .withMediaTypes(true, JSON_LD)
+        .withResource()
+            .named(state1)
+            .withMethod(httpMethod1)
+                .transitioningTo("Start")
+                .producing()
+            .end()
+        .end()
+        .withResource()
+            .named(state2)
+            .locatedAtTemplate(uriTemplate)
+            .withMethod(httpMethod2)
+                .transitioningTo(transition)
+            .end()
+        .end()
+    .build();
+
+    Iterable<Code> sources = generator.generateFrom(radl);
+    
+    JavaCode controller = getType(sources, controllerName(state1));
+    String methodCall = javaMethodName(httpMethod2) + "(response.getParameter(\"" + param + "\"))";
+    assertTrue("Missing method call: " + methodCall,
+        controller.methodBody(javaMethodName(httpMethod1)).contains(methodCall));
   }
   
 }

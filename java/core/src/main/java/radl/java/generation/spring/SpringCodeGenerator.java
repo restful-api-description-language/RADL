@@ -39,6 +39,7 @@ import radl.java.code.JavaCode;
  */
 public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveClassLength
 
+  private static final String NO_PARAMETER = "null";
   private static final String DTO_SUFFIX = "Resource";
   private static final String UNKNOWN_INPUT_TYPE = "Object";
   private static final String UNKNOWN_OUTPUT_TYPE = "ResourceSupport";
@@ -67,12 +68,12 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final Collection<Integer> FRAMEWORK_HANDLED_STATUSES = Arrays.asList(405, 406);
   private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
   private static final String SEMANTIC_ANNOTATION = "Expose";
-  private static final String PERMITTED_ACTIONS_VAR = "permittedActions";
-  private static final String PERMITTED_ACTIONS_TYPE = StringUtil.initCap(PERMITTED_ACTIONS_VAR);
+  private static final String RESPONSE_VAR = "response";
+  private static final String RESPONSE_TYPE = "Rest" + StringUtil.initCap(RESPONSE_VAR);
   private static final String CONTROLLER_SUPPORT_VAR = "support";
   private static final String ACTIONS_TYPE = "Actions";
-  private static final String TRANSITITION_CHECK_NAME = "contains";
-  private static final String TRANSITITION_DENY_NAME = "exclude";
+  private static final String TRANSITITION_CHECK_NAME = "allows";
+  private static final String TRANSITITION_DENY_NAME = "deny";
 
   private final String packagePrefix;
   private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
@@ -525,19 +526,22 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     result.add("");
     result.add("import java.util.ArrayList;");
     result.add("import java.util.Collection;");
+    result.add("import java.util.HashMap;");
+    result.add("import java.util.Map;");
     result.add("");
     result.add("");
-    result.add("public class %s<T> {", PERMITTED_ACTIONS_TYPE);
+    result.add("public class %s<T> {", RESPONSE_TYPE);
     result.add("");
-    result.add("  private final T target;");
+    result.add("  private final T payload;");
     result.add("  private final Collection<String> excludedActions = new ArrayList<String>();");
+    result.add("  private final Map<String, String> parameters = new HashMap<String, String>();");
     result.add("");
-    result.add("  public %s(T target) {", PERMITTED_ACTIONS_TYPE);
-    result.add("    this.target = target;");
+    result.add("  public %s(T payload) {", RESPONSE_TYPE);
+    result.add("    this.payload = payload;");
     result.add("  }");
     result.add("");
-    result.add("  public T getTarget() {");
-    result.add("    return target;");
+    result.add("  public T getPayload() {");
+    result.add("    return payload;");
     result.add("  }");
     result.add("");
     result.add("  public void %s(String action) {", TRANSITITION_DENY_NAME);
@@ -546,6 +550,14 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     result.add("");
     result.add("  public boolean %s(String action) {", TRANSITITION_CHECK_NAME);
     result.add("    return !excludedActions.contains(action);");
+    result.add("  }");
+    result.add("");
+    result.add("  public String getParameter(String name) {");
+    result.add("    return parameters.get(name);");
+    result.add("  }");
+    result.add("");
+    result.add("  public void setParameter(String name, String value) {");
+    result.add("    parameters.put(name, value);");
     result.add("  }");
     result.add("");
     result.add("}");
@@ -816,9 +828,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     code.add("  public %s %s(%s) {", type, javaMethod, parameters);
     parameters = stripParameterTypes(parameters);
     if (hasReturn) {
-      code.add("    %s<%s> %s = %s.%s(%s);", PERMITTED_ACTIONS_TYPE, type, PERMITTED_ACTIONS_VAR,
+      code.add("    %s<%s> %s = %s.%s(%s);", RESPONSE_TYPE, type, RESPONSE_VAR,
           CONTROLLER_SUPPORT_VAR, javaMethod, parameters);
-      code.add("    %s result = %s.getTarget();", type, PERMITTED_ACTIONS_VAR);
+      code.add("    %s result = %s.getPayload();", type, RESPONSE_VAR);
       if (hasHyperMediaTypes) {
         addLinks(radl, resource, method, code, parameters, argName);
       }
@@ -882,7 +894,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       for (String linkRelation : radl.transitionImplementations(transition)) {
         if (addedLinkRelations.add(linkRelation)) {
           String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
-          code.add("    if (%s.%s(%s.%s)) {", PERMITTED_ACTIONS_VAR, TRANSITITION_CHECK_NAME, ACTIONS_TYPE,
+          code.add("    if (%s.%s(%s.%s)) {", RESPONSE_VAR, TRANSITITION_CHECK_NAME, ACTIONS_TYPE,
               transitionConstants.get(transition).getName());
           code.add("      result.add(AffordanceBuilder");
           code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, arguments);
@@ -899,16 +911,21 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     StringBuilder result = new StringBuilder();
     String prefix = "";
     String requiredParameters = stripParameterTypes(ParametersType.SUPPORT.parameters(consumes, radl, resource, method,
-        "null"));
+        NO_PARAMETER));
     for (String param : requiredParameters.split(",")) {
       String parameter = param.trim();
+      if (parameter.isEmpty()) {
+        continue;
+      }
       result.append(prefix);
+      prefix = ", ";
       if (availableParameters.contains(parameter)) {
         result.append(parameter);
-      } else {
+      } else if (NO_PARAMETER.equals(parameter)) {
         result.append("null");
+      } else {
+        result.append(String.format("%s.getParameter(\"%s\")", RESPONSE_VAR, parameter));
       }
-      prefix = ", ";
     }
     return result.toString();
   }
@@ -920,8 +937,8 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       code.ensureImport(NO_TYPE_PACKAGE, NO_TYPE_PARAMETERLESS);
     } else if (UNKNOWN_OUTPUT_TYPE.equals(type)) {
       code.ensureImport(UNKNOWN_OUTPUT_TYPE_PACKAGE, UNKNOWN_OUTPUT_TYPE);
-    } else if (PERMITTED_ACTIONS_TYPE.equals(type)) {
-      code.ensureImport(packagePrefix + '.' + IMPL_PACKAGE, PERMITTED_ACTIONS_TYPE);
+    } else if (RESPONSE_TYPE.equals(type)) {
+      code.ensureImport(packagePrefix + '.' + IMPL_PACKAGE, RESPONSE_TYPE);
     }
   }
 
@@ -1001,7 +1018,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     }
     controllerClass.add("");
     if (hasMethod) {
-      controllerClass.add("import %s.%s.%s;", packagePrefix, IMPL_PACKAGE, PERMITTED_ACTIONS_TYPE);
+      controllerClass.add("import %s.%s.%s;", packagePrefix, IMPL_PACKAGE, RESPONSE_TYPE);
     }
     controllerClass.add("");
     controllerClass.add("");
@@ -1104,15 +1121,15 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     boolean hasReturn = !NO_TYPE.equals(type);
     addReturnTypeImport(type, code);
     if (hasReturn) {
-      addReturnTypeImport(PERMITTED_ACTIONS_TYPE, code);
+      addReturnTypeImport(RESPONSE_TYPE, code);
     }
     if (hasReturn) {
-      code.add("  public %s<%s> %s(%s) {", PERMITTED_ACTIONS_TYPE, type, httpToJavaMethod(method), args);
+      code.add("  public %s<%s> %s(%s) {", RESPONSE_TYPE, type, httpToJavaMethod(method), args);
       code.add("    %s result = %s", type, getDummyReturnStatement(type, code));
       code.add("    // result.setXxx();");
-      code.add("    %1$s<%2$s> %3$s = new %1$s<%2$s>(result);", PERMITTED_ACTIONS_TYPE, type, PERMITTED_ACTIONS_VAR);
-      code.add("    // %s.exclude(Actions.YYY);", PERMITTED_ACTIONS_VAR);
-      code.add("    return %s;", PERMITTED_ACTIONS_VAR);
+      code.add("    %1$s<%2$s> %3$s = new %1$s<%2$s>(result);", RESPONSE_TYPE, type, RESPONSE_VAR);
+      code.add("    // %s.exclude(Actions.YYY);", RESPONSE_VAR);
+      code.add("    return %s;", RESPONSE_VAR);
     } else {
       code.add("  public %s %s(%s) {", type, httpToJavaMethod(method), args);
       code.add("    return %s", getDummyReturnStatement(type, code));
