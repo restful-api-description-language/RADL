@@ -166,7 +166,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
     assertEquals("Method annotations", Collections.singleton(methodAnnotation).toString(),
         source.methodAnnotations(method).toString());
     assertEquals("Method arguments", "@RequestBody Object input", source.methodArguments(method));
-    assertEquals("Method return type", "ResourceSupport", source.methodReturns(method));
+    assertEquals("Method return type", "ResponseEntity<ResourceSupport>", source.methodReturns(method));
     assertTrue("Doesn't import ResourceSupport", source.imports().contains("org.springframework.hateoas.ResourceSupport"));
     assertTrue("Method body calls support", source.methodBody(method).contains(
         String.format("support.%s(input);", method)));
@@ -256,12 +256,12 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
 
   private void assertMethod(JavaCode javaSource, String method) {
     String arguments = "GET".equalsIgnoreCase(method) ? "" : "Object input";
-    String ret = "GET".equalsIgnoreCase(method) ? "ResourceSupport()" : "ResponseEntity<Void>(HttpStatus.NO_CONTENT)";
+    String ret = "GET".equalsIgnoreCase(method) ? "new ResourceSupport()" : "HttpStatus.NO_CONTENT";
 
     assertEquals("Method arguments for " + method, arguments, javaSource.methodArguments(method));
     // Make sure the comment is not viewed as a to-do in this code base
     String methodBody = javaSource.methodBody(method);
-    assertTrue("Method body for " + method + ":\n" + methodBody, methodBody.contains("new " + ret));
+    assertTrue("Method body for " + method + ":\n" + methodBody, methodBody.contains(ret));
   }
 
   @Test
@@ -774,7 +774,8 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
 
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerMethod1 = javaMethodName(httpMethod1);
-    assertEquals("Returns #1", dtoName(propertyGroup1), controller1.methodReturns(controllerMethod1));
+    assertEquals("Returns #1", "ResponseEntity<" + dtoName(propertyGroup1) + ">",
+        controller1.methodReturns(controllerMethod1));
     assertEquals("Args #1", "", controller1.methodArguments(controllerMethod1));
 
     JavaCode controller2 = getType(sources, controllerName(state2));
@@ -788,7 +789,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
     assertTrue("Missing method #2: " + controllerSupport2.methods(),
         controllerSupport2.methods().contains(controllerMethod2));
     assertTrue("Return support #2", controllerSupport2.methodBody(controllerMethod2).contains(
-        "new ResponseEntity<Void>(HttpStatus.NO_CONTENT)"));
+        "new RestResponse<Void>(null)"));
   }
 
   // #45 Generated controllers should add links/forms to responses
