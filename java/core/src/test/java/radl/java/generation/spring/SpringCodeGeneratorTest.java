@@ -29,7 +29,7 @@ import radl.test.RandomData;
 import radl.test.TestUtil;
 
 
-public class SpringCodeGeneratorTest {
+public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
 
   private static final RandomData RANDOM = new RandomData();
   private static final int NAME_LENGTH = RANDOM.integer(3, 7);
