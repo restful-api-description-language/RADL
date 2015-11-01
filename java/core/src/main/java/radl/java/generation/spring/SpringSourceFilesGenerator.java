@@ -25,7 +25,7 @@ import radl.java.code.JavaCode;
 public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
   private static final Collection<String> GENERATED_TYPES = Arrays.asList("Api", "CentralErrorHandler", "Identifiable",
-      "Uris");
+      "RestResponse", "Uris");
   private static final Collection<String> GENERATED_TYPE_SUFFIXES = Arrays.asList(
       "Actions", "Controller", "Resource", "Exception");
   

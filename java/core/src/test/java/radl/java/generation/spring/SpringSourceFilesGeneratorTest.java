@@ -128,7 +128,7 @@ public class SpringSourceFilesGeneratorTest {
   @Test
   public void generatesGeneratedSourceFileForBaseControllerSupport() throws Exception {
     assertGeneratedSourceFile("Actions");
-    assertGeneratedSourceFile("PermittedActions");
+    assertGeneratedSourceFile("RestResponse");
   }
 
 }
