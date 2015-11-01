@@ -827,7 +827,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
         produces);
     String type = returnType(produces, radl, resource, method);
     boolean hasReturn = !NO_TYPE.equals(type);
-    addReturnTypeImport(type, code);
+    addReturnTypeImport(type, true, code);
     code.ensureImport(RESPONSE_PACKAGE, RESPONSE_TYPE);
     String javaMethod = httpToJavaMethod(method);
     String parameters = ParametersType.CONTROLLER.parameters(consumes, radl, resource, method, argName);
@@ -941,10 +941,10 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result.toString();
   }
 
-  private void addReturnTypeImport(String type, JavaCode code) {
+  private void addReturnTypeImport(String type, boolean importNoType, JavaCode code) {
     if (type.endsWith(DTO_SUFFIX)) {
       code.ensureImport(dtoPackage(type), type);
-    } else if (NO_TYPE.equals(type)) {
+    } else if (NO_TYPE.equals(type) && importNoType) {
       code.ensureImport(RESPONSE_PACKAGE, RESPONSE_TYPE);
     } else if (UNKNOWN_OUTPUT_TYPE.equals(type)) {
       code.ensureImport(UNKNOWN_OUTPUT_TYPE_PACKAGE, UNKNOWN_OUTPUT_TYPE);
@@ -1128,9 +1128,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     String args = ParametersType.SUPPORT.parameters(consumes, radl, resource, method, argName);
     String type = returnType(produces, radl, resource, method);
     boolean hasReturn = !NO_TYPE.equals(type);
-    addReturnTypeImport(type, code);
+    addReturnTypeImport(type, false, code);
     if (hasReturn) {
-      addReturnTypeImport(SUPPORT_RESPONSE_TYPE, code);
+      addReturnTypeImport(SUPPORT_RESPONSE_TYPE, false, code);
     }
     code.add("  public %s<%s> %s(%s) {", SUPPORT_RESPONSE_TYPE, type, httpToJavaMethod(method), args);
     if (hasReturn) {
