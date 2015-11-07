@@ -35,7 +35,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
   private static final int NAME_LENGTH = RANDOM.integer(3, 7);
   private static final String JSON_LD = "application/ld+json";
   private static final String TYPE_API = "Api";
-  private static final String TYPE_URIS = "Uris";
+  private static final String TYPE_URIS = "Resources";
   private static final String TYPE_ERROR_DTO = "ErrorResource";
   private static final String TYPE_ACTIONS = "Actions";
   private static final String TRANSITION_ENABLED_METHOD = "response.allows";
@@ -70,8 +70,8 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
     TestUtil.assertCollectionEquals("Imports", Arrays.asList(
         "org.springframework.beans.factory.annotation.Autowired",
         "org.springframework.web.bind.annotation.RestController",
-        packagePrefix + ".api.Api",
-        packagePrefix + ".impl.Uris"), javaSource.imports());
+        packagePrefix + ".api." + TYPE_API,
+        packagePrefix + ".impl." + TYPE_URIS), javaSource.imports());
     assertEquals("Package", packagePrefix + '.' + expectedClassName.replaceAll("\\-", ""),
         javaSource.packageName());
 
@@ -363,7 +363,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
     assertFileComments(uris);
     assertEquals("# Implementation URIs", 1, uris.fieldNames().size());
     String constant = uris.fieldNames().iterator().next();
-    assertFalse("URI constant doesn't fit naming pattern: " + constant, constant.startsWith("URL_"));
+    assertTrue("URI constant doesn't fit naming pattern: " + constant, constant.startsWith("URL_"));
     assertEquals("URI value", quote(otherUri), uris.fieldValue(constant));
 
     JavaCode controller = getType(sources, TestUtil.initCap(name) + "Controller");
@@ -427,7 +427,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
     String constant = getFieldWithValue(uris, quote(uri));
     JavaCode controller = getType(sources, controllerName(name));
 
-    String requestMappingAnnotation = String.format("@RequestMapping(Uris.%s)", constant);
+    String requestMappingAnnotation = String.format("@RequestMapping(%s.%s)", TYPE_URIS, constant);
     assertTrue("Missing @RequestMapping: " + controller.typeAnnotations(),
         controller.typeAnnotations().contains(requestMappingAnnotation));
   }
@@ -852,7 +852,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
 
     JavaCode actions = getType(sources, TYPE_ACTIONS);
     String transitionConstant = transition.toUpperCase(Locale.getDefault());
-    assertTrue("Support doesn't have constant for transition",
+    assertTrue("Support doesn't have constant for transition: " + actions.fieldNames(),
         actions.fieldNames().contains(transitionConstant));
 
     JavaCode controller1 = getType(sources, controllerName(state1));

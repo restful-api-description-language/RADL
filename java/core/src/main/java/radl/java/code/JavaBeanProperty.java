@@ -1,7 +1,7 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.java.generation.spring;
+package radl.java.code;
 
 
 public class JavaBeanProperty {

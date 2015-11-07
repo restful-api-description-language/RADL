@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -31,7 +29,10 @@ import radl.core.code.PropertyGroups;
 import radl.core.code.RadlCode;
 import radl.core.code.RadlCode.ResourceMethod;
 import radl.core.generation.CodeGenerator;
+import radl.java.code.Constant;
+import radl.java.code.Constants;
 import radl.java.code.Java;
+import radl.java.code.JavaBeanProperty;
 import radl.java.code.JavaCode;
 
 /**
@@ -53,12 +54,10 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final String IMPL_PACKAGE = "impl";
   private static final String API_PACKAGE = "api";
   private static final String BILLBOARD_URL = "BILLBOARD";
-  private static final String CONSTANT_PREFIX_URL = "URL_";
   private static final String DEFAULT_MEDIA_TYPE = "application/";
-  private static final String MEDIA_TYPE_CONSTANT_PREFIX = "MEDIA_TYPE_";
-  private static final String DEFAULT_MEDIA_TYPE_CONSTANT = MEDIA_TYPE_CONSTANT_PREFIX + "DEFAULT";
+  private static final String DEFAULT_MEDIA_TYPE_CONSTANT = "MEDIA_TYPE_DEFAULT";
   private static final String API_TYPE = "Api";
-  private static final String URIS_TYPE = "Uris";
+  private static final String URIS_TYPE = "Resources";
   private static final int BAD_REQUEST = 400;
   private static final int DEFAULT_STATUS_CODE = BAD_REQUEST;
   private static final int INTERNAL_SERVER_ERROR = 500;
@@ -76,12 +75,12 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final String TRANSITITION_DENY_NAME = "deny";
 
   private final String packagePrefix;
-  private final Map<String, Constant> errorConstants = new TreeMap<String, Constant>();
-  private final Map<String, Constant> linkRelationConstants = new TreeMap<String, Constant>();
-  private final Map<String, Constant> mediaTypeConstants = new TreeMap<String, Constant>();
-  private final Map<String, Constant> transitionConstants = new TreeMap<String, Constant>();
-  private final Map<String, Constant> uriConstants = new TreeMap<String, Constant>();
-  private final String header;
+  private final Constants errorConstants = new Constants("ERROR", "Error conditions");
+  private final Constants linkRelationConstants = new Constants("LINK_REL", "Link relations");
+  private final Constants mediaTypeConstants = new Constants("MEDIA_TYPE", "Media types");
+  private final Constants transitionConstants = new Constants("", "");
+  private final Constants uriConstants = new Constants("URL", "URIs");
+  private final String fileHeader;
   private MediaType defaultMediaType;
 
   public SpringCodeGenerator(String packagePrefix) {
@@ -90,7 +89,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
 
   public SpringCodeGenerator(String packagePrefix, String header) {
     this.packagePrefix = packagePrefix;
-    this.header = header == null || header.trim().isEmpty() ? DEFAULT_HEADER : header;
+    this.fileHeader = header == null || header.trim().isEmpty() ? DEFAULT_HEADER : header;
     initHttpStatuses();
   }
 
@@ -137,15 +136,11 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   @Override
   public Iterable<Code> generateFrom(Document radl) {
     Collection<Code> result = new ArrayList<Code>();
-    try {
-      generate(new RadlCode(radl), result);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    generate(new RadlCode(radl), result);
     return result;
   }
 
-  private void generate(RadlCode radl, Collection<Code> result) throws Exception {
+  private void generate(RadlCode radl, Collection<Code> result) {
     defaultMediaType = radl.defaultMediaType();
     boolean hasHyperMediaTypes = radl.hasHyperMediaTypes();
     addLinkRelationConstants(radl);
@@ -155,7 +150,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private void generateSourcesForPropertyGroups(PropertyGroups propertyGroups, final boolean hasHyperMediaTypes,
-      final Collection<Code> sources) throws Exception {
+      final Collection<Code> sources) {
     if (propertyGroups == null) {
       return;
     }
@@ -279,7 +274,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return type;
   }
 
-  private void generateSourcesForErrors(RadlCode radl, final Collection<Code> sources) throws Exception {
+  private void generateSourcesForErrors(RadlCode radl, final Collection<Code> sources) {
     Iterator<String> errors = radl.errors().iterator();
     if (!errors.hasNext()) {
       return;
@@ -340,22 +335,22 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return result;
   }
 
-  private JavaCode generateException(String name, int statusCode, String documentation) {
+  private JavaCode generateException(String error, int statusCode, String documentation) {
     JavaCode result = new JavaCode();
     addPackage(IMPL_PACKAGE, result);
     result.add("");
     result.add("import %s;", apiType());
     result.add("");
     result.add("");
-    String type = toExceptionTypeName(getErrorName(name));
+    String type = toExceptionTypeName(getErrorName(error));
     result.add("public class %s extends %s implements %s {", type, getBaseException(statusCode), IDENTIFIABLE_TYPE);
     result.add("");
     result.add("  public %s() {", type);
-    result.add("    super(\"%s\");", getMessage(name, documentation));
+    result.add("    super(\"%s\");", getExceptionMessage(error, documentation));
     result.add("  }");
     result.add("");
     result.add("  public String getId() {");
-    result.add("    return %s.%s;", API_TYPE, errorConstants.get(name).getName());
+    result.add("    return %s.%s;", API_TYPE, errorConstants.byValue(error).getName());
     result.add("  }");
     result.add("");
     result.add("}");
@@ -383,9 +378,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return Java.toIdentifier(name + "Exception");
   }
 
-  private String getMessage(String name, String documentation) {
+  private String getExceptionMessage(String error, String documentation) {
     if (documentation == null || documentation.trim().isEmpty()) {
-      return errorConstants.get(name).getName();
+      return errorConstants.byValue(error).getName();
     }
     return Java.toString(documentation.trim());
   }
@@ -591,9 +586,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
 
   private void addTransitionConstants(RadlCode radl, JavaCode code) {
     for (String transition : getTransitions(radl)) {
-      ensureConstant("", transition, transition, null, transitionConstants);
+      transitionConstants.add(transition, transition, null);
     }
-    addConstants(transitionConstants, "", code);
+    addConstants(transitionConstants, code);
   }
 
   private Iterable<String> getTransitions(RadlCode radl) {
@@ -622,7 +617,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private void addUris(JavaCode code) {
-    addConstants(filter(uriConstants, CONSTANT_PREFIX_URL + BILLBOARD_URL, false), "Resource locations", code);
+    addConstants(uriConstants.filter(BILLBOARD_URL, false), code);
   }
 
   private Code generateApi(RadlCode radl) {
@@ -642,32 +637,21 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
 
   private void addErrors(RadlCode radl, JavaCode code) {
     addErrorConstants(radl);
-    addConstants(errorConstants, "Error conditions", code);
+    addConstants(errorConstants, code);
   }
 
   private void addErrorConstants(RadlCode radl) {
     for (String value : radl.errors()) {
-      String documentation = radl.errorDocumentation(value);
-      errorConstants.put(value, ensureConstant("ERROR_", getErrorName(value), value, documentation, errorConstants));
+      errorConstants.add(getErrorName(value), value, radl.errorDocumentation(value));
     }
   }
 
   private void addBillboardUri(JavaCode code) {
-    addConstants(filter(uriConstants, CONSTANT_PREFIX_URL + BILLBOARD_URL, true), "", code);
-  }
-
-  private Map<String, Constant> filter(Map<String, Constant> values, String value, boolean include) {
-    Map<String, Constant> result = new HashMap<String, Constant>();
-    for (Entry<String, Constant> entry : values.entrySet()) {
-      if (value.equals(entry.getValue().getName()) == include) {
-        result.put(entry.getKey(), entry.getValue());
-      }
-    }
-    return result;
+    addConstants(uriConstants.filter(BILLBOARD_URL, true), code);
   }
 
   private void addLinkRelations(JavaCode code) {
-    addConstants(linkRelationConstants, "Link relations", code);
+    addConstants(linkRelationConstants, code);
   }
 
   private void addLinkRelationConstants(RadlCode radl) {
@@ -675,27 +659,28 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       String[] segments = value.split("/");
       String name = segments[segments.length - 1];
       String documentation = radl.linkRelationDocumentation(value);
-      ensureConstant("LINK_REL_", name, value, documentation, linkRelationConstants);
+      linkRelationConstants.add(name, value, documentation);
     }
   }
 
   private void addMediaTypes(JavaCode code) {
-    addConstants(mediaTypeConstants, "Media types", code);
+    addConstants(mediaTypeConstants, code);
     if (defaultMediaType != null) {
-      if (mediaTypeConstants.isEmpty()) {
-        addConstantsHeading("Media types", code);
+      if (!mediaTypeConstants.all().iterator().hasNext()) {
+        addConstantsHeading(mediaTypeConstants.getDescription(), code);
       }
       code.add("  String %s = \"%s\";", getLocalMediaTypeConstant(defaultMediaType.name()), defaultMediaType.name());
       code.add("  String %s = %s;", DEFAULT_MEDIA_TYPE_CONSTANT, getLocalMediaTypeConstant(defaultMediaType.name()));
     }
   }
 
-  private void addConstants(Map<String, Constant> constants, String heading, JavaCode code) {
-    if (!constants.isEmpty()) {
+  private void addConstants(Constants constants, JavaCode code) {
+    Iterator<Constant> iterator = constants.all().iterator();
+    if (iterator.hasNext()) {
       String scope = code.isClass() ? "public static " : "";
-      addConstantsHeading(heading, code);
-      for (Entry<String, Constant> entry : constants.entrySet()) {
-        Constant constant = entry.getValue();
+      addConstantsHeading(constants.getDescription(), code);
+      while (iterator.hasNext()) {
+        Constant constant = iterator.next();
         if (constant.getComments().length > 0) {
           code.add("  /**");
           for (String comment : constant.getComments()) {
@@ -703,7 +688,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
           }
           code.add("   */");
         }
-        code.add("  %sString %s = \"%s\";", scope, constant.getName(), entry.getKey());
+        code.add("  %sString %s = \"%s\";", scope, constant.getName(), constant.getValue());
       }
     }
   }
@@ -720,7 +705,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
 
   private void addPackage(String name, Code code) {
     code.add("/*");
-    for (String line : header.split("\n")) {
+    for (String line : fileHeader.split("\n")) {
       code.add(" * %s", line);
     }
     code.add(" */");
@@ -775,16 +760,13 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     result.add("");
     String uri = radl.resourceLocation(resource);
     boolean addUris;
-    String namePrefix;
     String constantName;
     String type;
     if (transitionsToStart(radl, startTransition, resource)) {
-      namePrefix = CONSTANT_PREFIX_URL;
       constantName = BILLBOARD_URL;
       type = API_TYPE;
       addUris = false;
     } else {
-      namePrefix = "";
       constantName = name;
       type = URIS_TYPE;
       addUris = true;
@@ -792,7 +774,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     addControllerImports(radl, resource, addUris, result);
     result.add("@RestController");
     if (uri != null) {
-      Constant constant = ensureConstant(namePrefix, constantName, uri, null, uriConstants);
+      Constant constant = uriConstants.add(constantName, uri, null);
       result.add(String.format("@RequestMapping(%s.%s)", type, constant.getName()));
     }
     result.add("public class %s {", getControllerClassName(resource));
@@ -904,9 +886,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       code.ensureImport("de.escalon.hypermedia.spring", "AffordanceBuilder");
       for (String linkRelation : radl.transitionImplementations(transition)) {
         if (addedLinkRelations.add(linkRelation)) {
-          String linkConstant = API_TYPE + '.' + linkRelationConstants.get(linkRelation).getName();
+          String linkConstant = API_TYPE + '.' + linkRelationConstants.byValue(linkRelation).getName();
           code.add("    if (%s.%s(%s.%s)) {", RESPONSE_VAR, TRANSITITION_CHECK_NAME, ACTIONS_TYPE,
-              transitionConstants.get(transition).getName());
+              transitionConstants.byValue(transition).getName());
           code.add("      result.add(AffordanceBuilder");
           code.add("        .linkTo(AffordanceBuilder.methodOn(%s.class).%s(%s))", controller, method, arguments);
           code.add("        .withRel(%s));", linkConstant);
@@ -996,20 +978,9 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private String getLocalMediaTypeConstant(String mediaType) {
-    String name =
-        mediaType.startsWith(DEFAULT_MEDIA_TYPE) ? mediaType.substring(DEFAULT_MEDIA_TYPE.length()) : mediaType;
-    return ensureConstant(MEDIA_TYPE_CONSTANT_PREFIX, name, mediaType, null, mediaTypeConstants).getName();
-  }
-
-  private Constant ensureConstant(String namePrefix, String name, String value, String documentation,
-      Map<String, Constant> constants) {
-    Constant result = constants.get(value);
-    if (result == null) {
-      String contantName = namePrefix + Java.toName(name.replace('/', '_').toUpperCase(Locale.getDefault()));
-      result = new Constant(contantName, documentation);
-      constants.put(value, result);
-    }
-    return result;
+    String name = mediaType.startsWith(DEFAULT_MEDIA_TYPE)
+        ? mediaType.substring(DEFAULT_MEDIA_TYPE.length()) : mediaType;
+    return mediaTypeConstants.add(name, mediaType, null).getName();
   }
 
   private void addControllerImports(RadlCode radl, String resource, boolean addUris, Code controllerClass) {
@@ -1163,26 +1134,6 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       result = "new " + type + "();";
     }
     return result;
-  }
-
-  private static class Constant {
-
-    private final String name;
-    private final String comments;
-
-    public Constant(String name, String comments) {
-      this.name = name;
-      this.comments = comments;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String[] getComments() {
-      return comments == null ? new String[0] : comments.split("\n");
-    }
-
   }
 
   private enum ParametersType {
