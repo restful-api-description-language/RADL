@@ -1,11 +1,13 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.code;
+package radl.core.code.radl;
 
 import java.util.Map;
 
 import org.w3c.dom.Element;
+
+import radl.core.code.xml.XmlCode;
 
 
 public class PropertyImpl extends XmlCode implements Property {

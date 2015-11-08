@@ -1,8 +1,9 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.code;
+package radl.core.code.xml;
 
+import radl.core.code.GenericSyntax;
 
 /**
  * Syntax for XML code.

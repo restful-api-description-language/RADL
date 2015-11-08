@@ -1,9 +1,11 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.code;
+package radl.core.code.radl;
 
 import org.w3c.dom.Element;
+
+import radl.core.code.xml.NestedXml;
 
 
 public class PropertyGroup extends PropertyGroups implements Property {

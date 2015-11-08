@@ -10,6 +10,7 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import radl.core.Radl;
+import radl.core.code.radl.RadlCode;
 import radl.test.RandomData;
 import radl.test.TestUtil;
 

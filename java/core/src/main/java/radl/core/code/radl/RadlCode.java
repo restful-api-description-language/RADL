@@ -1,7 +1,7 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.code;
+package radl.core.code.radl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +15,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import radl.core.Radl;
+import radl.core.code.xml.NestedXml;
+import radl.core.code.xml.XmlCode;
 
 
 /**

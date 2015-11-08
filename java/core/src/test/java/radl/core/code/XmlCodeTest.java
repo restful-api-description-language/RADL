@@ -17,6 +17,9 @@ import com.google.common.collect.Iterables;
 import radl.common.xml.DocumentBuilder;
 import radl.common.xml.Xml;
 import radl.core.Radl;
+import radl.core.code.xml.NestedXml;
+import radl.core.code.xml.XmlCode;
+import radl.core.code.xml.XmlIndent;
 import radl.test.RandomData;
 import radl.test.TestUtil;
 

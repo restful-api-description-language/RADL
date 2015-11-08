@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import radl.core.code.RadlCode;
+import radl.core.code.radl.RadlCode;
 import radl.core.validation.Issue.Level;
 
 

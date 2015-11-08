@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import radl.core.code.radl.RadlCode;
+import radl.core.code.xml.XmlCode;
 import radl.java.code.JavaCode;
 
 

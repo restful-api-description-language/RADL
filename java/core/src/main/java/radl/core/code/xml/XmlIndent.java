@@ -1,7 +1,7 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.code;
+package radl.core.code.xml;
 
 
 /**

@@ -1,8 +1,9 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.code;
+package radl.core.code.radl;
 
+import radl.core.code.xml.NestedXml;
 
 public class PropertyGroups {
 

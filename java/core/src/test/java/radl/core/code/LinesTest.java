@@ -12,6 +12,7 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 
+import radl.core.code.xml.XmlSyntax;
 import radl.test.RandomData;
 
 

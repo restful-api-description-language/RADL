@@ -12,7 +12,7 @@ import org.junit.Test;
 import radl.common.xml.DocumentBuilder;
 import radl.common.xml.Xml;
 import radl.core.Radl;
-import radl.core.code.RadlCode;
+import radl.core.code.radl.RadlCode;
 import radl.test.RandomData;
 import radl.test.TestUtil;
 

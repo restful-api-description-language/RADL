@@ -9,8 +9,8 @@ import radl.core.Log;
 import radl.core.cli.Application;
 import radl.core.cli.Arguments;
 import radl.core.cli.Cli;
-import radl.core.code.RadlCode;
 import radl.core.code.SourceFile;
+import radl.core.code.radl.RadlCode;
 
 
 public class RadlComparer implements Application {

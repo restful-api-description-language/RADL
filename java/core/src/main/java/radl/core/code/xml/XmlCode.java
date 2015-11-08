@@ -1,7 +1,7 @@
 /*
  * Copyright © EMC Corporation. All rights reserved.
  */
-package radl.core.code;
+package radl.core.code.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +21,7 @@ import org.w3c.dom.Node;
 
 import radl.common.io.StringStream;
 import radl.common.xml.Xml;
+import radl.core.code.Code;
 
 
 /**
@@ -79,7 +80,7 @@ public class XmlCode extends Code {
     return root;
   }
 
-  protected <T> Iterable<T> multiple(String path, Class<T> returnType) {
+  public <T> Iterable<T> multiple(String path, Class<T> returnType) {
     Collection<T> result = new ArrayList<T>();
     try {
       XPath xpath = new DOMXPath(path);
@@ -99,11 +100,11 @@ public class XmlCode extends Code {
     namespaces.put(prefix, uri);
   }
 
-  protected String attr(Element element, String name) {
+  public String attr(Element element, String name) {
     return element.getAttributeNS(null, name);
   }
 
-  protected <T> T one(String path, Class<T> returnType) {
+  public <T> T one(String path, Class<T> returnType) {
     Iterator<T> results = multiple(path, returnType).iterator();
     if (!results.hasNext()) {
       throw new IllegalArgumentException("No results for: " + path);
@@ -119,13 +120,13 @@ public class XmlCode extends Code {
     return new XmlIndent(this);
   }
 
-  void indent(int toAdd) {
+  public void indent(int toAdd) {
     for (int i = 0; i < toAdd; i++) {
       indentation.append(' ');
     }
   }
 
-  void unindent(int toRemove) {
+  public void unindent(int toRemove) {
     indentation.setLength(indentation.length() - toRemove);
   }
 

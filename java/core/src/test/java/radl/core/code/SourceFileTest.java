@@ -13,6 +13,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import radl.common.io.IO;
+import radl.core.code.radl.RadlCode;
+import radl.core.code.xml.XmlCode;
 import radl.test.RandomData;
 import radl.test.TestUtil;
 
