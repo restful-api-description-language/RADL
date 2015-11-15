@@ -5,9 +5,9 @@ cache:
   - .gradle
 env:
   global:
-    - USER=ApiSecRay
+  - USER=ApiSecRay
     # BINTRAY API KEY:
-    - secure: XgXG6UVWg8+MpXXaNH0c3w3Tsp9XBi1eXPbGUi16ztZUS/DVDnCbrFFX1ABXz4Dw+qCER67hjtcL6O0bczt1oJFFurC1tMzSXqZSrVIDcDAEVKCi08dy73yxm0QX4HFWg/z67O0DzJi8teYMcItSgBAsKbhnVEV+mnYxS/wR86c=
+  - secure: XgXG6UVWg8+MpXXaNH0c3w3Tsp9XBi1eXPbGUi16ztZUS/DVDnCbrFFX1ABXz4Dw+qCER67hjtcL6O0bczt1oJFFurC1tMzSXqZSrVIDcDAEVKCi08dy73yxm0QX4HFWg/z67O0DzJi8teYMcItSgBAsKbhnVEV+mnYxS/wR86c=
     # COVERITY API KEY:
     - secure: "Rtj2gG4t84+r62T4IXOsJPA+3R8cfFJaCrehh8W9gFGXTRvwEnpBLkjJGBT//DhpnENZFncjy7Kk5LdDY3dY4qBtek+lxrAXTWqHmxOAEuwHBymlSWsQt0II1LD8HmmHeMUvo2LPq6flbZG7x4qR6/bk2y5BFAtdLn8G3G/CbOg="
     # HIPCHAT API KEY:
@@ -19,6 +19,8 @@ jdk:
 install: true
 script: ./gradlew build
 notifications:
+  slack:
+    secure: LJfuvagJjFqaoA8AJQtfLOtymOzpifA2qUqA1XI5Kd67sVFY5BViIHZ/+qy3jV+Ve7Msl8St+XiB9zrLqKOxFNNaFvYZYgpn4fb4RDxVWipZrVY9/DRwEImzuWNsx1Il7rn9zWK0jgmIyK2DK6wtWPnZUTinHGPIw3RtvR22AyA=
   webhooks:
     urls:
     - https://webhooks.gitter.im/e/9964f490aeaa2be3c3c9
@@ -27,18 +29,18 @@ notifications:
     on_start: true
   hipchat: $HIPCHAT_KEY@Radl
 after_success:
-  - ./deploy_to_bintray.sh
-  - bash <(curl -s https://codecov.io/bash)
+- ./deploy_to_bintray.sh
+- bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: releases
   api_key:
     secure: RWpPmmzrJ2Ddx8nwG6k6UZm98o7gMRpGJ2liCFUGy5Uuf8w5AXj6xMLKFdcK3pZFSYBQ1+4DycFPAXmFCfP+nv6dX9PbDkOVB669ecnxStfVse0zXYgjuNEmhAht6wDb/O6jiNUrnyXcmQDExhXC3SigtnWcLUiRbJOYGoc3oSQ=
   file_glob: true
   file:
-    - java/core/build/libs/*
-    - java/eclipse/build/libs/*
-    - java/gradle/build/libs/*
-    - java/maven/build/libs/*
+  - java/core/build/libs/*
+  - java/eclipse/build/libs/*
+  - java/gradle/build/libs/*
+  - java/maven/build/libs/*
   on:
     repo: restful-api-description-language/RADL
     tags: true
