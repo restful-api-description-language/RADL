@@ -21,7 +21,9 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import radl.core.code.Code;
+import radl.core.code.radl.RadlCode;
 import radl.core.generation.CodeGenerator;
+import radl.core.generation.Module;
 import radl.java.code.Java;
 import radl.java.code.JavaCode;
 import radl.test.RadlBuilder;
@@ -52,9 +54,20 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     assertController(resource, sources);
+  }
+
+  private Iterable<Code> radlToCode(Document radl) {
+    Module input = new Module(new RadlCode(radl));
+    Module generated = new Module();
+    Module skeleton = new Module();
+    generator.generate(input, generated, skeleton);
+    Collection<Code> result = new ArrayList<Code>();
+    result.addAll(generated);
+    result.addAll(skeleton);
+    return result;
   }
 
   private String aName() {
@@ -104,7 +117,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode uris = getType(sources, TYPE_URIS);
     String constant = getFieldWithValue(uris, quote(uri));
@@ -177,7 +190,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
   }
 
   private JavaCode generateController(Document radl, String resourceName) {
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
     return getType(sources, controllerName(resourceName));
   }
 
@@ -228,7 +241,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
     String method1 = javaMethodName(httpMethod1);
     String method2 = javaMethodName(httpMethod2);
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     getType(sources, TYPE_API);
     getType(sources, TYPE_ACTIONS);
@@ -292,7 +305,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
   }
 
   private JavaCode generateType(Document radl, String type) {
-    return getType(generator.generateFrom(radl), type);
+    return getType(radlToCode(radl), type);
   }
 
   private JavaCode getType(Iterable<Code> sources, String type) {
@@ -351,7 +364,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     String field = "URL_BILLBOARD";
     JavaCode api = getType(sources, TYPE_API);
@@ -384,7 +397,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode controller = getType(sources, TestUtil.initCap(name1) + TestUtil.initCap(name2) + "Controller");
     assertNotNull("Missing controller", controller);
@@ -404,7 +417,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode controller = getType(sources, TestUtil.initCap(javaMethodName(name)) + "Controller");
     assertNotNull("Missing controller", controller);
@@ -421,7 +434,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode uris = getType(sources, TYPE_URIS);
     String constant = getFieldWithValue(uris, quote(uri));
@@ -449,7 +462,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode api = getType(sources, TYPE_API);
     assertNotNull("Missing API", api);
@@ -521,7 +534,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
     JavaCode identifiable = getType(sources, "Identifiable");
 
     assertExceptionType(name2, documentation2, "IllegalArgumentException", identifiable, sources);
@@ -576,7 +589,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     getType(sources, exceptionName(name));
   }
@@ -598,7 +611,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode api = getType(sources, TYPE_API);
     String defaultMediaTypeConstant = "MEDIA_TYPE_DEFAULT";
@@ -625,7 +638,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode controller1 = getType(sources, controllerName(resource1));
     JavaCode controller2 = getType(sources, controllerName(resource2));
@@ -686,7 +699,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode dto1 = getType(sources, dtoName(name1));
     assertEquals("Package", packagePrefix + '.' + name1, dto1.packageName());
@@ -770,7 +783,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode controller1 = getType(sources, controllerName(state1));
     String controllerMethod1 = javaMethodName(httpMethod1);
@@ -840,7 +853,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode dto1 = getType(sources, dtoName(propertyGroup1));
     assertEquals("DTO super class", "ResourceSupport", dto1.superTypeName());
@@ -883,7 +896,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode dto = getType(sources, dtoName(data));
     assertEquals("Field type", XMLGregorianCalendar.class.getSimpleName(), dto.fieldType(property));
@@ -903,7 +916,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
 
     JavaCode dto = getType(sources, dtoName(data));
     assertEquals("Field type", "double", dto.fieldType(property));
@@ -961,7 +974,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
     
     JavaCode controller = getType(sources, controllerName(state1));
     int numLinks = 0;
@@ -988,7 +1001,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
         .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
     
     JavaCode controller = getType(sources, controllerName(name));
     String method = javaMethodName(httpMethod);
@@ -1038,7 +1051,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
         .end()
     .build();
 
-    Iterable<Code> sources = generator.generateFrom(radl);
+    Iterable<Code> sources = radlToCode(radl);
     
     JavaCode controller = getType(sources, controllerName(state1));
     String methodCall = javaMethodName(httpMethod2) + "(response.getParameter(\"" + param + "\"))";

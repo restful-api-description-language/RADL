@@ -6,7 +6,6 @@ package radl.java.generation.spring;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.w3c.dom.Document;
@@ -14,7 +13,9 @@ import org.w3c.dom.Document;
 import radl.core.code.Code;
 import radl.core.code.GeneratedSourceFile;
 import radl.core.code.SourceFile;
+import radl.core.code.radl.RadlCode;
 import radl.core.generation.CodeGenerator;
+import radl.core.generation.Module;
 import radl.core.generation.SourceFilesGenerator;
 import radl.java.code.JavaCode;
 
@@ -24,11 +25,6 @@ import radl.java.code.JavaCode;
  */
 public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
-  private static final Collection<String> GENERATED_TYPES = Arrays.asList("Api", "CentralErrorHandler", "Identifiable",
-      "RestResponse", "Uris");
-  private static final Collection<String> GENERATED_TYPE_SUFFIXES = Arrays.asList(
-      "Actions", "Controller", "Resource", "Exception");
-  
   private final CodeGenerator codeGenerator;
   private final String generatedSourceSetDir;
   private final String mainSourceSetDir;
@@ -51,20 +47,25 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
   @Override
   public Iterable<SourceFile> generateFrom(Document radl, File baseDir) {
     Collection<SourceFile> result = new ArrayList<SourceFile>();
-    for (Code code : codeGenerator.generateFrom(radl)) {
-      result.add(newSourceFileFor(baseDir, (JavaCode)code));
+    Module source = new Module();
+    source.add(new RadlCode(radl));
+    Module generated = new Module();
+    Module skeleton = new Module();
+    codeGenerator.generate(source, generated, skeleton);
+    for (Code code : generated) {
+      String path = codeToPath(baseDir, generatedSourceSetDir, (JavaCode)code);
+      result.add(new GeneratedSourceFile(path, code));
+    }
+    for (Code code : skeleton) {
+      String path = codeToPath(baseDir, mainSourceSetDir, (JavaCode)code);
+      result.add(new SourceFile(path, code));
     }
     return result;
   }
 
-  private SourceFile newSourceFileFor(File baseDir, JavaCode code) {
-    String path = codeToPath(baseDir, code);
-    return isGenerated(code) ? new GeneratedSourceFile(path, code) : new SourceFile(path, code);
-  }
-
-  private String codeToPath(File baseDir, JavaCode code) {
+  private String codeToPath(File baseDir, String sourceSetDir, JavaCode code) {
     try {
-      return new File(baseDir, directoryFor(code) + File.separator + fileFor(code)).getCanonicalPath();
+      return new File(baseDir, sourceSetDir + directoryFor(code) + File.separator + fileFor(code)).getCanonicalPath();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -72,25 +73,7 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
   private String directoryFor(JavaCode code) {
     String packageName = code.packageName();
-    String result = packageName.isEmpty() ? "." : packageName.replaceAll("\\.", "\\" + File.separator);
-    return getSourceSetDir(code) + result;
-  }
-
-  private String getSourceSetDir(JavaCode code) {
-    return isGenerated(code) ? generatedSourceSetDir : mainSourceSetDir;
-  }
-
-  private boolean isGenerated(JavaCode code) {
-    String type = code.simpleTypeName();
-    if (GENERATED_TYPES.contains(type)) {
-      return true;
-    }
-    for (String suffix : GENERATED_TYPE_SUFFIXES) {
-      if (type.endsWith(suffix)) {
-        return true;
-      }
-    }
-    return false;
+    return packageName.isEmpty() ? "." : packageName.replaceAll("\\.", "\\" + File.separator);
   }
 
   private String fileFor(JavaCode code) {

@@ -18,7 +18,6 @@ import java.util.TreeSet;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.atteo.evo.inflector.English;
-import org.w3c.dom.Document;
 
 import radl.common.StringUtil;
 import radl.core.code.Code;
@@ -31,6 +30,7 @@ import radl.core.code.radl.PropertyGroups;
 import radl.core.code.radl.RadlCode;
 import radl.core.code.radl.RadlCode.ResourceMethod;
 import radl.core.generation.CodeGenerator;
+import radl.core.generation.Module;
 import radl.java.code.Java;
 import radl.java.code.JavaBeanProperty;
 import radl.java.code.JavaCode;
@@ -75,12 +75,12 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final String TRANSITITION_DENY_NAME = "deny";
 
   private final String packagePrefix;
+  private final String fileHeader;
   private final Constants errorConstants = new Constants("ERROR", "Error conditions");
   private final Constants linkRelationConstants = new Constants("LINK_REL", "Link relations");
   private final Constants mediaTypeConstants = new Constants("MEDIA_TYPE", "Media types");
   private final Constants transitionConstants = new Constants("", "");
   private final Constants uriConstants = new Constants("URL", "URIs");
-  private final String fileHeader;
   private MediaType defaultMediaType;
 
   public SpringCodeGenerator(String packagePrefix) {
@@ -134,23 +134,21 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   @Override
-  public Iterable<Code> generateFrom(Document radl) {
-    Collection<Code> result = new ArrayList<Code>();
-    generate(new RadlCode(radl), result);
-    return result;
+  public void generate(Module source, Module generated, Module skeleton) {
+    generate((RadlCode)source.get(0), generated, skeleton);
   }
 
-  private void generate(RadlCode radl, Collection<Code> result) {
+  private void generate(RadlCode radl, Module generated, Module skeleton) {
     defaultMediaType = radl.defaultMediaType();
     boolean hasHyperMediaTypes = radl.hasHyperMediaTypes();
     addLinkRelationConstants(radl);
-    generateSourcesForPropertyGroups(radl.propertyGroups(), hasHyperMediaTypes, result);
-    generateSourcesForResources(radl, hasHyperMediaTypes, result);
-    generateSourcesForErrors(radl, result);
+    generateSourcesForPropertyGroups(radl.propertyGroups(), hasHyperMediaTypes, generated);
+    generateSourcesForResources(radl, hasHyperMediaTypes, generated, skeleton);
+    generateSourcesForErrors(radl, generated);
   }
 
-  private void generateSourcesForPropertyGroups(PropertyGroups propertyGroups, final boolean hasHyperMediaTypes,
-      final Collection<Code> sources) {
+  private void generateSourcesForPropertyGroups(PropertyGroups propertyGroups, boolean hasHyperMediaTypes,
+      Module sources) {
     if (propertyGroups == null) {
       return;
     }
@@ -159,7 +157,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     }
   }
 
-  protected String addDtosFor(PropertyGroup propertyGroup, boolean hasHyperMediaTypes, Collection<Code> sources) {
+  protected String addDtosFor(PropertyGroup propertyGroup, boolean hasHyperMediaTypes, Module sources) {
     final JavaCode code = new JavaCode();
     addPackage(propertyGroup.name(), code);
     code.add("");
@@ -225,7 +223,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private void addDtoFields(boolean hasHyperMediaTypes, PropertyGroup propertyGroup, JavaCode dto,
-      Collection<Code> sources) {
+      Module sources) {
     Collection<JavaBeanProperty> properties = new ArrayList<JavaBeanProperty>();
     for (String propertyName : propertyGroup.propertyNames()) {
       Property property = propertyGroup.property(propertyName);
@@ -243,7 +241,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     addProperties(dto, properties);
   }
 
-  protected String getType(Property property, boolean hasHyperMediaTypes, Collection<Code> sources) {
+  protected String getType(Property property, boolean hasHyperMediaTypes, Module sources) {
     String result = null;
     if (property instanceof PropertyGroup) {
       PropertyGroup propertyGroup = (PropertyGroup)property;
@@ -274,7 +272,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return type;
   }
 
-  private void generateSourcesForErrors(RadlCode radl, final Collection<Code> sources) {
+  private void generateSourcesForErrors(RadlCode radl, Module sources) {
     Iterator<String> errors = radl.errors().iterator();
     if (!errors.hasNext()) {
       return;
@@ -502,17 +500,18 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     return errorHandler;
   }
 
-  private void generateSourcesForResources(RadlCode radl, boolean hasHyperMediaTypes, Collection<Code> sources) {
+  private void generateSourcesForResources(RadlCode radl, boolean hasHyperMediaTypes, Module generated,
+      Module skeleton) {
     Iterator<String> startTransitions = radl.stateTransitionNames("").iterator();
     String startTransition = startTransitions.hasNext() ? startTransitions.next() : null;
-    sources.add(generatePermittedActions());
-    sources.add(generateActions(radl, hasHyperMediaTypes));
+    generated.add(generatePermittedActions());
+    generated.add(generateActions(radl, hasHyperMediaTypes));
     for (String resource : radl.resourceNames()) {
-      sources.add(generateController(radl, resource, hasHyperMediaTypes, startTransition));
-      sources.add(generateControllerSupport(radl, resource));
+      generated.add(generateController(radl, resource, hasHyperMediaTypes, startTransition));
+      skeleton.add(generateControllerSupport(radl, resource));
     }
-    sources.add(generateApi(radl));
-    sources.add(generateUris());
+    generated.add(generateApi(radl));
+    generated.add(generateUris());
   }
 
   private Code generatePermittedActions() {
