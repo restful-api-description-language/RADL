@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Arguments provided on the command-line to an application.
@@ -76,7 +77,8 @@ public class Arguments implements Iterator<String> {
    * @return a file named by the next argument
    */
   public File file() {
-    return new File(next());
+    String next = next();
+    return StringUtils.isEmpty(next) ? null : new File(next);
   }
 
   /**

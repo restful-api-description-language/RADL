@@ -1,0 +1,118 @@
+body{
+  margin:0;
+  padding:0 0 0 16em;
+}
+
+h1,
+h2{
+  color:goldenrod;
+}
+h3{
+  color:purple;
+}
+
+table{
+  border-collapse:collapse;
+  margin-bottom:1em;
+  width:90%
+}
+th,
+td{
+  border:1px solid;
+  padding:0.35em;
+  vertical-align:top;
+}
+th{
+  color:White;
+  background-color:CornflowerBlue;
+  text-align:left;
+  border-color:Navy;
+}
+td{
+  border-color:LightGrey;
+  vertical-align:middle;
+}
+tr:nth-child(odd){
+  background-color:#eeeeef;
+  padding:16px;
+}
+
+dl{
+  margin:16px;
+}
+dl dl{
+  background-color:#eeeeef;
+  padding:12px;
+}
+
+dt{
+  font-weight:bold;
+  padding-top:9px;
+}
+dt::after{
+  content:":";
+}
+dd{
+  margin:0;
+  padding-left:16px;
+}
+div.nested{
+  margin:0;
+  padding-left:16px;
+}
+
+li.transition{
+  list-style-type:none;
+}
+
+.outline{
+  vertical-align:top;
+  padding:1em;
+}
+.index{
+  position:fixed;
+  top:0;
+  left:0;
+  width:16em;
+  height:100%;
+  font-size:smaller;
+}
+.reference{
+  height:100%;
+}
+.buggy{
+  background-color:yellow;
+}
+.http{
+  border-radius:2px;
+  color:white;
+  display:inline-block;
+  font-size:0.7em;
+  padding:7px 0 4px;
+  text-align:center;
+  width:50px;
+}
+.http a{
+  color:white;
+}
+.DELETE{
+  background-color:blue;
+}
+.GET{
+  background-color:red;
+}
+.PATCH{
+  background-color:green;
+}
+.POST{
+  background-color:orange;
+}
+.PUT{
+  background-color:deeppink;
+}
+code{
+  background:none repeat scroll 0 0 #f5f5f5;
+  border:1px solid #ccc;
+  border-radius:2px;
+  padding:1px 3px;
+}
