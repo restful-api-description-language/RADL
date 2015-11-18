@@ -56,7 +56,7 @@
 
   <xsl:template name="toc-left">
     <h2>
-      <xsl:value-of select="/radl:service/@name"/>
+      <a href="#doctitle"><xsl:value-of select="/radl:service/@name"/></a>
     </h2>
     <ul>
       <li>

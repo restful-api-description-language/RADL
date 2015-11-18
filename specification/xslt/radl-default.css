@@ -27,9 +27,9 @@ td{
 }
 th{
   color:White;
-  background-color:Navy;
+  background-color:#0767B5;
   text-align:left;
-  border-color:Black;
+  border-color:LightGrey;
 }
 td{
   border-color:LightGrey;
@@ -85,12 +85,14 @@ li.transition{
 }
 .toc-left>h2>a:hover{
   color:hotpink;
+  font-style:normal;
 }
 .toc-left>ul>li>h3>a{
   color:#0767B5;
 }
 .toc-left>ul>li>h3>a:hover{
   color:hotpink;
+  font-style:normal;
 }
 .content{
   height:100%;
