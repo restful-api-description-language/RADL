@@ -39,9 +39,10 @@ class RadlPlugin implements Plugin<Project> {
       def radlFile = getRadlFile(project, serviceName)
       def extractionPropertiesFile = new File(radlFile.parentFile,
           "${radlFile.name.substring(0, radlFile.name.lastIndexOf('.'))}.properties")
+      def cssURL = getCssURL(project)
 
       addValidateRadlTask        project, radlFile
-      addRadlToDocumentationTask project, radlFile
+      addRadlToDocumentationTask project, cssURL, radlFile
       addRadlToSpringTask        project, radlFile
       addJavaToRadlTask          project, radlFile, serviceName, extractionPropertiesFile
     }
@@ -56,11 +57,12 @@ class RadlPlugin implements Plugin<Project> {
     project.check.dependsOn 'validateRadl'
   }
 
-  def addRadlToDocumentationTask(project, radlFile) {
+  def addRadlToDocumentationTask(project, cssURL, radlFile) {
     project.task('generateDocumentationFromRadl', type: JavaExec, dependsOn: 'validateRadl') {
       mustRunAfter 'extractRadlFromCode'
       main = 'radl.core.documentation.DocumentationGenerator'
       args new File(project.rootProject.buildDir, project.radl.docsDir).path
+      args cssURL
       args radlFile.path
       classpath project.configurations.radl
       doFirst {
@@ -157,6 +159,13 @@ class RadlPlugin implements Plugin<Project> {
       return project.radl.serviceName
     }
     project.rootProject.name
+  }
+
+  def getCssURL(project) {
+    if (project.radl.cssURL != null) {
+      return project.radl.cssURL
+    }
+    ''
   }
 
   def getRadlFile(project, serviceName) {

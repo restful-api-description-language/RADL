@@ -20,6 +20,7 @@
 
   <xsl:key name="status" match="//radl:status-codes/radl:status" use="@name"/>
 
+  <xsl:param name="css-file">radl-default.css</xsl:param>
   <xsl:variable name="start-state-name">Start</xsl:variable>
   <xsl:variable name="general-media-types"
     select="('application/ld+json', 'application/vnd.mason+json', 'application/vnd.siren+json', 'application/hal+json', '*/*')"/>
@@ -33,11 +34,11 @@
         <xsl:call-template name="style"/>
       </head>
       <body>
-        <div class="outline index">
-          <xsl:call-template name="index"/>
+        <div id="toc" class="outline toc-left">
+          <xsl:call-template name="toc-left"/>
         </div>
-        <div class="outline reference">
-          <xsl:call-template name="reference"/>
+        <div id="content" class="outline content">
+          <xsl:call-template name="content"/>
         </div>
       </body>
     </html>
@@ -47,128 +48,13 @@
     <xsl:value-of select="@name"/> REST Service </xsl:template>
 
   <xsl:template name="style">
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
     <style type="text/css">
-      body{
-          margin:0;
-          padding:0 0 0 16em;
-      }
-      
-      h1,
-      h2{
-          color:Navy;
-      }
-      h3{
-          color:Blue;
-      }
-      
-      table{
-          border-collapse:collapse;
-          margin-bottom:1em;
-          width:90%
-      }
-      th,
-      td{
-          border:1px solid;
-          padding:0.35em;
-          vertical-align:top;
-      }
-      th{
-          color:White;
-          background-color:CornflowerBlue;
-          text-align:left;
-          border-color:Black;
-      }
-      td{
-          border-color:LightGrey;
-          vertical-align:middle;
-      }
-      tr:nth-child(odd){
-          background-color:eeeeef;
-          padding:16px;
-      }
-      
-      dl{
-          margin:16px;
-      }
-      dl dl{
-          background-color:eeeeef;
-          padding:12px;
-      }
-      
-      dt{
-          font-weight:bold;
-          padding-top:9px;
-      }
-      dt::after{
-          content:":";
-      }
-      dd{
-          margin:0;
-          padding-left:16px;
-      }
-      div.nested{
-          margin:0;
-          padding-left:16px;
-      }
-      
-      li.transition{
-          list-style-type:none;
-      }
-      
-      .outline{
-          vertical-align:top;
-          padding:1em;
-      }
-      .index{
-          position:fixed;
-          top:0;
-          left:0;
-          width:16em;
-          height:100%;
-          font-size:smaller;
-      }
-      .reference{
-          height:100%;
-      }
-      .buggy{
-          background-color:yellow;
-      }
-      .http{
-          border-radius:2px;
-          color:white;
-          display:inline-block;
-          font-size:0.7em;
-          padding:7px 0 4px;
-          text-align:center;
-          width:50px;
-      }
-      .http a{
-          color:white;
-      }
-      .DELETE{
-          background-color:#a41e22;
-      }
-      .GET{
-          background-color:#0f6ab4;
-      }
-      .PATCH{
-          background-color:#d38042;
-      }
-      .POST{
-          background-color:#10a54a;
-      }
-      .PUT{
-          background-color:#c5862b;
-      }
-      code{
-          background:none repeat scroll 0 0 #f5f5f5;
-          border:1px solid #ccc;
-          border-radius:2px;
-          padding:1px 3px;
-      }</style>
+      <xsl:value-of select="unparsed-text($css-file)" disable-output-escaping="yes" />
+    </style>
   </xsl:template>
 
-  <xsl:template name="index">
+  <xsl:template name="toc-left">
     <h2>
       <xsl:value-of select="/radl:service/@name"/>
     </h2>
@@ -221,8 +107,8 @@
     </ul>
   </xsl:template>
 
-  <xsl:template name="reference">
-    <h1>
+  <xsl:template name="content">
+    <h1 id="doctitle">
       <xsl:value-of select="/radl:service/@name"/>
     </h1>
     <xsl:apply-templates select="radl:documentation"/>
@@ -236,7 +122,6 @@
     <xsl:call-template name="media-types"/>
     <xsl:call-template name="resources"/>
     <xsl:call-template name="authentication"/>
-
   </xsl:template>
 
   <xsl:template name="states">
@@ -1292,7 +1177,7 @@
         <xsl:for-each select="radl:examples/radl:example">
           <h4>Example: </h4>
           <xsl:apply-templates select="radl:documentation"/>
-          <pre><xsl:value-of select="text()"/></pre>
+          <pre class="prettyprint"><code><xsl:value-of select="text()"/></code></pre>
         </xsl:for-each>
 
       </xsl:for-each>

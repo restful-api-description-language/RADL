@@ -1,0 +1,133 @@
+html{
+  font-family:Lucida Sans Unicode;
+}
+body{
+  margin:0;
+  padding:0 0 0 18em;
+}
+
+h1,
+h2{
+  color:Navy;
+}
+h3{
+  color:#0767B5;
+}
+
+table{
+  border-collapse:collapse;
+  margin-bottom:1em;
+  width:90%
+}
+th,
+td{
+  border:1px solid;
+  padding:0.35em;
+  vertical-align:top;
+}
+th{
+  color:White;
+  background-color:Navy;
+  text-align:left;
+  border-color:Black;
+}
+td{
+  border-color:LightGrey;
+  vertical-align:middle;
+}
+tr:nth-child(odd){
+  background-color:#eeeeef;
+  padding:16px;
+}
+
+dl{
+  margin:16px;
+}
+dl dl{
+  background-color:#eeeeef;
+  padding:12px;
+}
+
+dt{
+  font-weight:bold;
+  padding-top:9px;
+}
+dt::after{
+  content:":";
+}
+dd{
+  margin:0;
+  padding-left:16px;
+}
+div.nested{
+  margin:0;
+  padding-left:16px;
+}
+
+li.transition{
+  list-style-type:none;
+}
+
+.outline{
+  vertical-align:top;
+  padding:1em;
+}
+.toc-left{
+  position:fixed;
+  top:0;
+  left:0;
+  width:14em;
+  height:100%;
+  background-color:#eeeeef;
+}
+.toc-left>h2>a{
+  color:#0767B5;
+}
+.toc-left>h2>a:hover{
+  color:hotpink;
+}
+.toc-left>ul>li>h3>a{
+  color:#0767B5;
+}
+.toc-left>ul>li>h3>a:hover{
+  color:hotpink;
+}
+.content{
+  height:100%;
+}
+.buggy{
+  background-color:yellow;
+}
+.http{
+  border-radius:2px;
+  color:white;
+  display:inline-block;
+  font-size:0.7em;
+  padding:7px 0 4px;
+  text-align:center;
+  width:50px;
+}
+.http a{
+  color:white;
+}
+.DELETE{
+  background-color:#a41e22;
+}
+.GET{
+  background-color:#0f6ab4;
+}
+.PATCH{
+  background-color:#d38042;
+}
+.POST{
+  background-color:#10a54a;
+}
+.PUT{
+  background-color:#c5862b;
+}
+*:not(pre)>code{
+  background:none repeat scroll 0 0 #f5f5f5;
+  border:1px solid #ccc;
+  border-radius:2px;
+  padding:1px 3px;
+}

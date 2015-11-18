@@ -39,6 +39,9 @@ public interface MavenConfig {
   String SERVICE_NAME = "serviceName";
   String SERVICE_NAME_DEFAULT = "${project.name}";
 
+  String CSS_URL_NAME = "cssURL";
+  String CSS_URL_DEFAULT = "";
+
   String SCM = "scm";
   String SCM_DEFAULT = "default";
 
