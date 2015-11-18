@@ -4,7 +4,7 @@
 package radl.java.generation.spring;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
@@ -24,7 +25,7 @@ import radl.common.xml.DocumentBuilder;
 import radl.core.code.Code;
 import radl.core.code.GeneratedSourceFile;
 import radl.core.code.SourceFile;
-import radl.core.generation.CodeGenerator;
+import radl.core.generation.CodeBaseGenerator;
 import radl.core.generation.Module;
 import radl.core.generation.SourceFilesGenerator;
 import radl.java.code.JavaCode;
@@ -52,7 +53,7 @@ public class SpringSourceFilesGeneratorTest {
     String class2 = aClass();
     Code code1 = newCode(package1, class1);
     Code code2 = newCode(package2, class2);
-    CodeGenerator codeGenerator = mock(CodeGenerator.class);
+    CodeBaseGenerator codeGenerator = mock(CodeBaseGenerator.class);
     Document radl = DocumentBuilder.newDocument().build();
     generate(codeGenerator, Arrays.asList(code1, code2));
     SourceFilesGenerator sourceFilesGenerator = new SpringSourceFilesGenerator(codeGenerator, "", "");
@@ -63,15 +64,16 @@ public class SpringSourceFilesGeneratorTest {
         expectedSourceFile(basePath, package2, class2)), actual);
   }
 
-  private void generate(CodeGenerator codeGenerator, final Collection<Code> codes) {
+  private void generate(CodeBaseGenerator codeGenerator, final Collection<Code> codes) {
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-        Module generated = (Module)invocation.getArguments()[1];
-        generated.addAll(codes);
+        @SuppressWarnings("unchecked")
+        List<Module> generated = (List<Module>)invocation.getArguments()[1];
+        generated.get(0).addAll(codes);
         return null;
       }
-    }).when(codeGenerator).generate(any(Module.class), any(Module.class), any(Module.class));
+    }).when(codeGenerator).generate(anyListOf(Module.class), anyListOf(Module.class));
   }
 
   private String aPackage() {
@@ -101,7 +103,7 @@ public class SpringSourceFilesGeneratorTest {
     String packageName = aPackage();
     String controllerClass = aClass() + "Controller";
     Code controllerCode = newCode(packageName, controllerClass);
-    CodeGenerator codeGenerator = mock(CodeGenerator.class);
+    CodeBaseGenerator codeGenerator = mock(CodeBaseGenerator.class);
     Document radl = DocumentBuilder.newDocument().build();
     generate(codeGenerator, Arrays.asList(controllerCode));
     SourceFilesGenerator sourceFilesGenerator = new SpringSourceFilesGenerator(codeGenerator, "", "");
@@ -119,7 +121,7 @@ public class SpringSourceFilesGeneratorTest {
   private void assertGeneratedSourceFile(String typeName) {
     String packageName = aPackage();
     Code code = newCode(packageName, typeName);
-    CodeGenerator codeGenerator = mock(CodeGenerator.class);
+    CodeBaseGenerator codeGenerator = mock(CodeBaseGenerator.class);
     Document radl = DocumentBuilder.newDocument().build();
     generate(codeGenerator, Arrays.asList(code));
     SourceFilesGenerator sourceFilesGenerator = new SpringSourceFilesGenerator(codeGenerator, "", "");

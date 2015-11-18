@@ -22,7 +22,7 @@ import org.w3c.dom.Document;
 
 import radl.core.code.Code;
 import radl.core.code.radl.RadlCode;
-import radl.core.generation.CodeGenerator;
+import radl.core.generation.CodeBaseGenerator;
 import radl.core.generation.Module;
 import radl.java.code.Java;
 import radl.java.code.JavaCode;
@@ -43,7 +43,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
   private static final String TRANSITION_ENABLED_METHOD = "response.allows";
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
-  private final CodeGenerator generator = new SpringCodeGenerator(packagePrefix);
+  private final CodeBaseGenerator generator = new SpringCodeGenerator(packagePrefix);
 
   @Test
   public void generatesControllerPerResource() {
@@ -63,7 +63,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
     Module input = new Module(new RadlCode(radl));
     Module generated = new Module();
     Module skeleton = new Module();
-    generator.generate(input, generated, skeleton);
+    generator.generate(Arrays.asList(input), Arrays.asList(generated, skeleton));
     Collection<Code> result = new ArrayList<Code>();
     result.addAll(generated);
     result.addAll(skeleton);

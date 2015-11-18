@@ -8,9 +8,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
@@ -29,16 +29,17 @@ import radl.core.code.radl.PropertyGroup;
 import radl.core.code.radl.PropertyGroups;
 import radl.core.code.radl.RadlCode;
 import radl.core.code.radl.RadlCode.ResourceMethod;
-import radl.core.generation.CodeGenerator;
+import radl.core.generation.CodeBaseGeneratorImpl;
 import radl.core.generation.Module;
 import radl.java.code.Java;
 import radl.java.code.JavaBeanProperty;
 import radl.java.code.JavaCode;
 
+
 /**
  * Generates Java code for the Spring framework from a RADL document.
  */
-public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveClassLength
+public class SpringCodeGenerator extends CodeBaseGeneratorImpl { // NOPMD ExcessiveClassLength
 
   private static final String NO_PARAMETER = "null";
   private static final String DTO_SUFFIX = "Resource";
@@ -63,7 +64,6 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private static final int INTERNAL_SERVER_ERROR = 500;
   private static final String ERROR_DTO_TYPE = "Error" + DTO_SUFFIX;
   private static final String IDENTIFIABLE_TYPE = "Identifiable";
-  private static final Map<Integer, String> HTTP_STATUSES = new HashMap<Integer, String>();
   private static final Collection<Integer> FRAMEWORK_HANDLED_STATUSES = Arrays.asList(405, 406);
   private static final String SEMANTIC_ANNOTATION_PACKAGE = "de.escalon.hypermedia.hydra.mapping";
   private static final String SEMANTIC_ANNOTATION = "Expose";
@@ -77,71 +77,38 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   private final String packagePrefix;
   private final String fileHeader;
   private final Constants errorConstants = new Constants("ERROR", "Error conditions");
-  private final Constants linkRelationConstants = new Constants("LINK_REL", "Link relations");
   private final Constants mediaTypeConstants = new Constants("MEDIA_TYPE", "Media types");
   private final Constants transitionConstants = new Constants("", "");
   private final Constants uriConstants = new Constants("URL", "URIs");
-  private MediaType defaultMediaType;
+  private Map<String, Object> context;
 
   public SpringCodeGenerator(String packagePrefix) {
     this(packagePrefix, null);
   }
 
   public SpringCodeGenerator(String packagePrefix, String header) {
+    super(new FromRadlCodeGenerationInitializer());
     this.packagePrefix = packagePrefix;
     this.fileHeader = header == null || header.trim().isEmpty() ? DEFAULT_HEADER : header;
-    initHttpStatuses();
-  }
-
-  private void initHttpStatuses() {
-    HTTP_STATUSES.put(400, "BAD_REQUEST");
-    HTTP_STATUSES.put(401, "UNAUTHORIZED");
-    HTTP_STATUSES.put(402, "PAYMENT_REQUIRED");
-    HTTP_STATUSES.put(403, "FORBIDDEN");
-    HTTP_STATUSES.put(404, "NOT_FOUND");
-    HTTP_STATUSES.put(405, "METHOD_NOT_ALLOWED");
-    HTTP_STATUSES.put(406, "NOT_ACCEPTABLE");
-    HTTP_STATUSES.put(407, "PROXY_AUTHENTICATION_REQUIRED");
-    HTTP_STATUSES.put(408, "REQUEST_TIMEOUT");
-    HTTP_STATUSES.put(409, "CONFLICT");
-    HTTP_STATUSES.put(410, "GONE");
-    HTTP_STATUSES.put(411, "LENGTH_REQUIRED");
-    HTTP_STATUSES.put(412, "PRECONDITION_FAILED");
-    HTTP_STATUSES.put(413, "PAYLOAD_TOO_LARGE");
-    HTTP_STATUSES.put(414, "URI_TOO_LONG");
-    HTTP_STATUSES.put(415, "UNSUPPORTED_MEDIA_TYPE");
-    HTTP_STATUSES.put(416, "REQUESTED_RANGE_NOT_SATISFIABLE");
-    HTTP_STATUSES.put(417, "EXPECTATION_FAILED");
-    HTTP_STATUSES.put(422, "UNPROCESSABLE_ENTITY");
-    HTTP_STATUSES.put(423, "LOCKED");
-    HTTP_STATUSES.put(424, "FAILED_DEPENDENCY");
-    HTTP_STATUSES.put(426, "UPGRADE_REQUIRED");
-    HTTP_STATUSES.put(428, "PRECONDITION_REQUIRED");
-    HTTP_STATUSES.put(429, "TOO_MANY_REQUESTS");
-    HTTP_STATUSES.put(431, "REQUEST_HEADER_FIELDS_TOO_LARGE");
-    HTTP_STATUSES.put(500, "INTERNAL_SERVER_ERROR");
-    HTTP_STATUSES.put(501, "NOT_IMPLEMENTED");
-    HTTP_STATUSES.put(502, "BAD_GATEWAY");
-    HTTP_STATUSES.put(503, "SERVICE_UNAVAILABLE");
-    HTTP_STATUSES.put(504, "GATEWAY_TIMEOUT");
-    HTTP_STATUSES.put(505, "HTTP_VERSION_NOT_SUPPORTED");
-    HTTP_STATUSES.put(506, "VARIANT_ALSO_NEGOTIATES");
-    HTTP_STATUSES.put(507, "INSUFFICIENT_STORAGE");
-    HTTP_STATUSES.put(508, "LOOP_DETECTED");
-    HTTP_STATUSES.put(509, "BANDWIDTH_LIMIT_EXCEEDED");
-    HTTP_STATUSES.put(510, "NOT_EXTENDED");
-    HTTP_STATUSES.put(511, "NETWORK_AUTHENTICATION_REQUIRED");
   }
 
   @Override
-  public void generate(Module source, Module generated, Module skeleton) {
-    generate((RadlCode)source.get(0), generated, skeleton);
+  protected Map<String, Object> newContext() {
+    Map<String, Object> result = super.newContext();
+    result.put(FromRadlCodeGenerator.PACKAGE_PREFIX, packagePrefix);
+    result.put(FromRadlCodeGenerator.FILE_HEADER, fileHeader);
+    this.context = result; // TODO: Remove when no longer needed
+    return result;
+  }
+
+  @Override
+  public void generate(List<Module> source, List<Module> destination) {
+    super.generate(source, destination);
+    generate((RadlCode)source.get(0).get(0), destination.get(0), destination.get(1));
   }
 
   private void generate(RadlCode radl, Module generated, Module skeleton) {
-    defaultMediaType = radl.defaultMediaType();
-    boolean hasHyperMediaTypes = radl.hasHyperMediaTypes();
-    addLinkRelationConstants(radl);
+    boolean hasHyperMediaTypes = (Boolean)context.get(FromRadlCodeGenerator.HAS_HYPERMEDIA);
     generateSourcesForPropertyGroups(radl.propertyGroups(), hasHyperMediaTypes, generated);
     generateSourcesForResources(radl, hasHyperMediaTypes, generated, skeleton);
     generateSourcesForErrors(radl, generated);
@@ -205,15 +172,19 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private void addSemanticAnnotationImport(PropertyGroup propertyGroup, Code code) {
-    if (defaultMediaType != null && defaultMediaType.isSemanticMediaType() && propertyGroup.hasSemantics()) {
+    if (defaultMediaType() != null && defaultMediaType().isSemanticMediaType() && propertyGroup.hasSemantics()) {
       code.add("import %s.%s;", SEMANTIC_ANNOTATION_PACKAGE, SEMANTIC_ANNOTATION);
       code.add("");
     }
   }
 
+  private MediaType defaultMediaType() {
+    return (MediaType)context.get(FromRadlCodeGenerator.DEFAULT_MEDIA_TYPE);
+  }
+
   private String getSemanticAnnotation(Property property, String indent) {
     String result = null;
-    if (defaultMediaType != null && defaultMediaType.isSemanticMediaType()) {
+    if (defaultMediaType() != null && defaultMediaType().isSemanticMediaType()) {
       String uri = property.uri();
       if (!uri.isEmpty()) {
         result = String.format("%s@%s(\"%s\")", indent, SEMANTIC_ANNOTATION, Java.toString(uri));
@@ -428,10 +399,15 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
     
     errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
     errorHandler.add("  public ResponseEntity<%s> %s(%s e) {", ERROR_DTO_TYPE, method, handledType);
-    errorHandler.add("    return error(e, %s.%s);", STATUS_TYPE, HTTP_STATUSES.get(statusCode));
+    errorHandler.add("    return error(e, %s.%s);", STATUS_TYPE, httpStatuses().get(statusCode));
     errorHandler.add("  }");
     errorHandler.add("");
     errorHandler.ensureImport(RESPONSE_PACKAGE, "ResponseEntity");
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<Integer, String> httpStatuses() {
+    return (Map<Integer, String>)context.get(FromRadlCodeGenerator.SPRING_HTTP_STATUSES);
   }
 
   private String handledExceptionType(JavaCode exceptionType) {
@@ -650,26 +626,21 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
   }
 
   private void addLinkRelations(JavaCode code) {
-    addConstants(linkRelationConstants, code);
+    addConstants(linkRelationConstants(), code);
   }
 
-  private void addLinkRelationConstants(RadlCode radl) {
-    for (String value : radl.linkRelationNames()) {
-      String[] segments = value.split("/");
-      String name = segments[segments.length - 1];
-      String documentation = radl.linkRelationDocumentation(value);
-      linkRelationConstants.add(name, value, documentation);
-    }
+  private Constants linkRelationConstants() {
+    return (Constants)context.get(FromRadlCodeGenerator.CONSTANTS_LINK_RELATIONS);
   }
 
   private void addMediaTypes(JavaCode code) {
     addConstants(mediaTypeConstants, code);
-    if (defaultMediaType != null) {
+    if (defaultMediaType() != null) {
       if (!mediaTypeConstants.all().iterator().hasNext()) {
         addConstantsHeading(mediaTypeConstants.getDescription(), code);
       }
-      code.add("  String %s = \"%s\";", getLocalMediaTypeConstant(defaultMediaType.name()), defaultMediaType.name());
-      code.add("  String %s = %s;", DEFAULT_MEDIA_TYPE_CONSTANT, getLocalMediaTypeConstant(defaultMediaType.name()));
+      code.add("  String %s = \"%s\";", getLocalMediaTypeConstant(defaultMediaType().name()), defaultMediaType().name());
+      code.add("  String %s = %s;", DEFAULT_MEDIA_TYPE_CONSTANT, getLocalMediaTypeConstant(defaultMediaType().name()));
     }
   }
 
@@ -885,7 +856,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       code.ensureImport("de.escalon.hypermedia.spring", "AffordanceBuilder");
       for (String linkRelation : radl.transitionImplementations(transition)) {
         if (addedLinkRelations.add(linkRelation)) {
-          String linkConstant = API_TYPE + '.' + linkRelationConstants.byValue(linkRelation).getName();
+          String linkConstant = API_TYPE + '.' + linkRelationConstants().byValue(linkRelation).getName();
           code.add("    if (%s.%s(%s.%s)) {", RESPONSE_VAR, TRANSITITION_CHECK_NAME, ACTIONS_TYPE,
               transitionConstants.byValue(transition).getName());
           code.add("      result.add(AffordanceBuilder");
@@ -1051,7 +1022,7 @@ public class SpringCodeGenerator implements CodeGenerator { // NOPMD ExcessiveCl
       return "";
     }
     String mediaType = iterator.next();
-    if (!iterator.hasNext() && defaultMediaType != null && mediaType.equals(defaultMediaType.name())) {
+    if (!iterator.hasNext() && defaultMediaType() != null && mediaType.equals(defaultMediaType().name())) {
       // Explicit use of default media type
       mediaType = API_TYPE + '.' + DEFAULT_MEDIA_TYPE_CONSTANT;
     } else {
