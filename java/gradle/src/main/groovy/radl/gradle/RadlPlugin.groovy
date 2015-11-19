@@ -162,8 +162,8 @@ class RadlPlugin implements Plugin<Project> {
   }
 
   def getCssURL(project) {
-    if (project.radl.cssURL != null) {
-      return project.radl.cssURL
+    if (project.radl.cssUrl != null) {
+      return project.radl.cssUrl
     }
     ''
   }
