@@ -13,8 +13,9 @@
    ##########################################################################
 -->
 <xsl:stylesheet version="2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:html="http://www.w3.org/1999/xhtml"
-  xmlns:radl="urn:radl:service" exclude-result-prefixes="#all">
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:html="http://www.w3.org/1999/xhtml"
+                xmlns:radl="urn:radl:service"
+                exclude-result-prefixes="#all">
 
   <xsl:output method="html" encoding="utf-8" indent="yes" cdata-section-elements="radl:example"/>
 
@@ -48,7 +49,7 @@
     <xsl:value-of select="@name"/> REST Service </xsl:template>
 
   <xsl:template name="style">
-    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"/>
     <style type="text/css">
       <xsl:value-of select="unparsed-text($css-file)" disable-output-escaping="yes" />
     </style>
@@ -1174,12 +1175,20 @@
 
         <xsl:apply-templates select="radl:documentation"/>
 
+        <xsl:if test="@property-group">
+          <h4>
+            <xsl:text>Property Group: </xsl:text>
+            <xsl:call-template name="a-href">
+              <xsl:with-param name="prefix">propertygroup</xsl:with-param>
+              <xsl:with-param name="name" select="@property-group"/>
+            </xsl:call-template>
+          </h4>
+        </xsl:if>
         <xsl:for-each select="radl:examples/radl:example">
           <h4>Example: </h4>
           <xsl:apply-templates select="radl:documentation"/>
           <pre class="prettyprint"><code><xsl:value-of select="text()"/></code></pre>
         </xsl:for-each>
-
       </xsl:for-each>
 
     </xsl:for-each>
@@ -1322,7 +1331,6 @@
 
   <xsl:template match="radl:property-group[exists(@ref)]">
     <p>
-      <xsl:text>Property Group: </xsl:text>
       <xsl:value-of select="@name"/>
       <xsl:if test="@repeats">*</xsl:if>
       (see <xsl:call-template name="a-href">
@@ -1332,23 +1340,41 @@
   </xsl:template>
 
   <xsl:template match="radl:property-group[not(@ref)]">
-    <h2>
-      <xsl:call-template name="id">
-        <xsl:with-param name="prefix">propertygroup</xsl:with-param>
-        <xsl:with-param name="name" select="@name"/>
-      </xsl:call-template>
-      <xsl:text>Property Group: </xsl:text>
-      <xsl:value-of select="@name"/>
-      <xsl:if test="@repeats">*</xsl:if>      
-
-      <xsl:if test="@uri"> (<a>
+    <xsl:param name = "root-property-group" />
+    <xsl:choose>
+      <xsl:when test="$root-property-group = 'true'">
+        <h2>
+          <xsl:call-template name="id">
+            <xsl:with-param name="prefix">propertygroup</xsl:with-param>
+            <xsl:with-param name="name" select="@name"/>
+          </xsl:call-template>
+          <xsl:value-of select="@name"/>
+          <xsl:if test="@repeats">*</xsl:if>
+          <xsl:if test="@uri"> (<a>
+            <xsl:attribute name="href">
+              <xsl:value-of select="@uri"/>
+            </xsl:attribute>
+            <code>
+              <xsl:value-of select="@uri"/>
+            </code></a>)
+          </xsl:if>
+        </h2>
+      </xsl:when>
+      <xsl:otherwise>
+        <code>
+          <xsl:value-of select="@name"/>
+        </code>
+        <xsl:if test="@repeats">*</xsl:if>
+        <xsl:if test="@uri"> (<a>
           <xsl:attribute name="href">
             <xsl:value-of select="@uri"/>
           </xsl:attribute>
           <code>
             <xsl:value-of select="@uri"/>
-          </code></a>) </xsl:if>
-    </h2>
+          </code></a>)
+        </xsl:if>
+      </xsl:otherwise>
+    </xsl:choose>
 
     <xsl:if test="radl:documentation">
       <dd>
@@ -1357,7 +1383,9 @@
     </xsl:if>
     <xsl:if test="radl:property | radl:property-group">
       <dl>
-        <xsl:apply-templates select="radl:property | radl:property-group"/>
+        <xsl:apply-templates select="radl:property | radl:property-group">
+          <xsl:with-param name="root-property-group">false</xsl:with-param>
+        </xsl:apply-templates>
       </dl>
     </xsl:if>
 
@@ -1365,16 +1393,17 @@
 
   <xsl:template match="radl:property">
     <p>
-      <xsl:value-of select="@name"/>
-      <xsl:if test="@repeats">*</xsl:if>      
+      <code>
+        <xsl:value-of select="@name"/>
+      </code>
+      <xsl:if test="@repeats">*</xsl:if>
       <xsl:if test="@uri"> (<a>
           <xsl:attribute name="href">
             <xsl:value-of select="@uri"/>
           </xsl:attribute>
-          <code>
             <xsl:value-of select="@uri"/>
-          </code>
-        </a>) </xsl:if>
+        </a>)
+      </xsl:if>
       <xsl:if test="@type">
         <xsl:text> - </xsl:text>
         <xsl:value-of select="@type"/>
@@ -1397,11 +1426,11 @@
 
         <xsl:apply-templates select="//radl:property-groups/radl:property-group">
           <xsl:sort select="@name"/>
+          <xsl:with-param name="root-property-group">true</xsl:with-param>
         </xsl:apply-templates>
       </xsl:when>
       <xsl:otherwise>No property groups</xsl:otherwise>
     </xsl:choose>
-
   </xsl:template>
 
   <xsl:template name="uri-parameters">
@@ -1419,45 +1448,56 @@
               <xsl:with-param name="prefix">uriparameter</xsl:with-param>
               <xsl:with-param name="name" select="@name"/>
             </xsl:call-template>
-
             <code>
               <xsl:value-of select="@name"/>
             </code>
           </h2>
           <xsl:choose>
             <xsl:when test="@datatype | radl:value-range | radl:default | radl:documentation">
-              <dl>
-                <xsl:if test="@datatype">
-                  <dt>Datatype</dt>
-                  <dd>
-                    <code>
-                      <xsl:value-of select="@datatype"/>
-                    </code>
-                  </dd>
-                </xsl:if>
-                <xsl:if test="radl:value-range">
-                  <dt>Values</dt>
-                  <dd>
-                    <code>
-                      <xsl:value-of select="radl:value-range"/>
-                    </code>
-                  </dd>
-                </xsl:if>
-                <xsl:if test="radl:default">
-                  <dt>Default Value</dt>
-                  <dd>
-                    <code>
-                      <xsl:value-of select="radl:default"/>
-                    </code>
-                  </dd>
-                </xsl:if>
-                <xsl:if test="radl:documentation">
-                  <dt>Documentation</dt>
-                  <dd>
-                    <xsl:apply-templates select="radl:documentation"/>
-                  </dd>
-                </xsl:if>
-              </dl>
+              <table>
+                <tr>
+                  <xsl:if test="@datatype">
+                    <th>Datatype</th>
+                  </xsl:if>
+                  <xsl:if test="radl:value-range">
+                    <th>Values</th>
+                  </xsl:if>
+                  <xsl:if test="radl:default">
+                    <th>Default Value</th>
+                  </xsl:if>
+                  <xsl:if test="radl:documentation">
+                    <th>Documentation</th>
+                  </xsl:if>
+                </tr>
+                <tr>
+                  <xsl:if test="@datatype">
+                    <td>
+                      <code>
+                        <xsl:value-of select="@datatype"/>
+                      </code>
+                    </td>
+                  </xsl:if>
+                  <xsl:if test="radl:value-range">
+                    <td>
+                      <code>
+                        <xsl:value-of select="radl:value-range"/>
+                      </code>
+                    </td>
+                  </xsl:if>
+                  <xsl:if test="radl:default">
+                    <td>
+                      <code>
+                        <xsl:value-of select="radl:default"/>
+                      </code>
+                    </td>
+                  </xsl:if>
+                  <xsl:if test="radl:documentation">
+                    <td>
+                      <xsl:apply-templates select="radl:documentation"/>
+                    </td>
+                  </xsl:if>
+                </tr>
+              </table>
             </xsl:when>
           </xsl:choose>
         </xsl:for-each>
