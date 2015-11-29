@@ -115,11 +115,11 @@ public final class DocumentationGenerator implements Application {
     File assembledRadl = RadlFileAssembler.assemble(radlFile, docDir);
     Document radlDocument = Xml.parse(assembledRadl);
     new StateDiagramGenerator().generateFrom(radlDocument, serviceDir, configuration);
-    String localCssFile = normalizeCSSFile(docDir, cssSource);
+    File localCssFile = normalizeCSSFile(docDir, cssSource);
     try {
-      generateClientDocumentation(radlDocument, getIndexFile(serviceDir), localCssFile);
+      generateClientDocumentation(radlDocument, getIndexFile(serviceDir), localCssFile.toURI().toString());
     } finally {
-      IO.delete(new File(localCssFile));
+      IO.delete(localCssFile);
     }
   }
 
@@ -149,7 +149,7 @@ public final class DocumentationGenerator implements Application {
     }
   }
 
-  private String normalizeCSSFile(File docDir, String cssSource) {
+  private File normalizeCSSFile(File docDir, String cssSource) {
     if (StringUtils.isNotBlank(cssSource)) {
       Log.info("Provided CSS URL is: " + cssSource);
     }
@@ -159,7 +159,7 @@ public final class DocumentationGenerator implements Application {
           new URL(cssSource).openStream();
       File localCss = new File(docDir, "radl-use.css");
       IO.copy(inputStream, new FileOutputStream(localCss));
-      return localCss.toURI().toString();
+      return localCss;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

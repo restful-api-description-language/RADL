@@ -58,7 +58,7 @@ public class Radl2HtmlDocPlugin extends AbstractMojo implements MavenConfig {
         new Arguments(new String[] {
             docsDir.getAbsolutePath(),
             null,
-            cssURL.toString(),
+            cssURL == null ? null : cssURL.toString(),
             radlFile.getAbsolutePath()
         }));
     getLog().info(String.format(MSG, docsDir));

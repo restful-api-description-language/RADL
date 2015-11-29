@@ -14,21 +14,29 @@ import java.util.Map;
 public class CodeBaseGeneratorImpl implements CodeBaseGenerator {
 
   private final CodeGenerator[] generators;
+  private final String packagePrefix;
+  private final String fileHeader;
 
-  public CodeBaseGeneratorImpl(CodeGenerator... generators) {
+  public CodeBaseGeneratorImpl(String packagePrefix, String fileHeader, CodeGenerator... generators) {
+    this.packagePrefix = packagePrefix;
+    this.fileHeader = fileHeader;
     this.generators = generators;
   }
   
   @Override
   public void generate(List<Module> source, List<Module> destination) {
     Map<String, Object> context = newContext();
+    context.put(CodeGenerator.OUTPUT_MODULES, destination);
     for (CodeGenerator generator : generators) {
       moduleFor(destination, generator).addAll(generator.generateFrom(source, context));
     }
   }
 
   protected Map<String, Object> newContext() {
-    return new HashMap<String, Object>();
+    Map<String, Object> result = new HashMap<String, Object>();
+    result.put(CodeGenerator.PACKAGE_PREFIX, packagePrefix);
+    result.put(CodeGenerator.FILE_HEADER, fileHeader);
+    return result;
   }
 
   protected Module moduleFor(List<Module> modules, CodeGenerator generator) {

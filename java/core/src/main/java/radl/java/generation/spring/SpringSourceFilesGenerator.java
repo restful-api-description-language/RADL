@@ -32,7 +32,7 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
   public SpringSourceFilesGenerator(String packagePrefix, String generatedSourceSetDir, String mainSourceSetDir,
       String header) {
-    this(new SpringCodeGenerator(packagePrefix, header), generatedSourceSetDir, mainSourceSetDir);
+    this(new SpringCodeBaseGenerator(packagePrefix, header), generatedSourceSetDir, mainSourceSetDir);
   }
 
   SpringSourceFilesGenerator(CodeBaseGenerator codeGenerator, String generatedSourceSetDir, String mainSourceSetDir) {

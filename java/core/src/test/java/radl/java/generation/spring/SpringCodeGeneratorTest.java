@@ -43,7 +43,7 @@ public class SpringCodeGeneratorTest { // NOPMD ExcessiveClassLength
   private static final String TRANSITION_ENABLED_METHOD = "response.allows";
 
   private final String packagePrefix = 'a' + RANDOM.string(NAME_LENGTH) + '.' + RANDOM.string(NAME_LENGTH);
-  private final CodeBaseGenerator generator = new SpringCodeGenerator(packagePrefix);
+  private final CodeBaseGenerator generator = new SpringCodeBaseGenerator(packagePrefix);
 
   @Test
   public void generatesControllerPerResource() {

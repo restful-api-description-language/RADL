@@ -19,10 +19,16 @@ public class FromRadlCodeGenerationInitializer extends FromRadlCodeGenerator {
   protected Collection<Code> generateFromRadl(RadlCode radl, Map<String, Object> context) {
     context.put(DEFAULT_MEDIA_TYPE, radl.defaultMediaType());
     context.put(HAS_HYPERMEDIA, radl.hasHyperMediaTypes());
+    context.put(MEDIA_TYPE_CONSTANTS, new Constants("MEDIA_TYPE", "Media Types"));
+    context.put(URI_CONSTANTS, new Constants("URL", "URIs"));
     
     Constants linkRelationConstants = new Constants("LINK_REL", "Link relations");
     addLinkRelationConstants(radl, linkRelationConstants);
-    context.put(CONSTANTS_LINK_RELATIONS, linkRelationConstants);
+    context.put(LINK_RELATION_CONSTANTS, linkRelationConstants);
+    
+    Constants errorConstants = new Constants("ERROR", "Error conditions");
+    addErrorConstants(radl, errorConstants);
+    context.put(ERROR_CONSTANTS, errorConstants);
     
     Map<Integer, String> httpStatuses = new HashMap<Integer, String>();
     initHttpStatuses(httpStatuses);
@@ -78,6 +84,12 @@ public class FromRadlCodeGenerationInitializer extends FromRadlCodeGenerator {
     httpStatuses.put(509, "BANDWIDTH_LIMIT_EXCEEDED");
     httpStatuses.put(510, "NOT_EXTENDED");
     httpStatuses.put(511, "NETWORK_AUTHENTICATION_REQUIRED");
+  }
+
+  private void addErrorConstants(RadlCode radl, Constants constants) {
+    for (String value : radl.errors()) {
+      constants.add(getErrorName(value), value, radl.errorDocumentation(value));
+    }
   }
 
 }

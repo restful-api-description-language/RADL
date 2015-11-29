@@ -12,6 +12,10 @@ import radl.core.code.Code;
 
 public interface CodeGenerator {
 
+  String FILE_HEADER = "file.header";
+  String PACKAGE_PREFIX = "package.prefix";
+  String OUTPUT_MODULES = "modules.output";
+
   /**
    * Generate code from input code.
    * @param input The input modules from which to generate code

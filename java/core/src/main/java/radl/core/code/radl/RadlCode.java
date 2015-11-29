@@ -294,4 +294,9 @@ public class RadlCode extends XmlCode {
 
   }
 
+
+  public boolean hasErrors() {
+    return errors().iterator().hasNext();
+  }
+
 }

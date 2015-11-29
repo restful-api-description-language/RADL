@@ -13,11 +13,15 @@ env:
     # HIPCHAT API KEY:
     - secure: "UN6AK7fRKtaR50eo6IMCTeAgBkQUiCXu1PizMyHqwMesPGWIcuTZ1mSse65+lua6bfk9nabKVj/fTfP+1/mYPUZk+ltQJnoEGGfR+SB/8EzH6
 WesK3eGbG8jWz+Lm2tVFBhppZ+DMpUzDtcv5I+S1/fg0T8PT6ckvejBzDmqqXw="
+
 language: java
 jdk:
 - openjdk6
 install: true
 script: ./gradlew build
+
+
+## Notifications
 notifications:
   slack:
     secure: LJfuvagJjFqaoA8AJQtfLOtymOzpifA2qUqA1XI5Kd67sVFY5BViIHZ/+qy3jV+Ve7Msl8St+XiB9zrLqKOxFNNaFvYZYgpn4fb4RDxVWipZrVY9/DRwEImzuWNsx1Il7rn9zWK0jgmIyK2DK6wtWPnZUTinHGPIw3RtvR22AyA=
@@ -29,8 +33,20 @@ notifications:
     on_start: true
   hipchat: $HIPCHAT_KEY@Radl
 after_success:
+<<<<<<< HEAD
 - ./deploy_to_bintray.sh
 - bash <(curl -s https://codecov.io/bash)
+=======
+  - ./deploy_to_bintray.sh
+  - bash <(curl -s https://codecov.io/bash)
+
+
+## Deployment
+
+before_deploy:
+- gem install mime-types -v 2.6.2
+
+>>>>>>> a9e74b78e07f5e8b2ed9e0b9eb444ce390bdfc23
 deploy:
   provider: releases
   api_key:
@@ -45,6 +61,7 @@ deploy:
     repo: restful-api-description-language/RADL
     tags: true
     all_branches: true
+    
 addons:
   coverity_scan:
     project:
