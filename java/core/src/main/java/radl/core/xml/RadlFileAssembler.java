@@ -6,6 +6,7 @@ package radl.core.xml;
 
 import java.io.File;
 import java.io.FileWriter;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -61,8 +62,6 @@ public final class RadlFileAssembler {
     } else {
       dir.mkdirs();
     }
-    File assembled = new File(dir, name + ".out");
-    Log.info("-> Assembling the radl file for processing: " + assembled.getAbsolutePath());
-    return assembled;
+    return new File(dir, name + ".out");
   }
 }

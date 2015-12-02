@@ -74,7 +74,7 @@ public final class RadlValidator implements Application {
     while (arguments.hasNext()) {
       File radlFile = arguments.file();
       File assembledRadl = RadlFileAssembler.assemble(radlFile, reportDir);
-      Log.info("-> Validating " + assembledRadl.getName() + " using " + validator);
+      Log.info("-> Validating " + radlFile.getName() + " using " + validator);
       Collection<Issue> issuesByFile = new ArrayList<Issue>();
       issues.put(assembledRadl.getName(), issuesByFile);
       try {
