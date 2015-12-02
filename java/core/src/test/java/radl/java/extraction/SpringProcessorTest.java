@@ -10,7 +10,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -19,8 +22,20 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.w3c.dom.Document;
+
+import radl.core.code.Code;
+import radl.core.code.radl.RadlCode;
+import radl.core.extraction.ExtractOptions;
+import radl.core.extraction.ResourceModelHolder;
+import radl.core.extraction.ResourceModelImpl;
+import radl.java.code.Java;
+import radl.java.code.JavaCode;
 
 
 public class SpringProcessorTest extends AbstractRestAnnotationProcessorTest {
@@ -28,15 +43,22 @@ public class SpringProcessorTest extends AbstractRestAnnotationProcessorTest {
   private static final String SPRING_ANNOTATION_PACKAGE = "org.springframework.web.bind.annotation.";
   private static final String REQUEST_MAPPING_ANNOTATION = "RequestMapping";
   private static final String REQUEST_PARAM_ANNOTATION = "RequestParam";
+  private static final String REQUEST_METHOD = "RequestMethod";
+
+  @Rule
+  public final TemporaryFolder folder = new TemporaryFolder();
 
   private final SpringProcessor processor = new SpringProcessor();
+  private File baseDir;
 
   @Before
-  public void init() {
+  public void init() throws IOException {
     ProcessingEnvironment processingEnv = mock(ProcessingEnvironment.class);
     Elements elementUtils = mock(Elements.class);
     when(processingEnv.getElementUtils()).thenReturn(elementUtils);
     processor.init(processingEnv);
+
+    baseDir = folder.newFolder();
   }
 
   @Test
@@ -59,11 +81,54 @@ public class SpringProcessorTest extends AbstractRestAnnotationProcessorTest {
 
   @Test
   public void extractsUri() throws Exception {
-    TypeElement annotation = requestMapping();
-    String uri = '/' + aName() + '/';
-    Element element = annotatedClass(annotation, "value", uri);
+    String location = '/' + aName() + '/';
+    String resource = aResource();
+    JavaCode code = startControllerClass(resource, location);
+    addControllerMethod(aMethod(), code);
+    endClass(code);
 
-    assertEquals("URI", Arrays.asList(uri), processor.getUri(element, Arrays.asList(annotation)));
+    RadlCode radl = extractRadlFrom(code);
+
+    assertEquals("Resources", Collections.singletonList(resource), radl.resourceNames());
+    assertEquals("Resource location", location, radl.resourceLocation(resource));
+  }
+
+  private String aResource() {
+    return StringUtils.capitalize(aName());
+  }
+
+  private JavaCode startControllerClass(String resource, String location) {
+    JavaCode result = new JavaCode();
+    result.add("import %s%s;", SPRING_ANNOTATION_PACKAGE, REQUEST_MAPPING_ANNOTATION);
+    result.add("import %s%s;", SPRING_ANNOTATION_PACKAGE, REQUEST_METHOD);
+    result.add("");
+    result.add("@%s(\"%s\")", REQUEST_MAPPING_ANNOTATION, location);
+    result.add("public class %sController {", Java.toIdentifier(resource));
+    return result;
+  }
+
+  private String aMethod() {
+    return "GET";
+  }
+
+  private void addControllerMethod(String method, JavaCode code) {
+    code.add("  @%s(method=%s.%s)", REQUEST_MAPPING_ANNOTATION, REQUEST_METHOD, method);
+    code.add("  public void %s() {", method);
+    code.add("  }");
+    code.add("");
+  }
+
+  private void endClass(Code code) {
+    code.add("}");
+  }
+
+  private RadlCode extractRadlFrom(JavaCode code) throws IOException {
+    ResourceModelHolder.INSTANCE.set(new ResourceModelImpl());
+    code.writeTo(new File(baseDir, code.typeName() + ".java"));
+    ExtractOptions options = new FromJavaExtractOptions(Collections.<File>emptyList(), Collections.<File>emptyList(),
+        "", "1.6", null, false);
+    Document radl = new FromJavaRadlExtractor().extractFrom(aName(), baseDir, options);
+    return new RadlCode(radl);
   }
 
   private TypeElement requestMapping() {

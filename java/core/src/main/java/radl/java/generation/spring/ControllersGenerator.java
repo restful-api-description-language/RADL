@@ -50,7 +50,7 @@ public class ControllersGenerator extends AbstractControllersGenerator {
   }
 
   @Override
-  protected void initController(RadlCode radl, String resource, JavaCode controller) {
+  protected void initController(RadlCode radl, String resource, Code controller) {
     String uri = radl.resourceLocation(resource);
     boolean addUris;
     String constantName;

@@ -135,6 +135,12 @@ public class RadlMerger implements ResourceModelMerger {
 
   private void addMediaTypes(DocumentBuilder radl, ResourceModel resourceModel) {
     Iterable<String> mediaTypes = resourceModel.mediaTypes();
+    if (mediaTypes == null) {
+      throw new IllegalStateException("Missing media types in resource model");
+    }
+    if (mediaTypes.iterator() == null) {
+      throw new IllegalStateException("Missing media types iterator");
+    }
     if (mediaTypes.iterator().hasNext()) {
       radl.element("media-types");
       for (String mediaType : mediaTypes) {

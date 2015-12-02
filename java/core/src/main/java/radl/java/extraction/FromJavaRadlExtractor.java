@@ -291,7 +291,7 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
       compilerOptions.delete();
     }
     File resourceModelFile = null;
-    String processorOptions = null;
+    String processorOptions = "";
     if (extractOptions.isSerializeModel()) {
       resourceModelFile = newResourceModelFile();
       ResourceModelSerializer.serializeModelToFile(resourceModel, resourceModelFile);

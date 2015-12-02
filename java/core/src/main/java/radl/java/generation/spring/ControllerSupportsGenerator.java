@@ -3,6 +3,7 @@
  */
 package radl.java.generation.spring;
 
+import radl.core.code.Code;
 import radl.core.code.radl.RadlCode;
 import radl.java.code.JavaCode;
 
@@ -12,7 +13,7 @@ public class ControllerSupportsGenerator extends AbstractControllersGenerator {
   static final String CLASS_NAME_SUFFIX = "ControllerSupport";
 
   @Override
-  protected void initController(RadlCode radl, String resource, JavaCode controllerSupport) {
+  protected void initController(RadlCode radl, String resource, Code controllerSupport) {
     controllerSupport.add("import org.springframework.stereotype.Service;");
     controllerSupport.add("");
     controllerSupport.add("");

@@ -124,7 +124,7 @@ public class ControllerGeneratorTest extends AbstractSpringCodeGeneratorTestCase
 
     Iterable<Code> sources = radlToCode(radl);
 
-    JavaCode controller = getType(sources, TestUtil.initCap(javaMethodName(name)) + "Controller");
+    Code controller = getType(sources, TestUtil.initCap(javaMethodName(name)) + "Controller");
     assertNotNull("Missing controller", controller);
   }
 

@@ -48,7 +48,7 @@ public class ApiGenerator extends FromRadlCodeGenerator {
     return result;
   }
 
-  private void addDefaultMediaType(JavaCode code) {
+  private void addDefaultMediaType(Code code) {
     if (defaultMediaType != null) {
       if (!mediaTypeConstants.all().iterator().hasNext()) {
         addConstantsHeading(mediaTypeConstants.getDescription(), code);

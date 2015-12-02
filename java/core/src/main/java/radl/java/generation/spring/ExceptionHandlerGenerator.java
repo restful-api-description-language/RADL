@@ -107,7 +107,7 @@ public class ExceptionHandlerGenerator extends FromRadlErrorsCodeGenerator {
     return result.toString();
   }
 
-  private Code endErrorHandler(JavaCode errorHandler) {
+  private Code endErrorHandler(Code errorHandler) {
     errorHandler.add("  private ResponseEntity<%s> error(Throwable t, %s statusCode) {", ERROR_DTO_TYPE, STATUS_TYPE);
     errorHandler.add("    %s error = new %s();", ERROR_DTO_TYPE, ERROR_DTO_TYPE);
     errorHandler.add("    if (t instanceof %s) {", IDENTIFIABLE_TYPE);

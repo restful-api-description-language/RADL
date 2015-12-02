@@ -226,6 +226,6 @@ public abstract class AbstractControllersGenerator extends FromRadlCodeGenerator
 
   protected abstract void addControllerMethod(RadlCode radl, String resource, String method, JavaCode result);
   protected abstract String getClassNameSuffix();
-  protected abstract void initController(RadlCode radl, String resource, JavaCode controller);
+  protected abstract void initController(RadlCode radl, String resource, Code controller);
 
 }

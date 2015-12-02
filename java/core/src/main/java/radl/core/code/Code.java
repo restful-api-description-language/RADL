@@ -3,7 +3,10 @@
  */
 package radl.core.code;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import radl.common.io.IO;
@@ -86,6 +89,19 @@ public class Code extends ArrayList<String> {
   @Override
   public String toString() {
     return text();
+  }
+
+  public void writeTo(File file) {
+    try {
+      PrintWriter writer = new PrintWriter(file, "UTF8");
+      try {
+        writer.println(text());
+      } finally {
+        writer.close();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

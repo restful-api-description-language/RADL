@@ -36,8 +36,8 @@ public class ExceptionsGenerator extends FromRadlErrorsCodeGenerator {
     return result;
   }
 
-  private JavaCode generateException(String error, int statusCode, String documentation) {
-    JavaCode result = new JavaCode();
+  private Code generateException(String error, int statusCode, String documentation) {
+    Code result = new JavaCode();
     addPackage(IMPL_PACKAGE, result);
     result.add("");
     result.add("import %s;", apiType());

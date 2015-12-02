@@ -83,7 +83,7 @@ public class JavaCode extends Code {
     }
     return result;
   }
-  
+
   public boolean isClass() {
     return CLASS_NAME_PATTERN.matcher(text()).matches();
   }
@@ -119,7 +119,7 @@ public class JavaCode extends Code {
       }
     });
   }
-  
+
   private Collection<String> collectPatterns(Pattern pattern, int group, Comparator<String> comparator) {
     Collection<String> result = new TreeSet<String>(comparator);
     if (isSingleLinePattern(pattern)) {
@@ -271,9 +271,15 @@ public class JavaCode extends Code {
     }
     return "";
   }
-  
+
   public String fullyQualifiedName() {
-    return String.format("%s.%s", packageName(), simpleTypeName());
+    StringBuilder result = new StringBuilder();
+    result.append(packageName());
+    if (result.length() > 0) {
+      result.append('.');
+    }
+    result.append(simpleTypeName());
+    return result.toString();
   }
 
   /**
