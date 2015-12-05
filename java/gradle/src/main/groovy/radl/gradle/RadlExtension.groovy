@@ -31,6 +31,6 @@ class RadlExtension {
 
   def generateDirName
   def generateSpring = false
-  def springVersion = '4.2.1.RELEASE'
+  def springVersion = '4.2.3.RELEASE'
 
 }

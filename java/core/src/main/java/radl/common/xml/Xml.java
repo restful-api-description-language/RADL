@@ -5,6 +5,7 @@ package radl.common.xml;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,11 +19,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -36,15 +40,17 @@ import org.xml.sax.SAXParseException;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 
+import radl.core.xml.RadlFileAssembler;
+
 
 /**
  * Utility methods for working with XML.
  */
 public final class Xml {
 
-  private static final String NAMESPACE_ATTRIBUTE_PREFIX = "xmlns";
-
   public static final String XML_PROLOG = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+
+  private static final String NAMESPACE_ATTRIBUTE_PREFIX = "xmlns";
 
   /*
    * Avoid expensive DocumentBuilderFactory provider lookup by reusing a static instance. The
@@ -577,6 +583,38 @@ public final class Xml {
         return false;
       }
       return message.contains("no grammar found") || message.contains("must match DOCTYPE root \"null\"");
+    }
+  }
+
+  public static Document parseWithIncludes(File xml) throws XmlException {
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      factory.setXIncludeAware(true);
+      factory.setFeature(RadlFileAssembler.XINCLUDE_FIXUP_BASE_URI, false);
+      factory.setFeature(RadlFileAssembler.XINCLUDE_FIXUP_LANGUAGE, false);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      if (!builder.isXIncludeAware()) {
+        throw new RuntimeException("The document builder does not support XInclude: " + builder);
+      }
+      return builder.parse(xml);
+    } catch (Exception e) {
+      throw new XmlException(e);
+    }
+  }
+
+  public static void identityTransform(Document source, File destination) throws XmlException {
+    try {
+      FileWriter writer = new FileWriter(destination, false);
+      try {
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.transform(new DOMSource(source), new StreamResult(writer));
+      } finally {
+        writer.close();
+      }
+    } catch (Exception e) {
+      throw new XmlException(e);
     }
   }
 

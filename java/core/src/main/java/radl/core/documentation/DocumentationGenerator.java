@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -113,13 +114,17 @@ public final class DocumentationGenerator implements Application {
   private void generateClientDocumentation(File radlFile, File docDir, File configuration, String cssSource) {
     File serviceDir = getServiceDir(radlFile, docDir);
     File assembledRadl = RadlFileAssembler.assemble(radlFile, docDir);
-    Document radlDocument = Xml.parse(assembledRadl);
-    new StateDiagramGenerator().generateFrom(radlDocument, serviceDir, configuration);
-    File localCssFile = normalizeCSSFile(docDir, cssSource);
     try {
-      generateClientDocumentation(radlDocument, getIndexFile(serviceDir), localCssFile.toURI().toString());
+      Document radlDocument = Xml.parse(assembledRadl);
+      new StateDiagramGenerator().generateFrom(radlDocument, serviceDir, configuration);
+      File localCssFile = normalizeCSSFile(docDir, cssSource);
+      try {
+        generateClientDocumentation(radlDocument, getIndexFile(serviceDir), localCssFile.toURI().toString());
+      } finally {
+        IO.delete(localCssFile);
+      }
     } finally {
-      IO.delete(localCssFile);
+      IO.delete(assembledRadl);
     }
   }
 

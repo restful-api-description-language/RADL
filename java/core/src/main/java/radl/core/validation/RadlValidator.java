@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import radl.common.io.IO;
 import radl.core.Log;
 import radl.core.cli.Application;
 import radl.core.cli.Arguments;
@@ -74,19 +75,27 @@ public final class RadlValidator implements Application {
     while (arguments.hasNext()) {
       File radlFile = arguments.file();
       File assembledRadl = RadlFileAssembler.assemble(radlFile, reportDir);
-      Log.info("-> Validating " + radlFile.getName() + " using " + validator);
-      Collection<Issue> issuesByFile = new ArrayList<Issue>();
-      issues.put(assembledRadl.getName(), issuesByFile);
       try {
-        InputStream stream = new FileInputStream(assembledRadl);
-        try {
-          validator.validate(stream, issuesByFile);
-        } finally {
-          stream.close();
-        }
-      } catch (IOException e) {
-        issuesByFile.add(new Issue(Validator.class, Level.ERROR, 0, 0, e.toString()));
+        Log.info("-> Validating " + radlFile.getName() + " using " + validator);
+        validate(assembledRadl, validator, issues);
+      } finally {
+        IO.delete(assembledRadl);
       }
+    }
+  }
+
+  private void validate(File radl, Validator validator, Map<String, Collection<Issue>> issues) {
+    Collection<Issue> issuesByFile = new ArrayList<Issue>();
+    issues.put(radl.getName(), issuesByFile);
+    try {
+      InputStream stream = new FileInputStream(radl);
+      try {
+        validator.validate(stream, issuesByFile);
+      } finally {
+        stream.close();
+      }
+    } catch (IOException e) {
+      issuesByFile.add(new Issue(Validator.class, Level.ERROR, 0, 0, e.toString()));
     }
   }
 

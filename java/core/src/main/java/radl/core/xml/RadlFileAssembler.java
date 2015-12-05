@@ -5,19 +5,11 @@
 package radl.core.xml;
 
 import java.io.File;
-import java.io.FileWriter;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-
+import radl.common.xml.Xml;
+import radl.common.xml.XmlException;
 import radl.core.Log;
+
 
 public final class RadlFileAssembler {
 
@@ -25,36 +17,23 @@ public final class RadlFileAssembler {
   public static final String XINCLUDE_FIXUP_LANGUAGE = "http://apache.org/xml/features/xinclude/fixup-language";
 
   private RadlFileAssembler() {
+    // Utility class
   }
 
   public static File assemble(File radlFile, File targetDirectory) {
-    File fullRadlFile = createFullRadlFile(radlFile, targetDirectory);
+    File result = createOutputFile(radlFile, targetDirectory);
     try {
-      // merge RADL files into a single file using transformation
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      factory.setXIncludeAware(true);
-      factory.setFeature(XINCLUDE_FIXUP_BASE_URI, false);
-      factory.setFeature(XINCLUDE_FIXUP_LANGUAGE, false);
-      DocumentBuilder docBuilder = factory.newDocumentBuilder();
-      if (!docBuilder.isXIncludeAware()) {
-        throw new RuntimeException("The document builder does not support XInclude: " + docBuilder);
-      }
-      Document doc = docBuilder.parse(radlFile);
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-      StreamResult result = new StreamResult(new FileWriter(fullRadlFile, false));
-      DOMSource source = new DOMSource(doc);
-      transformer.transform(source, result);
-    } catch (Exception e) {
+      // Merge potentially several RADL files into a single file using identity transformation and XInclude-aware parser
+      Xml.identityTransform(Xml.parseWithIncludes(radlFile), result);
+    } catch (XmlException e) {
       Log.error("Failed to assemble RADL file: " + e.getMessage());
       return radlFile;
     }
 
-    return fullRadlFile;
+    return result;
   }
 
-  private static File createFullRadlFile(File radlFile, File targetDirectory) {
+  private static File createOutputFile(File radlFile, File targetDirectory) {
     String name = radlFile.getName();
     File dir = targetDirectory;
     if (dir == null) {
@@ -64,4 +43,5 @@ public final class RadlFileAssembler {
     }
     return new File(dir, name + ".out");
   }
+
 }

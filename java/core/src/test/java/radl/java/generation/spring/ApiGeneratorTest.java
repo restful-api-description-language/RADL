@@ -80,7 +80,8 @@ public class ApiGeneratorTest extends AbstractSpringCodeGeneratorTestCase {
 
     String field = "LINK_REL_FOO_BAR";
     TestUtil.assertCollectionEquals("Fields", Arrays.asList(field), api.fieldNames());
-    assertEquals("Field comment", Arrays.asList("See " + linkRelationSpecificationUri), api.fieldComments(field));
+    TestUtil.assertCollectionEquals("Field comment", Arrays.asList("See " + linkRelationSpecificationUri + "."),
+        api.fieldComments(field));
   }
 
   // #39 - Add error conditions to generated API
@@ -107,7 +108,7 @@ public class ApiGeneratorTest extends AbstractSpringCodeGeneratorTestCase {
 
     String error1 = "ERROR_" + name1.toUpperCase(Locale.getDefault());
     assertTrue("Missing field " + error1, api.fieldNames().contains(error1));
-    assertEquals("JavaDoc for error #1", Arrays.asList(docPart1 + ' ' + docPart2), api.fieldComments(error1));
+    assertEquals("JavaDoc for error #1", Arrays.asList(docPart1 + ' ' + docPart2 + '.'), api.fieldComments(error1));
 
     String error3 = "ERROR_" + name3.toUpperCase(Locale.getDefault());
     assertTrue("Missing field " + error3, api.fieldNames().contains(error3));

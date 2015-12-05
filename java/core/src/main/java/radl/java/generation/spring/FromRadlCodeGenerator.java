@@ -57,10 +57,11 @@ public abstract class FromRadlCodeGenerator implements CodeGenerator {
   static final String TRANSITITION_CHECK_NAME = "allows";
   static final String TRANSITITION_DENY_NAME = "deny";
   private static final String STANDARD_MEDIA_TYPE = "application/";
+  private static final String PUNCTATION = ".!?";
 
   private String fileHeader;
   private String packagePrefix;
-  
+
   protected String getPackagePrefix() {
     return packagePrefix;
   }
@@ -167,8 +168,14 @@ public abstract class FromRadlCodeGenerator implements CodeGenerator {
         Constant constant = iterator.next();
         if (constant.getComments().length > 0) {
           code.add("  /**");
+          boolean firstLine = true;
           for (String comment : constant.getComments()) {
-            code.add("   * %s", comment);
+            if (comment.isEmpty()) {
+              continue;
+            }
+            String line = ensurePunctuation(comment, firstLine);
+            code.add("   * %s", line);
+            firstLine = false;
           }
           code.add("   */");
         }
@@ -185,6 +192,17 @@ public abstract class FromRadlCodeGenerator implements CodeGenerator {
     code.add("");
     code.add("  // %s", heading);
     code.add("");
+  }
+
+  private String ensurePunctuation(String text, boolean firstLine) {
+    return firstLine ? ensurePunctuation(text) : text;
+  }
+
+  private String ensurePunctuation(String text) {
+    if (PUNCTATION.indexOf(text.charAt(text.length() - 1)) < 0) {
+      return text + '.';
+    }
+    return text;
   }
 
   protected String getMediaTypeConstant(Constants mediaTypeConstants, String mediaType) {

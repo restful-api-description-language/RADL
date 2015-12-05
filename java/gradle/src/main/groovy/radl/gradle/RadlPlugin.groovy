@@ -16,10 +16,6 @@ class RadlPlugin implements Plugin<Project> {
   void apply(Project project) {
     project.extensions.create('radl', RadlExtension)
 
-    project.configurations {
-      radl
-    }
-
     project.sourceSets {
       main {
         java {
@@ -28,7 +24,18 @@ class RadlPlugin implements Plugin<Project> {
       }
     }
 
+    project.configurations {
+      radl
+      radlCompile.extendsFrom compile
+    }
+    
+    project.dependencies {
+      radlCompile project.sourceSets.main.output
+    }
+
     project.afterEvaluate {
+      project.tasks.findByName('checkstyleRadl')*.onlyIf { false }
+    
       project.dependencies {
         radl ("radl:radl-core:$project.radl.coreVersion") {
           transitive = true
