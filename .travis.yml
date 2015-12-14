@@ -16,7 +16,7 @@ WesK3eGbG8jWz+Lm2tVFBhppZ+DMpUzDtcv5I+S1/fg0T8PT6ckvejBzDmqqXw="
 
 language: java
 jdk:
-- openjdk6
+- openjdk7
 install: true
 script: ./gradlew build
 
