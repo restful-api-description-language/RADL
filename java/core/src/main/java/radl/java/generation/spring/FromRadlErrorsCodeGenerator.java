@@ -26,7 +26,7 @@ public abstract class FromRadlErrorsCodeGenerator extends FromRadlCodeGenerator 
     if (!errors.iterator().hasNext()) {
       return Collections.emptyList();
     }
-    Collection<Code> result = new ArrayList<Code>();
+    Collection<Code> result = new ArrayList<>();
     generateFromRadlErrors(radl, errors, context, result);
     return result;
   }

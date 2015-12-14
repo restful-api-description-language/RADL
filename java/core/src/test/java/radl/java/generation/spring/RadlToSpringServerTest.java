@@ -108,7 +108,7 @@ public class RadlToSpringServerTest {
   }
 
   private Collection<File> generatedFiles() {
-    Collection<File> result = new ArrayList<File>();
+    Collection<File> result = new ArrayList<>();
     addFilesIn(baseDir, result);
     return result;
   }

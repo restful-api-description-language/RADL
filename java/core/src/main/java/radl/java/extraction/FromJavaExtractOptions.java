@@ -47,7 +47,7 @@ public class FromJavaExtractOptions implements ExtractOptions {
   }
 
   public Map<String, String> getAnnotationProcessorOptions() {
-    Map<String, String> result = new HashMap<String, String>();
+    Map<String, String> result = new HashMap<>();
     if (annotationProcessorOptions == null) {
       return result;
     }

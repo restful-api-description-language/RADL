@@ -24,8 +24,8 @@ import javax.lang.model.type.TypeMirror;
 
 public class TestRoundEnvironment implements RoundEnvironment {
 
-  private final Set<Element> rootElements = new HashSet<Element>();
-  private final Map<TypeElement, Element> elementsByAnnotation = new HashMap<TypeElement, Element>();
+  private final Set<Element> rootElements = new HashSet<>();
+  private final Map<TypeElement, Element> elementsByAnnotation = new HashMap<>();
 
   public void addRootElement(Element element) {
     rootElements.add(element);
@@ -55,7 +55,7 @@ public class TestRoundEnvironment implements RoundEnvironment {
   }
 
   public Iterable<TypeElement> getAnnotationsOn(Element element) {
-    Collection<TypeElement> result = new ArrayList<TypeElement>();
+    Collection<TypeElement> result = new ArrayList<>();
     for (Entry<TypeElement, Element> entry : elementsByAnnotation.entrySet()) {
       if (element.getSimpleName().contentEquals(entry.getValue().getSimpleName())) {
         result.add(entry.getKey());

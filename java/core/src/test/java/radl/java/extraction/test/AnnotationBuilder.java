@@ -12,7 +12,7 @@ public class AnnotationBuilder<T extends Annotatable<T>> {
   private static final String ANNOTATION_PACKAGE = "javax.ws.rs.";
 
   private final T parent;
-  private final Collection<Annotation> annotations = new HashSet<Annotation>();
+  private final Collection<Annotation> annotations = new HashSet<>();
 
   public AnnotationBuilder(T parent) {
     this.parent = parent;

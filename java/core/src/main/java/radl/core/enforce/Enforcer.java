@@ -29,9 +29,9 @@ public class Enforcer<I, T> {
    * @param removeUnlisted Whether to remove objects from reality that are not desired
    */
   public void enforce(Desired<I, T> desired, Reality<I, T> reality, boolean removeUnlisted) {
-    Collection<I> toRemove = new ArrayList<I>();
-    Collection<I> toUpdate = new ArrayList<I>();
-    Collection<I> toAdd = new ArrayList<I>();
+    Collection<I> toRemove = new ArrayList<>();
+    Collection<I> toUpdate = new ArrayList<>();
+    Collection<I> toAdd = new ArrayList<>();
     collectUpdates(desired, reality, toRemove, toUpdate, toAdd);
     if (removeUnlisted) {
       remove(toRemove, reality);
@@ -42,7 +42,7 @@ public class Enforcer<I, T> {
 
   private void collectUpdates(Desired<I, T> desired, Reality<I, T> reality,
       Collection<I> toRemove, Collection<I> toUpdate, Collection<I> toAdd) {
-    Collection<I> wantedIds = new ArrayList<I>(desired.getIds());
+    Collection<I> wantedIds = new ArrayList<>(desired.getIds());
     for (I id : reality.getIds()) {
       if (wantedIds.contains(id)) {
         wantedIds.remove(id);

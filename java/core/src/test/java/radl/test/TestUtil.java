@@ -40,7 +40,7 @@ public final class TestUtil {
       }
     }
     if (actualItems.hasNext()) {
-      Collection<T> extraItems = new ArrayList<T>();
+      Collection<T> extraItems = new ArrayList<>();
       while (actualItems.hasNext()) {
         extraItems.add(actualItems.next());
       }

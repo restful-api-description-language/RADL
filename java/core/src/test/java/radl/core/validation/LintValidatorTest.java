@@ -30,7 +30,7 @@ public class LintValidatorTest {
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {
-    Collection<String[]> result = new ArrayList<String[]>();
+    Collection<String[]> result = new ArrayList<>();
     for (String dir : TESTS_DIR.list()) {
       result.add(new String[] { dir });
     }
@@ -59,7 +59,7 @@ public class LintValidatorTest {
   }
 
   private Collection<Issue> validate(File radlFile) throws IOException {
-    Collection<Issue> result = new ArrayList<Issue>();
+    Collection<Issue> result = new ArrayList<>();
     Validator validator = new LintValidator();
     try (InputStream radl = new FileInputStream(radlFile)) {
       validator.validate(radl, result);

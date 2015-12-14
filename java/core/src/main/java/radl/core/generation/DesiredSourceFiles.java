@@ -43,7 +43,7 @@ public class DesiredSourceFiles implements Desired<String, SourceFile> {
 
   private Map<String, SourceFile> sourceFiles() {
     if (sourceFiles == null) {
-      sourceFiles = new TreeMap<String, SourceFile>();
+      sourceFiles = new TreeMap<>();
       for (SourceFile sourceFile : generator.generateFrom(radl, baseDir)) {
         sourceFiles.put(sourceFile.path(), sourceFile);
       }

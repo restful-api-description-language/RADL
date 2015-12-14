@@ -42,7 +42,7 @@ public final class RadlValidator implements Application {
    */
   @Override
   public int run(Arguments arguments) {
-    Map<String, Collection<Issue>> issues = new TreeMap<String, Collection<Issue>>();
+    Map<String, Collection<Issue>> issues = new TreeMap<>();
     String reportFileName = arguments.hasNext() ? arguments.next() : DEFAULT_REPORT_FILE_NAME;
     String issueReporterId = DEFAULT_ISSUE_REPORTER;
     if (reportFileName.endsWith(".radl")) {
@@ -85,7 +85,7 @@ public final class RadlValidator implements Application {
   }
 
   private void validate(File radl, Validator validator, Map<String, Collection<Issue>> issues) {
-    Collection<Issue> issuesByFile = new ArrayList<Issue>();
+    Collection<Issue> issuesByFile = new ArrayList<>();
     issues.put(radl.getName(), issuesByFile);
     try (InputStream stream = new FileInputStream(radl)) {
       validator.validate(stream, issuesByFile);

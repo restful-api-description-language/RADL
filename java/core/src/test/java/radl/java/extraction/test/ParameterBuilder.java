@@ -11,7 +11,7 @@ public class ParameterBuilder implements Annotatable<ParameterBuilder> {
 
   private final MethodBuilder parent;
   private final String name;
-  private final Collection<Annotation> annotations = new HashSet<Annotation>();
+  private final Collection<Annotation> annotations = new HashSet<>();
   private String documentation;
 
   public ParameterBuilder(MethodBuilder parent, String name) {
@@ -26,7 +26,7 @@ public class ParameterBuilder implements Annotatable<ParameterBuilder> {
   }
 
   public AnnotationBuilder<ParameterBuilder> annotatedWith() {
-    return new AnnotationBuilder<ParameterBuilder>(this);
+    return new AnnotationBuilder<>(this);
   }
 
   public ParameterBuilder documentedWith(String provided) {

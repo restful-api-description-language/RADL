@@ -22,7 +22,7 @@ public class JavaCompiler implements Application {
   }
 
   private String[] getCompileArguments(Arguments arguments) {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     Properties properties = arguments.properties();
     File baseDir = new File(properties.getProperty("base.dir"));
     File outputDir = new File(baseDir, "classes");

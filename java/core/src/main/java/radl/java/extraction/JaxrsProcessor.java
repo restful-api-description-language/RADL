@@ -38,7 +38,7 @@ public class JaxrsProcessor extends AbstractRestAnnotationProcessor {
 
   @Override
   public Set<String> getSupportedOptions() {
-    return new HashSet<String>(Arrays.asList(PATCH_OPTION, LOG_OPTION));
+    return new HashSet<>(Arrays.asList(PATCH_OPTION, LOG_OPTION));
   }
 
   @Override
@@ -53,7 +53,7 @@ public class JaxrsProcessor extends AbstractRestAnnotationProcessor {
     if (patchAnnotation == null) {
       return super.getSupportedAnnotationTypes();
     }
-    Set<String> result = new HashSet<String>();
+    Set<String> result = new HashSet<>();
     result.addAll(super.getSupportedAnnotationTypes());
     result.add(patchAnnotation);
     return result;

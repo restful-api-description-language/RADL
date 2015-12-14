@@ -173,7 +173,7 @@ public class ControllersGenerator extends AbstractControllersGenerator {
   }
 
   private Collection<String> toCollection(String parameters) {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     for (String parameter : parameters.split(",")) {
       result.add(parameter.trim());
     }
@@ -181,7 +181,7 @@ public class ControllersGenerator extends AbstractControllersGenerator {
   }
 
   private void addLinks(RadlCode radl, String state, JavaCode code, Collection<String> callerParameters) {
-    Collection<String> addedLinkRelations = new HashSet<String>();
+    Collection<String> addedLinkRelations = new HashSet<>();
     for (String transition : radl.stateTransitionNames(state)) {
       ResourceMethod resourceMethod = radl.transitionMethod(transition);
       String controller = getControllerClassName(resourceMethod.getResource());

@@ -13,9 +13,9 @@ public class TypeBuilder implements Annotatable<TypeBuilder> {
   private final boolean isInterface;
   private final boolean isAbstract;
   private final String name;
-  private final Collection<Annotation> annotations = new HashSet<Annotation>();
-  private final Collection<Method> methods = new HashSet<Method>();
-  private final Collection<String> superTypes = new HashSet<String>();
+  private final Collection<Annotation> annotations = new HashSet<>();
+  private final Collection<Method> methods = new HashSet<>();
+  private final Collection<String> superTypes = new HashSet<>();
   private String documentation;
 
   public TypeBuilder(ProjectBuilder parent, boolean isInterface, boolean isAbstract, String name) {
@@ -26,7 +26,7 @@ public class TypeBuilder implements Annotatable<TypeBuilder> {
   }
 
   public AnnotationBuilder<TypeBuilder> annotatedWith() {
-    return new AnnotationBuilder<TypeBuilder>(this);
+    return new AnnotationBuilder<>(this);
   }
 
   @Override

@@ -29,7 +29,7 @@ import radl.core.code.Code;
  */
 public class XmlCode extends Code {
 
-  private final Map<String, String> namespaces = new HashMap<String, String>();
+  private final Map<String, String> namespaces = new HashMap<>();
   private final StringBuilder indentation = new StringBuilder(); // NOPMD AvoidStringBufferField
   private transient Node root;
 
@@ -81,7 +81,7 @@ public class XmlCode extends Code {
   }
 
   public <T> Iterable<T> multiple(String path, Class<T> returnType) {
-    Collection<T> result = new ArrayList<T>();
+    Collection<T> result = new ArrayList<>();
     try {
       XPath xpath = new DOMXPath(path);
       for (Entry<String, String> entry : namespaces.entrySet()) {
@@ -136,7 +136,7 @@ public class XmlCode extends Code {
   }
 
   public Iterable<String> elementsAttribute(String attribute, String elementXPath, Object... args) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     for (Element element : multiple(String.format(elementXPath, args), Element.class)) {
       String value = attr(element, attribute);
       if (!value.isEmpty()) {

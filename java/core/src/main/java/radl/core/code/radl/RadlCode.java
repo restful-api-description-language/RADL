@@ -29,9 +29,9 @@ public class RadlCode extends XmlCode {
   private static final String TRANSITION_PATH = "//radl:states/radl:*/radl:transitions/radl:transition";
   private static final String LINK_RELATIONS_PATH = "//radl:link-relations/radl:link-relation";
   private static final String ERRORS_PATH = "//radl:errors/radl:error";
-  
+
   private transient Iterable<String> states;
-  private final transient Map<String, Iterable<String>> methodsByResource = new HashMap<String, Iterable<String>>();
+  private final transient Map<String, Iterable<String>> methodsByResource = new HashMap<>();
 
   public RadlCode() {
     super();
@@ -41,7 +41,7 @@ public class RadlCode extends XmlCode {
   private void init() {
     addNamespace("radl", Radl.NAMESPACE_URI);
   }
-  
+
   public RadlCode(Document document) {
     super(document);
     init();
@@ -90,7 +90,7 @@ public class RadlCode extends XmlCode {
     Collections.sort(collection);
     return collection;
   }
-  
+
   public boolean isStartState(String state) {
     return START_STATE.equals(state);
   }
@@ -100,7 +100,7 @@ public class RadlCode extends XmlCode {
         : statePath(state) + "/radl:transitions/radl:transition";
     return elementsName(xpath, state);
   }
-  
+
   public String statePath(String name) {
     return STATES_PATH + namePath(name);
   }
@@ -108,7 +108,7 @@ public class RadlCode extends XmlCode {
   public String statePropertyGroup(String state) {
     return optional(elementsAttribute("property-group", statePath(state)));
   }
-  
+
   private String optional(Iterable<String> values) {
     Iterator<String> result = values.iterator();
     return result.hasNext() ? result.next() : START_STATE;
@@ -201,7 +201,7 @@ public class RadlCode extends XmlCode {
   private String namePath(String name) {
     return "[@name='" + name + "']";
   }
-  
+
   private String documentation(String path) {
     Iterator<Element> specification = multiple(path + "/radl:specification", Element.class).iterator();
     if (specification.hasNext()) {
@@ -228,7 +228,7 @@ public class RadlCode extends XmlCode {
   }
 
   public Iterable<MediaType> mediaTypes() {
-    Collection<MediaType> result = new ArrayList<MediaType>();
+    Collection<MediaType> result = new ArrayList<>();
     for (String name : mediaTypeNames()) {
       result.add(new MediaType(name));
     }
@@ -268,9 +268,9 @@ public class RadlCode extends XmlCode {
     return null;
   }
 
-  
+
   public static class ResourceMethod {
-    
+
     private final String resource;
     private final String method;
 

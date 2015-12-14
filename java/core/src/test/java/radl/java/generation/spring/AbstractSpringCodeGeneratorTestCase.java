@@ -43,7 +43,7 @@ public abstract class AbstractSpringCodeGeneratorTestCase {
     Module generated = new Module();
     Module skeleton = new Module();
     generator.generate(Arrays.asList(input), Arrays.asList(generated, skeleton));
-    Collection<Code> result = new ArrayList<Code>();
+    Collection<Code> result = new ArrayList<>();
     result.addAll(generated);
     result.addAll(skeleton);
     return result;
@@ -131,7 +131,7 @@ public abstract class AbstractSpringCodeGeneratorTestCase {
   }
 
   protected JavaCode getType(Iterable<Code> sources, String type) {
-    Collection<String> types = new ArrayList<String>();
+    Collection<String> types = new ArrayList<>();
     for (Code source : sources) {
       JavaCode javaSource = (JavaCode)source;
       if (type.equals(javaSource.typeName())) {

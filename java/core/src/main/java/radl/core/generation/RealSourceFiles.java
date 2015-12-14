@@ -55,7 +55,7 @@ public class RealSourceFiles implements Reality<String, SourceFile> {
 
   @Override
   public Collection<String> getIds() {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     addPaths(new File(baseDir, generatedSourceDir + codeDir), result);
     addPaths(new File(baseDir, mainSourceSetDir + codeDir), result);
     Collections.sort(result);

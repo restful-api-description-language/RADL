@@ -25,9 +25,9 @@ import radl.core.validation.Issue.Level;
  */
 public class LintValidator implements Validator {
 
-  private final Map<String, String> resourcesByLocation = new HashMap<String, String>();
-  private final Map<String, Collection<String>> checkedResourcesByResource = new HashMap<String, Collection<String>>();
-  private final Collection<String> actions = new ArrayList<String>();
+  private final Map<String, String> resourcesByLocation = new HashMap<>();
+  private final Map<String, Collection<String>> checkedResourcesByResource = new HashMap<>();
+  private final Collection<String> actions = new ArrayList<>();
   private Collection<Issue> issues;
   private RadlCode radl;
 
@@ -128,7 +128,7 @@ public class LintValidator implements Validator {
   }
 
   private void validateLinkRelations() {
-    Set<String> linkRelations = new TreeSet<String>();
+    Set<String> linkRelations = new TreeSet<>();
     for (String linkRelation : radl.linkRelationNames()) {
       if (linkRelations.contains(linkRelation)) {
         error("Duplicate link-relation: '%s'", linkRelation);
@@ -157,7 +157,7 @@ public class LintValidator implements Validator {
   }
 
   private void validateMediaTypes() {
-    Set<String> mediaTypes = new TreeSet<String>();
+    Set<String> mediaTypes = new TreeSet<>();
     for (String mediaType : radl.mediaTypeNames()) {
       if (mediaTypes.contains(mediaType)) {
         error("Duplicate media-type: '%s'", mediaType);
@@ -168,7 +168,7 @@ public class LintValidator implements Validator {
   }
 
   private void validateResourceModel() {
-    Set<String> resources = new TreeSet<String>();
+    Set<String> resources = new TreeSet<>();
     for (String resource : radl.resourceNames()) {
       if (resources.contains(resource)) {
         error("Duplicate resource: '%s'", resource);
@@ -211,7 +211,7 @@ public class LintValidator implements Validator {
   }
 
   private String getDuplicateTemplateVariable(String uri) {
-    Collection<String> variables = new ArrayList<String>();
+    Collection<String> variables = new ArrayList<>();
     for (String part : splitUri(uri)) {
       String variable = getVariable(part);
       if (variable != null) {
@@ -237,7 +237,7 @@ public class LintValidator implements Validator {
   }
 
   private void validateDuplicateParts(String name, String location) {
-    Collection<String> parts = new ArrayList<String>();
+    Collection<String> parts = new ArrayList<>();
     for (String part : splitUri(location)) {
       if (parts.contains(part)) {
         warn("Location of '%s' contains duplicate part '%s': %s", name, part, location);
@@ -278,7 +278,7 @@ public class LintValidator implements Validator {
   private Collection<String> getCheckedResourcesFor(String resource) {
     Collection<String> result = checkedResourcesByResource.get(resource);
     if (result == null) {
-      result = new HashSet<String>();
+      result = new HashSet<>();
       result.add(resource);
       checkedResourcesByResource.put(resource, result);
     }
@@ -306,7 +306,7 @@ public class LintValidator implements Validator {
   }
 
   private boolean haveSameMethod(String resource1, String resource2) {
-    Collection<String> methods = new ArrayList<String>();
+    Collection<String> methods = new ArrayList<>();
     for (String method : radl.methodNames(resource1)) {
       methods.add(method);
     }
@@ -331,7 +331,7 @@ public class LintValidator implements Validator {
   }
 
   private static List<Resource> sort(Resource... resources) {
-    List<Resource> result = new ArrayList<Resource>();
+    List<Resource> result = new ArrayList<>();
     for (Resource resource : resources) {
       result.add(resource);
     }
@@ -430,7 +430,7 @@ public class LintValidator implements Validator {
     Iterator<String> states = radl.stateNames().iterator();
     if (states.hasNext()) {
       boolean startStateFound = false;
-      Set<String> stateNames = new TreeSet<String>();
+      Set<String> stateNames = new TreeSet<>();
       while (states.hasNext()) {
         String state = states.next();
         if (stateNames.contains(state)) {

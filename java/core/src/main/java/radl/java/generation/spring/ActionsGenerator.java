@@ -45,7 +45,7 @@ public class ActionsGenerator extends FromRadlCodeGenerator {
   }
 
   private Iterable<String> getTransitions(RadlCode radl) {
-    Collection<String> result = new TreeSet<String>();
+    Collection<String> result = new TreeSet<>();
     for (String state : radl.stateNames()) {
       if (radl.isStartState(state)) {
         continue;

@@ -52,7 +52,7 @@ class RadlValidatingVisitor implements IResourceDeltaVisitor, IResourceVisitor {
   private void validateRadl(IResource resource) throws CoreException {
     if ("radl".equals(resource.getFileExtension()) && resource instanceof IFile) {
       IFile file = (IFile)resource;
-      Collection<Issue> issues = new ArrayList<Issue>();
+      Collection<Issue> issues = new ArrayList<>();
       validator.validate(file.getContents(), issues);
       for (Issue issue : issues) {
         IMarker marker = resource.createMarker(MARKER_TYPE);

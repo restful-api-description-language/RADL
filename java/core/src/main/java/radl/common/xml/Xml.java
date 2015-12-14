@@ -224,7 +224,7 @@ public final class Xml {
 
   public static Element getChildElementByAttribute(Element parent, String childName, final String attributeName,
       final String attributeValue) throws Exception {
-    final AtomicReference<Element> result = new AtomicReference<Element>();
+    final AtomicReference<Element> result = new AtomicReference<>();
     processChildElements(parent, new ElementProcessor() {
       @Override
       public void process(Element element) throws Exception {
@@ -331,7 +331,7 @@ public final class Xml {
   public static String toString(Node node) {
     StringBuilder result = new StringBuilder();
     if (node != null) {
-      Map<String, String> namespaces = new HashMap<String, String>();
+      Map<String, String> namespaces = new HashMap<>();
       namespaces.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
       namespaces.put("http://www.w3.org/XML/1998/namespace", "xml");
       append(node, 0, namespaces, result);
@@ -535,7 +535,7 @@ public final class Xml {
   }
 
   public static Iterable<Node> getAttributes(Node node) {
-    Collection<Node> result = new ArrayList<Node>();
+    Collection<Node> result = new ArrayList<>();
     NamedNodeMap attributes = node.getAttributes();
     for (int i = 0; i < attributes.getLength(); i++) {
       Node attribute = attributes.item(i);

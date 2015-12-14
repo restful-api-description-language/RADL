@@ -26,7 +26,7 @@ public class RelaxNgValidatorTest {
 
   private final File file = new File(RANDOM.string());
   private final Validator validator = new RelaxNgValidator();
-  private final Collection<Issue> issues = new ArrayList<Issue>();
+  private final Collection<Issue> issues = new ArrayList<>();
 
   @After
   public void done() {

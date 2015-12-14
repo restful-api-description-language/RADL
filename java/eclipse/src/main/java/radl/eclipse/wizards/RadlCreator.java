@@ -33,16 +33,11 @@ public class RadlCreator {
       ensureFolder(monitor, folder);
     }
     final IFile result = folder.getFile(serviceNameToFileName(serviceName));
-    InputStream stream = getRadlSkeleton(serviceName);
-    try {
-      try {
-        if (result.exists()) {
-          result.setContents(stream, true, true, monitor);
-        } else {
-          result.create(stream, true, monitor);
-        }
-      } finally {
-        stream.close();
+    try (InputStream stream = getRadlSkeleton(serviceName)) {
+      if (result.exists()) {
+        result.setContents(stream, true, true, monitor);
+      } else {
+        result.create(stream, true, monitor);
       }
     } catch (IOException e) { // NOPMD EmptyCatchBlock
     }

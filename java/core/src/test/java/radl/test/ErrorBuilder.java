@@ -12,7 +12,7 @@ import org.w3c.dom.Document;
 public class ErrorBuilder {
 
   private final RadlBuilder parent;
-  private final Map<String, Error> errors = new LinkedHashMap<String, Error>();
+  private final Map<String, Error> errors = new LinkedHashMap<>();
 
   public ErrorBuilder(RadlBuilder parent) {
     this.parent = parent;
@@ -34,7 +34,7 @@ public class ErrorBuilder {
   public ErrorBuilder error(String name, int statusCode) {
     return error(name, null, statusCode);
   }
-  
+
   public RadlBuilder end() {
     parent.setErrors(errors);
     return parent;
@@ -44,11 +44,11 @@ public class ErrorBuilder {
     return end().build();
   }
 
-  
+
   public class Error {
 
     public static final int UNDEFINED_STATUS_CODE = -1;
-    
+
     private final String documentation;
     private final int statusCode;
 
@@ -68,7 +68,7 @@ public class ErrorBuilder {
     public boolean hasStatusCode() {
       return statusCode != UNDEFINED_STATUS_CODE;
     }
-    
+
   }
-  
+
 }

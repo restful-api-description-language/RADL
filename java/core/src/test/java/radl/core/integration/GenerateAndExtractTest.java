@@ -49,7 +49,7 @@ public class GenerateAndExtractTest {
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {
-    Collection<String[]> result = new ArrayList<String[]>();
+    Collection<String[]> result = new ArrayList<>();
     for (String fileName : TESTS_DIR.list(new FilenameFilter() {
       @Override
       public boolean accept(File dir, String name) {
@@ -162,7 +162,7 @@ public class GenerateAndExtractTest {
   }
 
   private Iterable<File> collectFilesIn(File dir) {
-    Collection<File> result = new ArrayList<File>();
+    Collection<File> result = new ArrayList<>();
     collectFilesIn(dir, result);
     return result;
   }

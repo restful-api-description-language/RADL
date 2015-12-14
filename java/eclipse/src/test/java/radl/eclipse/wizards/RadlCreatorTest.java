@@ -53,7 +53,7 @@ public class RadlCreatorTest {
   private final IFolder folder = mock(IFolder.class);
   private final IFile file = mock(IFile.class);
   private final IProject project = mock(IProject.class);
-  private final Collection<String> natureIds = new ArrayList<String>();
+  private final Collection<String> natureIds = new ArrayList<>();
   private InputStream contents;
 
   @Before

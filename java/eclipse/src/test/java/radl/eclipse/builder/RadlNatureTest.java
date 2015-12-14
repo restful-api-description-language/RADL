@@ -29,7 +29,7 @@ public class RadlNatureTest {
 
   private final IProject project = mock(IProject.class);
   private final IProjectNature nature = new RadlNature();
-  private final Collection<ICommand> commands = new ArrayList<ICommand>();
+  private final Collection<ICommand> commands = new ArrayList<>();
 
   @Test
   public void configureAddsBuilderWhenNotPresent() throws CoreException {
@@ -47,7 +47,7 @@ public class RadlNatureTest {
     when(projectDescription.getNatureIds()).thenReturn(new String[0]);
     when(projectDescription.newCommand()).thenReturn(new Command());
     when(projectDescription.getBuildSpec()).thenReturn(commands.toArray(new ICommand[commands.size()]));
-    final Collection<ICommand> cache = new ArrayList<ICommand>();
+    final Collection<ICommand> cache = new ArrayList<>();
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {

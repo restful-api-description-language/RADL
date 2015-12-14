@@ -47,7 +47,7 @@ public class SpringSourceFilesGenerator implements SourceFilesGenerator {
 
   @Override
   public Iterable<SourceFile> generateFrom(Document radl, File baseDir) {
-    Collection<SourceFile> result = new ArrayList<SourceFile>();
+    Collection<SourceFile> result = new ArrayList<>();
     Module input = new Module();
     input.add(new RadlCode(radl));
     Module generated = new Module();

@@ -191,8 +191,8 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
   }
 
   protected String buildClasspath() {
-    List<Artifact> artifacts = new ArrayList<Artifact>();
-    List<File> theClasspathFiles = new ArrayList<File>();
+    List<Artifact> artifacts = new ArrayList<>();
+    List<File> theClasspathFiles = new ArrayList<>();
     collectProjectArtifactsAndClasspath(artifacts, theClasspathFiles);
 
     StringBuilder paths = new StringBuilder();

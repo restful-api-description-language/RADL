@@ -46,7 +46,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
 
   protected abstract Parameter getParameter(Element element, TypeElement annotation);
 
-  private final Set<String> supportedAnnotations = new LinkedHashSet<String>();
+  private final Set<String> supportedAnnotations = new LinkedHashSet<>();
   private String[] loggableClasses = new String[0];
 
   public AbstractRestAnnotationProcessor(String packageName, String[] annotationNames) {
@@ -74,7 +74,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
 
   private Map<Element, Collection<TypeElement>> annotationsByElement(Set<? extends TypeElement> annotations,
       RoundEnvironment environment) {
-    Map<Element, Collection<TypeElement>> result = new HashMap<Element, Collection<TypeElement>>();
+    Map<Element, Collection<TypeElement>> result = new HashMap<>();
     for (TypeElement annotation : annotations) {
       for (Element element : environment.getElementsAnnotatedWith(annotation)) {
         if (shouldIgnore(element.getKind())) {
@@ -82,7 +82,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
         }
         Collection<TypeElement> elementAnnotations = result.get(element);
         if (elementAnnotations == null) {
-          elementAnnotations = new ArrayList<TypeElement>();
+          elementAnnotations = new ArrayList<>();
           result.put(element, elementAnnotations);
         }
         elementAnnotations.add(annotation);
@@ -101,7 +101,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
     String method = null;
     Collection<String> consumes = null;
     Collection<String> produces = null;
-    Collection<Parameter> parameters = new ArrayList<Parameter>();
+    Collection<Parameter> parameters = new ArrayList<>();
     uri = getUri(element, annotations);
     for (TypeElement annotation : annotations) {
       method = update(getMethod(element, annotation), method);
@@ -139,7 +139,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
   }
 
   private Collection<Element> getConcreteSubClassesOf(Set<? extends Element> allTypes, Element classElement) {
-    Collection<Element> result = new HashSet<Element>();
+    Collection<Element> result = new HashSet<>();
     for (Element subClassElement : getTypesExtendingOrImplementing(allTypes, classElement)) {
       if (!subClassElement.getModifiers().contains(Modifier.ABSTRACT)) {
         result.add(subClassElement);
@@ -221,7 +221,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
       Element methodElement) {
     Element returnType = getReturnType(methodElement);
     if (allTypes.contains(returnType)) {
-      Collection<String> result = new HashSet<String>();
+      Collection<String> result = new HashSet<>();
       for (Element type : getTypesExtendingOrImplementing(allTypes, returnType)) {
         result.add(qualifiedNameOf(type));
       }
@@ -231,7 +231,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
   }
 
   private Collection<Element> getTypesExtendingOrImplementing(Set<? extends Element> allTypes, Element baseType) {
-    Collection<Element> result = new LinkedHashSet<Element>();
+    Collection<Element> result = new LinkedHashSet<>();
     result.add(baseType);
     addTypesExtendingOrImplementing(allTypes, baseType.asType(), result);
     logClass("Sub types: " + result, qualifiedNameOf(baseType));
@@ -287,7 +287,7 @@ public abstract class AbstractRestAnnotationProcessor extends AbstractRestProces
       if (entry.getKey().getSimpleName().contentEquals(property)) {
         Object values = entry.getValue().getValue();
         if (values instanceof Iterable) {
-          Collection<String> result = new ArrayList<String>();
+          Collection<String> result = new ArrayList<>();
           for (Object value : (Iterable<?>)values) {
             result.add(StringUtil.stripQuotes(value.toString()));
           }

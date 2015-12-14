@@ -39,8 +39,8 @@ public final class ProjectBuilder {
   private final TestRoundEnvironment environment;
   private final Types types = mock(Types.class);
   private final Elements elements = mock(Elements.class);
-  private final Map<String, DeclaredType> missingTypes = new HashMap<String, DeclaredType>();
-  private final Map<String, String> options = new HashMap<String, String>();
+  private final Map<String, DeclaredType> missingTypes = new HashMap<>();
+  private final Map<String, String> options = new HashMap<>();
 
   private ProjectBuilder() {
     environment = new TestRoundEnvironment();
@@ -152,7 +152,7 @@ public final class ProjectBuilder {
     when(annotated.getAnnotationMirrors()).thenAnswer(new Answer<List<? extends AnnotationMirror>>() {
       @Override
       public List<? extends AnnotationMirror> answer(InvocationOnMock invocation) throws Throwable {
-        List<AnnotationMirror> annotationMirrors = new ArrayList<AnnotationMirror>();
+        List<AnnotationMirror> annotationMirrors = new ArrayList<>();
         if (previous != null) {
           annotationMirrors.addAll(previous);
         }
@@ -216,7 +216,7 @@ public final class ProjectBuilder {
   }
 
   private void addSuperTypes(Type type, Element classElement) {
-    final List<TypeMirror> superTypes = new ArrayList<TypeMirror>();
+    final List<TypeMirror> superTypes = new ArrayList<>();
     for (String name : type.getSuperTypes()) {
       Element element = findElement(name);
       if (element == null) {

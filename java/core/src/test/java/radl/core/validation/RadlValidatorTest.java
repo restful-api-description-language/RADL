@@ -60,7 +60,7 @@ public class RadlValidatorTest {
     }
     Arguments args = new Arguments(files);
     Validator validator = mock(Validator.class);
-    Map<String, Collection<Issue>> issues = new TreeMap<String, Collection<Issue>>();
+    Map<String, Collection<Issue>> issues = new TreeMap<>();
 
     radlValidator.validate(args, validator, issues, dir);
 
@@ -78,7 +78,7 @@ public class RadlValidatorTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void throwsExceptionOnError() {
-    Map<String, Collection<Issue>> issues = new HashMap<String, Collection<Issue>>();
+    Map<String, Collection<Issue>> issues = new HashMap<>();
     issues.put(RANDOM.string(), Arrays.asList(new Issue(Validator.class, Level.ERROR, RANDOM.integer(),
         RANDOM.integer(), RANDOM.string())));
     radlValidator.reportIssues(issues, new PrintStreamIssueReporter(System.err));
@@ -98,7 +98,7 @@ public class RadlValidatorTest {
     try (PrintStream out = new PrintStream(stream, true, encoding)) {
       List<Issue> issuesByFile = Arrays.asList(new Issue(Validator.class, Level.WARNING, line1, column1, warning),
           new Issue(Validator.class, Level.INFO, line2, column2, info));
-      Map<String, Collection<Issue>> issues = new HashMap<String, Collection<Issue>>();
+      Map<String, Collection<Issue>> issues = new HashMap<>();
       issues.put(fileName, issuesByFile);
       radlValidator.reportIssues(issues, new PrintStreamIssueReporter(out));
     }
@@ -115,7 +115,7 @@ public class RadlValidatorTest {
     String info = RANDOM.string();
     Issue issue2 = new Issue(Validator.class, Level.INFO, RANDOM.integer(), RANDOM.integer(), info);
     Issue issue1 = new Issue(Validator.class, Level.WARNING, RANDOM.integer(), RANDOM.integer(), warning);
-    Map<String, Collection<Issue>> issues = new HashMap<String, Collection<Issue>>();
+    Map<String, Collection<Issue>> issues = new HashMap<>();
     issues.put(fileName, Arrays.asList(issue1, issue2));
     IssueReporter reporter = mock(IssueReporter.class);
 

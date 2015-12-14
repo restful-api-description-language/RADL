@@ -27,7 +27,7 @@ public class Lines {
   }
 
   public Iterable<String> split(String text) {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     String remainder = text;
     String indent = getIndent(remainder);
     String prefix = "";

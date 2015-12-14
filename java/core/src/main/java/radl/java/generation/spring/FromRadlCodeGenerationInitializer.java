@@ -21,19 +21,19 @@ public class FromRadlCodeGenerationInitializer extends FromRadlCodeGenerator {
     context.put(HAS_HYPERMEDIA, radl.hasHyperMediaTypes());
     context.put(MEDIA_TYPE_CONSTANTS, new Constants("MEDIA_TYPE", "Media Types"));
     context.put(URI_CONSTANTS, new Constants("URL", "URIs"));
-    
+
     Constants linkRelationConstants = new Constants("LINK_REL", "Link relations");
     addLinkRelationConstants(radl, linkRelationConstants);
     context.put(LINK_RELATION_CONSTANTS, linkRelationConstants);
-    
+
     Constants errorConstants = new Constants("ERROR", "Error conditions");
     addErrorConstants(radl, errorConstants);
     context.put(ERROR_CONSTANTS, errorConstants);
-    
-    Map<Integer, String> httpStatuses = new HashMap<Integer, String>();
+
+    Map<Integer, String> httpStatuses = new HashMap<>();
     initHttpStatuses(httpStatuses);
     context.put(SPRING_HTTP_STATUSES, httpStatuses);
-    
+
     return Collections.emptyList();
   }
 

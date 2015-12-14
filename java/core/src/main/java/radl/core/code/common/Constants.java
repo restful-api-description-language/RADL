@@ -13,8 +13,8 @@ import radl.java.code.Java;
 public class Constants {
 
   private static final char WORD_SEPARATOR = '_';
-  
-  private final Map<String, Constant> itemsByValue = new TreeMap<String, Constant>();
+
+  private final Map<String, Constant> itemsByValue = new TreeMap<>();
   private final String prefix;
   private final String description;
 
@@ -32,15 +32,15 @@ public class Constants {
     add(result);
     return result;
   }
-  
+
   private String constantName(String name) {
     return prefix + Java.toName(name.replace('/', WORD_SEPARATOR).toUpperCase(Locale.getDefault()));
   }
-  
+
   private void add(Constant constant) {
     itemsByValue.put(constant.getValue(), constant);
   }
-  
+
   public Constant byValue(String value) {
     return itemsByValue.get(value);
   }
@@ -59,5 +59,5 @@ public class Constants {
     }
     return result;
   }
-  
+
 }

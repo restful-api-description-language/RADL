@@ -26,7 +26,7 @@ public class JGraphStateDiagram implements StateDiagram {
       mxConstants.ALIGN_LEFT, mxConstants.STYLE_FONTCOLOR);
 
   private final mxGraph graph;
-  private final Map<String, Object> cells = new HashMap<String, Object>();
+  private final Map<String, Object> cells = new HashMap<>();
   private final Object parent;
 
   public JGraphStateDiagram() {

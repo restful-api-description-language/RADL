@@ -34,7 +34,7 @@ public class CompositeValidatorTest {
     Validator v1 = mock(Validator.class);
     Validator v2 = mock(Validator.class);
     Validator composite = new CompositeValidator(v1, v2);
-    Collection<Issue> issues = new ArrayList<Issue>();
+    Collection<Issue> issues = new ArrayList<>();
     AtomicReference<byte[]> bytes1 = captureValidatedBytes(v1, issues);
     AtomicReference<byte[]> bytes2 = captureValidatedBytes(v2, issues);
     String contents = RANDOM.string();
@@ -48,7 +48,7 @@ public class CompositeValidatorTest {
   }
 
   private AtomicReference<byte[]> captureValidatedBytes(Validator validator, Collection<Issue> issues) {
-    final AtomicReference<byte[]> result = new AtomicReference<byte[]>();
+    final AtomicReference<byte[]> result = new AtomicReference<>();
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {

@@ -22,7 +22,7 @@ public class NestedXml extends XmlCode {
   }
 
   public Iterable<String> items() {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     for (Element element : multiple(elementName, Element.class)) {
       result.add(attr(element, idAttributeName));
     }

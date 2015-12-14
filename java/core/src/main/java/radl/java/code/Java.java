@@ -82,7 +82,7 @@ public final class Java {
   }
 
   private static Iterable<String> getCandidateDirs() {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     String dir = System.getProperty(JAVA_HOME);
     result.add(dir);
     if (dir.endsWith("jre")) {
@@ -138,7 +138,7 @@ public final class Java {
   public static String toIdentifier(String value) {
     return toIdentifier(value, true);
   }
-  
+
   public static String toIdentifier(String value, boolean initCap) {
     StringBuilder result = new StringBuilder(value);
     while (!Character.isJavaIdentifierStart(result.charAt(0))) {

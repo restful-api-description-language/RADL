@@ -62,7 +62,7 @@ public class Method implements Comparable<Method>, Serializable {
       return Collections.emptyList();
     }
     if (values.contains(",")) {
-      Collection<String> result = new ArrayList<String>();
+      Collection<String> result = new ArrayList<>();
       for (String value : values.split(",")) {
         result.add(StringUtil.stripQuotes(value));
       }

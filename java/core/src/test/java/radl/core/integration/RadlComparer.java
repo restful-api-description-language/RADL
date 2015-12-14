@@ -19,7 +19,7 @@ public class RadlComparer implements Application {
     Cli.run(RadlComparer.class, args);
   }
 
-  private final Collection<String> differences = new ArrayList<String>();
+  private final Collection<String> differences = new ArrayList<>();
 
   @Override
   public int run(Arguments arguments) {

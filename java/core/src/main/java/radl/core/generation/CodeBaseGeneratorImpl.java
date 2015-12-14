@@ -33,7 +33,7 @@ public class CodeBaseGeneratorImpl implements CodeBaseGenerator {
   }
 
   protected Map<String, Object> newContext() {
-    Map<String, Object> result = new HashMap<String, Object>();
+    Map<String, Object> result = new HashMap<>();
     result.put(CodeGenerator.PACKAGE_PREFIX, packagePrefix);
     result.put(CodeGenerator.FILE_HEADER, fileHeader);
     return result;

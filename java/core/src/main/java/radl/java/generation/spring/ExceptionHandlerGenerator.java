@@ -29,7 +29,7 @@ public class ExceptionHandlerGenerator extends FromRadlErrorsCodeGenerator {
 
   private Code generateExceptionHandler(RadlCode radl, Iterable<String> errors, Collection<Code> sources) {
     final JavaCode errorHandler = startErrorHandler();
-    final Collection<String> errorHandlingMethods = new ArrayList<String>();
+    final Collection<String> errorHandlingMethods = new ArrayList<>();
     for (String error : errors) {
       int statusCode = radl.errorStatus(error);
       JavaCode exceptionType = getException(error, sources);
@@ -83,7 +83,7 @@ public class ExceptionHandlerGenerator extends FromRadlErrorsCodeGenerator {
       return;
     }
     errorHandlingMethods.add(method);
-    
+
     errorHandler.add("  @ExceptionHandler({ %s.class })", handledType);
     errorHandler.add("  public ResponseEntity<%s> %s(%s e) {", ERROR_DTO_TYPE, method, handledType);
     errorHandler.add("    return error(e, %s.%s);", STATUS_TYPE, httpStatuses.get(statusCode));

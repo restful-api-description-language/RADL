@@ -22,7 +22,7 @@ public class EnforcerTest {
 
   private static final RandomData RANDOM = new RandomData();
 
-  private final Enforcer<String, String> enforcer = new Enforcer<String, String>();
+  private final Enforcer<String, String> enforcer = new Enforcer<>();
 
   @Test
   public void addsMissingDesiredObjects() {

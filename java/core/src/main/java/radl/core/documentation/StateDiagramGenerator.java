@@ -119,7 +119,7 @@ public class StateDiagramGenerator {
   }
 
   private String getUriFor(Node node, final String transition) throws Exception {
-    final AtomicReference<String> result = new AtomicReference<String>();
+    final AtomicReference<String> result = new AtomicReference<>();
     Xml.processNestedElements(node, new ElementProcessor() {
       @Override
       public void process(Element resourceElement) throws Exception {
@@ -146,7 +146,7 @@ public class StateDiagramGenerator {
   }
 
   private String getLinkRelationFor(Node node, final String transition, final String[] prefixes) throws Exception {
-    AtomicReference<String> result = new AtomicReference<String>();
+    AtomicReference<String> result = new AtomicReference<>();
     setTransitionLinkRelation(node, transition, prefixes, result);
     if (result.get() != null) {
       addTransitionMethod(node, transition, result);

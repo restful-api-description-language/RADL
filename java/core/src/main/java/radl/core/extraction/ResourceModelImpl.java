@@ -35,20 +35,17 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   private static final String PATH_SEPARATOR = "/";
   private static final String[] REMOVABLE_CLASS_SUFFIXES = { "Controller", "RestResource", "Resource" };
 
-  private final Collection<String> resources = new HashSet<String>();
-  private final Map<String, Collection<Method>> methodsByResource = new HashMap<String, Collection<Method>>();
-  private final Map<String, Collection<String>> locationsByResource = new HashMap<String, Collection<String>>();
-  private final Map<String, Collection<UriTemplateVar>> locationVarsByResource
-      = new HashMap<String, Collection<UriTemplateVar>>();
-  private final Map<String, Collection<String>> parentResourcesByChild
-      = new LinkedHashMap<String, Collection<String>>();
-  private final Map<String, Collection<String>> childResourcesByParent
-      = new LinkedHashMap<String, Collection<String>>();
-  private final Map<String, String> documentationByResource = new HashMap<String, String>();
-  private final Map<String, String> overrideNames = new HashMap<String, String>();
-  private final Collection<String> ignorePackageParts = new HashSet<String>();
-  private final Collection<String> ignoreResourceParts = new HashSet<String>();
-  private final Collection<String> resourcesToLog = new HashSet<String>();
+  private final Collection<String> resources = new HashSet<>();
+  private final Map<String, Collection<Method>> methodsByResource = new HashMap<>();
+  private final Map<String, Collection<String>> locationsByResource = new HashMap<>();
+  private final Map<String, Collection<UriTemplateVar>> locationVarsByResource = new HashMap<>();
+  private final Map<String, Collection<String>> parentResourcesByChild = new LinkedHashMap<>();
+  private final Map<String, Collection<String>> childResourcesByParent = new LinkedHashMap<>();
+  private final Map<String, String> documentationByResource = new HashMap<>();
+  private final Map<String, String> overrideNames = new HashMap<>();
+  private final Collection<String> ignorePackageParts = new HashSet<>();
+  private final Collection<String> ignoreResourceParts = new HashSet<>();
+  private final Collection<String> resourcesToLog = new HashSet<>();
   private final AtomicInteger counter = new AtomicInteger();
   private boolean shouldSimplifyResourceNames;
   private boolean completed;
@@ -108,7 +105,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
     }
     Collection<String> parents = parentResourcesByChild.get(childResource);
     if (parents == null) {
-      parents = new HashSet<String>();
+      parents = new HashSet<>();
       parentResourcesByChild.put(childResource, parents);
     }
     if (parents.add(parentResource)) {
@@ -116,7 +113,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
       logResource(childResource, "is child of " + parentResource);
       Collection<String> children = childResourcesByParent.get(parentResource);
       if (children == null) {
-        children = new ArrayList<String>();
+        children = new ArrayList<>();
         childResourcesByParent.put(parentResource, children);
       }
       children.add(childResource);
@@ -184,7 +181,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
     }
     Collection<Method> resourceMethods = methodsByResource.get(resourceName);
     if (resourceMethods == null) {
-      resourceMethods = new TreeSet<Method>();
+      resourceMethods = new TreeSet<>();
       methodsByResource.put(resourceName, resourceMethods);
     }
     Method method = new Method(methodName, documentation, consumes, produces);
@@ -211,7 +208,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
     }
     Collection<String> locations = locationsByResource.get(resourceName);
     if (locations == null) {
-      locations = new LinkedHashSet<String>();
+      locations = new LinkedHashSet<>();
     }
     if (locations.addAll(removeValidation(uris))) {
       logResource(resourceName, "is located at " + uris);
@@ -220,7 +217,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Collection<String> removeValidation(Collection<String> uris) {
-    Collection<String> result = new HashSet<String>();
+    Collection<String> result = new HashSet<>();
     for (String uri : uris) {
       result.add(removeValidation(uri));
     }
@@ -265,7 +262,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
     logResource(resourceName, "location var: " + varName);
     Collection<UriTemplateVar> vars = locationVarsByResource.get(resourceName);
     if (vars == null) {
-      vars = new ArrayList<UriTemplateVar>();
+      vars = new ArrayList<>();
       locationVarsByResource.put(resourceName, vars);
     }
     UriTemplateVar found = null;
@@ -283,7 +280,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
 
   @Override
   public Iterable<String> getLocationVars(String resourceName) {
-    Collection<String> result = new TreeSet<String>();
+    Collection<String> result = new TreeSet<>();
     Collection<UriTemplateVar> vars = locationVarsByResource.get(resourceName);
     if (vars != null) {
       for (UriTemplateVar var : vars) {
@@ -309,7 +306,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
 
   @Override
   public Iterable<String> mediaTypes() {
-    Collection<String> result = new TreeSet<String>();
+    Collection<String> result = new TreeSet<>();
     for (Collection<Method> methods : methodsByResource.values()) {
       for (Method method : methods) {
         result.addAll(method.getConsumes());
@@ -360,7 +357,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Collection<String> getChildResourcesWithMultipleParents() {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     for (Entry<String, Collection<String>> entry : parentResourcesByChild.entrySet()) {
       if (entry.getValue().size() > 1) {
         result.add(entry.getKey());
@@ -384,7 +381,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Collection<String> ancestorsOf(String resource) {
-    Collection<String> result = new HashSet<String>();
+    Collection<String> result = new HashSet<>();
     addAncestorsOf(resource, result);
     return result;
   }
@@ -443,7 +440,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
       addParentResource(grandChild, newChild);
     }
     if (methodsByResource.containsKey(oldChild)) {
-      methodsByResource.put(newChild, new TreeSet<Method>(methodsByResource.get(oldChild)));
+      methodsByResource.put(newChild, new TreeSet<>(methodsByResource.get(oldChild)));
     }
     if (locationsByResource.containsKey(oldChild)) {
       addLocations(newChild, locationsByResource.get(oldChild));
@@ -498,7 +495,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Collection<String> getResourcesWithMultipleLocations() {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     for (Entry<String, Collection<String>> entry : locationsByResource.entrySet()) {
       Collection<String> locations = entry.getValue();
       if (locations != null && locations.size() > 1) {
@@ -512,7 +509,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
     String name = baseName + NAME_SEPARATOR + lastSegmentOf(location);
     addResource(name, null);
     if (methodsByResource.containsKey(baseName)) {
-      methodsByResource.put(name, new TreeSet<Method>(methodsByResource.get(baseName)));
+      methodsByResource.put(name, new TreeSet<>(methodsByResource.get(baseName)));
     }
     addLocations(name, Arrays.asList(location));
   }
@@ -522,7 +519,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private void resolveLocations() {
-    Map<String, Collection<String>> resolvedLocations = new HashMap<String, Collection<String>>();
+    Map<String, Collection<String>> resolvedLocations = new HashMap<>();
     resolveParameterizedLocations(resolvedLocations);
     resolveChildLocations(resolvedLocations);
     locationsByResource.putAll(resolvedLocations);
@@ -563,12 +560,12 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Collection<String> ancestorOrSelfNames(String resource) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     String name = resource;
     while (name != null) {
       int index = result.indexOf(name);
       if (index >= 0) {
-        List<String> children = new ArrayList<String>(parentResourcesByChild.keySet());
+        List<String> children = new ArrayList<>(parentResourcesByChild.keySet());
         if (children.indexOf(name) < children.indexOf(getParent(name))) {
           while (result.size() > index + 1) {
             result.remove(index + 1);
@@ -605,7 +602,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Collection<String> resolveParameterizedLocations(Iterator<String> locations) {
-    Collection<String> result = new LinkedHashSet<String>();
+    Collection<String> result = new LinkedHashSet<>();
     result.add(locations.next());
     while (locations.hasNext()) {
       String current = locations.next();
@@ -676,15 +673,15 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Map<String, Collection<String>> getDuplicateChildResourcesByLocation() {
-    Map<String, Collection<String>> result = new HashMap<String, Collection<String>>();
-    Map<String, String> resourcesByLocation = new HashMap<String, String>();
+    Map<String, Collection<String>> result = new HashMap<>();
+    Map<String, String> resourcesByLocation = new HashMap<>();
     for (Entry<String, Collection<String>> entry : locationsByResource.entrySet()) {
       String location = firstItem(entry.getValue());
       String resource = entry.getKey();
       if (resourcesByLocation.containsKey(location) && parentResourcesByChild.containsKey(resource)) {
         Collection<String> duplicateChildResources = result.get(location);
         if (duplicateChildResources == null) {
-          duplicateChildResources = new HashSet<String>();
+          duplicateChildResources = new HashSet<>();
           result.put(location, duplicateChildResources);
         }
         duplicateChildResources.add(resource);
@@ -705,7 +702,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private <T> void replaceKey(Map<String, T> map, String newKey, Collection<String> oldKeys) {
-    Map<String, T> values = new HashMap<String, T>();
+    Map<String, T> values = new HashMap<>();
     for (String oldKey : oldKeys) {
       T value = map.remove(oldKey);
       if (value == null) {
@@ -757,7 +754,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
     for (Entry<String, MergedMethods> entry : getResourcesWithSameLocationAndDifferentMethods().entrySet()) {
       Collection<Method> methods = methodsByResource.get(entry.getKey());
       if (methods == null) {
-        methods = new ArrayList<Method>();
+        methods = new ArrayList<>();
       }
       MergedMethods mergedMethods = entry.getValue();
       methods.addAll(mergedMethods.getMethods());
@@ -768,8 +765,8 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Map<String, MergedMethods> getResourcesWithSameLocationAndDifferentMethods() {
-    Map<String, MergedMethods> result = new HashMap<String, MergedMethods>();
-    Collection<String> resourcesToProcess = new ArrayList<String>(resources);
+    Map<String, MergedMethods> result = new HashMap<>();
+    Collection<String> resourcesToProcess = new ArrayList<>(resources);
     for (String resource : resources) {
       addResourcesWithSameLocationAndDifferentMethods(resource, resourcesToProcess, result);
     }
@@ -798,7 +795,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
 
   private Collection<String> getResourcesWithSameLocationAndDifferentMethods(Collection<String> resourcesToProcess,
       String resource, String uri, Collection<Method> methods) {
-    Collection<String> result = new TreeSet<String>();
+    Collection<String> result = new TreeSet<>();
     result.add(resource);
     for (String otherResource : resourcesToProcess) {
       if (isResourceWithSameLocationAndDifferentMethods(resource, uri, methods, otherResource)) {
@@ -824,7 +821,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private Collection<Method> getMethods(String resource) {
-    Collection<Method> methods = new ArrayList<Method>();
+    Collection<Method> methods = new ArrayList<>();
     Collection<Method> originalMethods = methodsByResource.get(resource);
     if (originalMethods != null) {
       methods.addAll(originalMethods);
@@ -899,7 +896,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   private List<String> splitQualifiedName(String className) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     for (String rawPart : className.split("\\" + NAME_SEPARATOR)) {
       if (!ignorePackageParts.contains(rawPart)) {
         result.add(removeSuffixes(rawPart));
@@ -952,7 +949,7 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
 
   @Override
   public Collection<Method> methodsOf(String resource) {
-    return new TreeSet<Method>(methodsByResource.get(resource));
+    return new TreeSet<>(methodsByResource.get(resource));
   }
 
   @Override
@@ -964,8 +961,8 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
     if (!shouldSimplifyResourceNames) {
       return;
     }
-    Collection<String> complexNames = new TreeSet<String>();
-    Map<String, String> friendlyNames = new HashMap<String, String>();
+    Collection<String> complexNames = new TreeSet<>();
+    Map<String, String> friendlyNames = new HashMap<>();
     for (String resource : resources) {
       if (resource.contains(NAME_SEPARATOR)) {
         complexNames.add(resource);

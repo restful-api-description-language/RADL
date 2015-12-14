@@ -33,7 +33,7 @@ public class DtosGenerator extends FromRadlCodeGenerator {
 
   @Override
   protected Collection<Code> generateFromRadl(RadlCode radl, Map<String, Object> context) {
-    Collection<Code> result = new ArrayList<Code>();
+    Collection<Code> result = new ArrayList<>();
     defaultMediaType = (MediaType)context.get(FromRadlCodeGenerator.DEFAULT_MEDIA_TYPE);
     packagePrefix = (String)context.get(CodeGenerator.PACKAGE_PREFIX);
     Boolean hasHyperMediaTypes = (Boolean)context.get(FromRadlCodeGenerator.HAS_HYPERMEDIA);
@@ -114,7 +114,7 @@ public class DtosGenerator extends FromRadlCodeGenerator {
 
   private void addDtoFields(boolean hasHyperMediaTypes, PropertyGroup propertyGroup, JavaCode dto,
       Collection<Code> sources) {
-    Collection<JavaBeanProperty> properties = new ArrayList<JavaBeanProperty>();
+    Collection<JavaBeanProperty> properties = new ArrayList<>();
     for (String propertyName : propertyGroup.propertyNames()) {
       Property property = propertyGroup.property(propertyName);
       String annotation = getSemanticAnnotation(property, "  ");

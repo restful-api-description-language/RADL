@@ -32,7 +32,7 @@ public class DocumentationTest {
 
   @Parameters(name = "{0}")
   public static Iterable<String[]> tests() {
-    Collection<String[]> result = new ArrayList<String[]>();
+    Collection<String[]> result = new ArrayList<>();
     for (String dir : TESTS_DIR.list()) {
       result.add(new String[] { dir });
     }

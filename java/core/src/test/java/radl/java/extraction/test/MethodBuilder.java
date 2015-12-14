@@ -12,10 +12,10 @@ public class MethodBuilder implements Annotatable<MethodBuilder> {
 
   private final TypeBuilder parent;
   private final String name;
-  private final Collection<Annotation> annotations = new HashSet<Annotation>();
+  private final Collection<Annotation> annotations = new HashSet<>();
   private String returnType;
   private String documentation;
-  private final Collection<Parameter> parameters = new ArrayList<Parameter>();
+  private final Collection<Parameter> parameters = new ArrayList<>();
 
   public MethodBuilder(TypeBuilder parent, String name) {
     this.parent = parent;
@@ -23,7 +23,7 @@ public class MethodBuilder implements Annotatable<MethodBuilder> {
   }
 
   public AnnotationBuilder<MethodBuilder> annotatedWith() {
-    return new AnnotationBuilder<MethodBuilder>(this);
+    return new AnnotationBuilder<>(this);
   }
 
   @Override

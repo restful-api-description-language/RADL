@@ -102,7 +102,7 @@ public class XmlTest {
             .end()
     .build();
 
-    final Collection<String> animals = new ArrayList<String>();
+    final Collection<String> animals = new ArrayList<>();
     Xml.processNestedElements(document, new ElementProcessor() {
       @Override
       public void process(Element zebraElement) {
@@ -126,7 +126,7 @@ public class XmlTest {
             .end()
     .build();
 
-    final Collection<String> animals = new ArrayList<String>();
+    final Collection<String> animals = new ArrayList<>();
     Xml.processDecendantElements(document, new ElementProcessor() {
       @Override
       public void process(Element eagleElement) {

@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public class Arguments implements Iterator<String> {
 
-  private final List<String> args = new ArrayList<String>();
+  private final List<String> args = new ArrayList<>();
   private int index;
 
   /**

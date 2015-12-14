@@ -46,7 +46,7 @@ public class RadlNature implements IProjectNature {
   }
 
   private String[] ensureNature(String[] natureIds) {
-    Collection<String> result = new LinkedHashSet<String>();
+    Collection<String> result = new LinkedHashSet<>();
     for (String natureId : natureIds) {
       result.add(natureId);
     }

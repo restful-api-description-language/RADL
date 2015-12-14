@@ -18,7 +18,7 @@ import radl.common.xml.Xml;
 public class TestParser {
 
   public Iterable<Assertion> parse(File test) throws Exception {
-    final Collection<Assertion> result = new ArrayList<Assertion>();
+    final Collection<Assertion> result = new ArrayList<>();
     Document assertions = Xml.parse(test);
     Xml.processChildElements(assertions.getDocumentElement(), new ElementProcessor() {
       @Override

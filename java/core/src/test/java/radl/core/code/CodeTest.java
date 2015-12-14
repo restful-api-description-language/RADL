@@ -89,7 +89,7 @@ public class CodeTest {
 
     code.add(line1 + ' ' + line2);
 
-    Collection<String> actual = new ArrayList<String>();
+    Collection<String> actual = new ArrayList<>();
     for (String line : code) {
       actual.add(line);
     }

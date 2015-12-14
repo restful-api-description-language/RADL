@@ -24,7 +24,7 @@ public abstract class AbstractControllersGenerator extends FromRadlCodeGenerator
 
   @Override
   protected Collection<Code> generateFromRadl(RadlCode radl, Map<String, Object> context) {
-    Collection<Code> result = new ArrayList<Code>();
+    Collection<Code> result = new ArrayList<>();
     mediaTypeConstants = (Constants)context.get(FromRadlCodeGenerator.MEDIA_TYPE_CONSTANTS);
     defaultMediaType = (MediaType)context.get(FromRadlCodeGenerationInitializer.DEFAULT_MEDIA_TYPE);
     for (String resource : radl.resourceNames()) {

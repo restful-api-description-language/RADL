@@ -129,7 +129,7 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   }
 
   private Collection<File> getExtraSource(Arguments arguments) {
-    Collection<File> result = new TreeSet<File>();
+    Collection<File> result = new TreeSet<>();
     if (arguments.hasNext()) {
       for (String path : arguments.next().split(File.pathSeparator)) {
         result.add(new File(path));
@@ -149,13 +149,13 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     File baseDir = new File(properties.getProperty("base.dir"));
     File radlFile = new File(properties.getProperty("radl.file"));
     String configurationFileName = properties.getProperty("configuration.file");
-    Collection<File> extraSource = new HashSet<File>();
+    Collection<File> extraSource = new HashSet<>();
     if (properties.containsKey("extra.source")) {
       for (String fileName : properties.getProperty("extra.source", "").split("\\" + File.pathSeparator)) {
         extraSource.add(new File(fileName));
       }
     }
-    Collection<File> classpath = new HashSet<File>();
+    Collection<File> classpath = new HashSet<>();
     if (properties.containsKey("classpath")) {
       for (String fileName : properties.getProperty("classpath", "").split("\\" + File.pathSeparator)) {
         classpath.add(new File(fileName));
@@ -184,7 +184,7 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   }
 
   private Collection<File> getClasspath(Arguments arguments, File baseDir) {
-    Collection<File> result = new TreeSet<File>();
+    Collection<File> result = new TreeSet<>();
     if (arguments.hasNext()) {
       classpathFromArgument(arguments.next(), result);
     } else {
@@ -267,7 +267,7 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   }
 
   private void processAnnotationsOfFilesIn(File baseDir, JavaCompiler compiler, FromJavaExtractOptions extractOptions) {
-    Collection<File> javaFiles = new ArrayList<File>();
+    Collection<File> javaFiles = new ArrayList<>();
     javaFiles.addAll(extractOptions.getExtraSource());
     collectJavaFilesIn(baseDir, javaFiles);
     if (javaFiles.isEmpty()) {
@@ -351,7 +351,7 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   }
 
   private String asPath(Collection<File> classpath) {
-    Collection<String> paths = new HashSet<String>();
+    Collection<String> paths = new HashSet<>();
     for (File file : classpath) {
       if (file.getName().endsWith(CLASSPATH_FILE)) {
         addClassPaths(file, paths);
@@ -373,7 +373,7 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
   private void addTargetPaths(final File targetFile, final Collection<String> paths) {
     Document document = Xml.parse(targetFile);
     try {
-      final Collection<String> locations = new ArrayList<String>();
+      final Collection<String> locations = new ArrayList<>();
       Xml.processNestedElements(document.getDocumentElement(), new ElementProcessor() {
         @Override
         public void process(Element element) throws Exception {

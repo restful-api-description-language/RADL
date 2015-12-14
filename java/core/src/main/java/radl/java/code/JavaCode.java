@@ -93,7 +93,7 @@ public class JavaCode extends Code {
    */
   public Collection<String> typeAnnotations() {
     Matcher matcher = getTypeNameMatcher();
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     String annotations = matcher.group(1);
     if (annotations != null) {
       for (String annotation : annotations.split("\\n")) {
@@ -121,7 +121,7 @@ public class JavaCode extends Code {
   }
 
   private Collection<String> collectPatterns(Pattern pattern, int group, Comparator<String> comparator) {
-    Collection<String> result = new TreeSet<String>(comparator);
+    Collection<String> result = new TreeSet<>(comparator);
     if (isSingleLinePattern(pattern)) {
       collectPatternsByLine(pattern, group, result);
     } else {
@@ -171,7 +171,7 @@ public class JavaCode extends Code {
   }
 
   private Collection<String> getAnnotations(Pattern pattern, int namePart, String name) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     if (isSingleLinePattern(pattern)) {
       getAnnotationsByLine(pattern, namePart, name, result);
     } else {
@@ -350,7 +350,7 @@ public class JavaCode extends Code {
    * @return The comments at the start of the file containing this code
    */
   public Iterable<String> fileComments() {
-    Collection<String> result = new ArrayList<String>();
+    Collection<String> result = new ArrayList<>();
     int line = 0;
     if (get(line).trim().startsWith("/*")) {
       while (!get(++line).trim().endsWith("*/")) {
@@ -375,7 +375,7 @@ public class JavaCode extends Code {
    * @return The interfaces implemented by this type
    */
   public Iterable<String> implementedInterfaces() {
-    Collection<String> result = new TreeSet<String>();
+    Collection<String> result = new TreeSet<>();
     String interfaces = getTypeNameMatcher().group(8);
     if (interfaces == null) {
       return result;
@@ -415,7 +415,7 @@ public class JavaCode extends Code {
   }
 
   private Collection<String> getComments(Pattern pattern, int namePart, String name) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     if (isSingleLinePattern(pattern)) {
       getCommentsByLine(pattern, namePart, name, result);
     } else {

@@ -22,7 +22,7 @@ public class RadlMerger implements ResourceModelMerger {
   static final String HTML_NAMESPACE_URI = "http://www.w3.org/1999/xhtml";
 
   private String service;
-  private final Map<String, String> specificationByMediaType = new HashMap<String, String>();
+  private final Map<String, String> specificationByMediaType = new HashMap<>();
 
   public RadlMerger() {
     registerStandardMediaTypes();
