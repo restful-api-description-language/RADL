@@ -61,23 +61,17 @@ public class LintValidatorTest {
   private Collection<Issue> validate(File radlFile) throws IOException {
     Collection<Issue> result = new ArrayList<Issue>();
     Validator validator = new LintValidator();
-    InputStream radl = new FileInputStream(radlFile);
-    try {
+    try (InputStream radl = new FileInputStream(radlFile)) {
       validator.validate(radl, result);
-    } finally {
-      radl.close();
     }
     return result;
   }
 
   private Issue newIssue(File issueFile) throws IOException {
-    InputStream issue = new FileInputStream(issueFile);
-    try {
+    try (InputStream issue = new FileInputStream(issueFile)) {
       Element issueElement = Xml.parse(issue).getDocumentElement();
       return new Issue(LintValidator.class, getLevel(issueElement), getIntAttr(issueElement, "line"),
           getIntAttr(issueElement, "column"), issueElement.getTextContent());
-    } finally {
-      issue.close();
     }
   }
 

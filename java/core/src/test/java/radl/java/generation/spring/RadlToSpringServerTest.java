@@ -60,11 +60,8 @@ public class RadlToSpringServerTest {
             .named(lower + name)
         .end()
     .build();
-    PrintWriter writer = new PrintWriter(radlFile, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(radlFile, "UTF8")) {
       writer.print(Xml.toString(radlDocument));
-    } finally {
-      writer.close();
     }
     String packagePrefix = somePackage();
     String generatedSourceSetDir = someSourceSetDir();
@@ -140,5 +137,5 @@ public class RadlToSpringServerTest {
       throw e;
     }
   }
-  
+
 }

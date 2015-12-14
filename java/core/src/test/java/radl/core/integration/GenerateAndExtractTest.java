@@ -100,15 +100,12 @@ public class GenerateAndExtractTest {
 
   private File extractionArgumentsFile(File generatedSpringCodeDir, File generatedRadlFile) throws IOException {
     File argumentsFile = new File(outputDir, "extract.arguments");
-    PrintWriter writer = new PrintWriter(argumentsFile, "UTF-8");
-    try {
+    try (PrintWriter writer = new PrintWriter(argumentsFile, "UTF-8")) {
       writer.println("service.name = " + example);
       writer.println("base.dir = " + fileToPropertiesPath(generatedSpringCodeDir.getPath()));
       writer.println("radl.file = " + fileToPropertiesPath(generatedRadlFile.getPath()));
       writer.println("classpath = " + getClassPath());
       writer.println("java.version = " + Java.getVersion());
-    } finally {
-      writer.close();
     }
     return argumentsFile;
   }

@@ -55,7 +55,7 @@ public class ControllersGenerator extends AbstractControllersGenerator {
     boolean addUris;
     String constantName;
     String type;
-    if (transitionsToStart(radl, resource, startTransition)) {
+    if (transitionsToStart(radl, resource)) {
       constantName = BILLBOARD_URL;
       type = API_TYPE;
       addUris = false;
@@ -72,7 +72,7 @@ public class ControllersGenerator extends AbstractControllersGenerator {
     }
   }
 
-  private boolean transitionsToStart(RadlCode radl, String resource, String startTransition) {
+  private boolean transitionsToStart(RadlCode radl, String resource) {
     for (String method : radl.methodNames(resource)) {
       for (String transition : radl.methodTransitions(resource, method)) {
         if (transition.equals(startTransition)) {

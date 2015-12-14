@@ -136,13 +136,8 @@ public final class Xml {
   }
 
   public static Document parse(File file, boolean validating) {
-    try {
-      InputStream stream = new FileInputStream(file);
-      try {
-        return parse(stream, validating);
-      } finally {
-        stream.close();
-      }
+    try (InputStream stream = new FileInputStream(file)) {
+      return parse(stream, validating);
     } catch (IOException e) {
       throw new IllegalArgumentException("Failed to parse " + file.getAbsolutePath(), e);
     }
@@ -604,15 +599,10 @@ public final class Xml {
   }
 
   public static void identityTransform(Document source, File destination) throws XmlException {
-    try {
-      FileWriter writer = new FileWriter(destination, false);
-      try {
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.transform(new DOMSource(source), new StreamResult(writer));
-      } finally {
-        writer.close();
-      }
+    try (FileWriter writer = new FileWriter(destination, false)) {
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.transform(new DOMSource(source), new StreamResult(writer));
     } catch (Exception e) {
       throw new XmlException(e);
     }

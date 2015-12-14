@@ -87,13 +87,8 @@ public final class RadlValidator implements Application {
   private void validate(File radl, Validator validator, Map<String, Collection<Issue>> issues) {
     Collection<Issue> issuesByFile = new ArrayList<Issue>();
     issues.put(radl.getName(), issuesByFile);
-    try {
-      InputStream stream = new FileInputStream(radl);
-      try {
-        validator.validate(stream, issuesByFile);
-      } finally {
-        stream.close();
-      }
+    try (InputStream stream = new FileInputStream(radl)) {
+      validator.validate(stream, issuesByFile);
     } catch (IOException e) {
       issuesByFile.add(new Issue(Validator.class, Level.ERROR, 0, 0, e.toString()));
     }

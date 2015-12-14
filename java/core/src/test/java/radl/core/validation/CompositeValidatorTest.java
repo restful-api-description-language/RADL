@@ -39,11 +39,8 @@ public class CompositeValidatorTest {
     AtomicReference<byte[]> bytes2 = captureValidatedBytes(v2, issues);
     String contents = RANDOM.string();
 
-    InputStream stream = new StringStream(contents);
-    try {
+    try (InputStream stream = new StringStream(contents)) {
       composite.validate(stream, issues);
-    } finally {
-      stream.close();
     }
 
     assertArrayEquals("Bytes supplied to child 1", contents.getBytes("UTF8"), bytes1.get());
@@ -65,12 +62,9 @@ public class CompositeValidatorTest {
   private byte[] readBytesFrom(InvocationOnMock invocation) throws IOException {
     byte[] bytes;
     InputStream found = (InputStream)invocation.getArguments()[0];
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    try {
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       IO.copy(found, out);
       bytes = out.toByteArray();
-    } finally {
-      out.close();
     }
     return bytes;
   }

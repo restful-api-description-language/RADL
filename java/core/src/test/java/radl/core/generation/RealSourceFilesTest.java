@@ -77,11 +77,8 @@ public class RealSourceFilesTest {
   private File ensureRandomFile(String sourceSetDir, String packageName, String prefix) throws IOException {
     File result = randomFile(sourceSetDir, packageName, prefix);
     result.getParentFile().mkdirs();
-    PrintWriter writer = new PrintWriter(result, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(result, "UTF8")) {
       writer.println(RANDOM.string());
-    } finally {
-      writer.close();
     }
     return result;
   }

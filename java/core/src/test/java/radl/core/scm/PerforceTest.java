@@ -45,11 +45,8 @@ public class PerforceTest {
 
   private File someFile() throws IOException {
     File result = TestUtil.randomFile(getClass(), ".p4");
-    PrintWriter writer = new PrintWriter(result, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(result, "UTF8")) {
       writer.println();
-    } finally {
-      writer.close();
     }
     return result;
   }

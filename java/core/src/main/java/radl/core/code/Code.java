@@ -92,13 +92,8 @@ public class Code extends ArrayList<String> {
   }
 
   public void writeTo(File file) {
-    try {
-      PrintWriter writer = new PrintWriter(file, "UTF8");
-      try {
-        writer.println(text());
-      } finally {
-        writer.close();
-      }
+    try (PrintWriter writer = new PrintWriter(file, "UTF8")) {
+      writer.println(text());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -75,13 +75,10 @@ public class RadlFileAssemblerTest {
 
   private void assertXmlEquals(File file1, File file2) throws Exception {
     XMLUnit.setIgnoreWhitespace(true);
-    FileInputStream ins1 = new FileInputStream(file1);
-    FileInputStream ins2 = new FileInputStream(file2);
-    try {
-      XMLAssert.assertXMLEqual("XML Compare", new InputSource(ins1), new InputSource(ins2));
-    } finally {
-      ins1.close();
-      ins2.close();
+    try (FileInputStream ins1 = new FileInputStream(file1)) {
+      try (FileInputStream ins2 = new FileInputStream(file2)) {
+        XMLAssert.assertXMLEqual("XML Compare", new InputSource(ins1), new InputSource(ins2));
+      }
     }
   }
 

@@ -28,13 +28,8 @@ public class GeneratedSourceFileTest {
 
   @Before
   public void init() throws FileNotFoundException {
-    try {
-      PrintWriter writer = new PrintWriter(path, "UTF8");
-      try {
-        writer.println(RANDOM.string());
-      } finally {
-        writer.close();
-      }
+    try (PrintWriter writer = new PrintWriter(path, "UTF8")) {
+      writer.println(RANDOM.string());
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }

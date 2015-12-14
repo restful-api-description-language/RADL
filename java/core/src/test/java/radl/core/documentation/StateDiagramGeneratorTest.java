@@ -41,13 +41,8 @@ public class StateDiagramGeneratorTest {
     String prefix = "$rel";
     File configuration = new File(someName() + ".properties");
     String linkRelationsUriPrefix = "urn:radl:" + someName();
-    try {
-      PrintWriter writer = new PrintWriter(configuration, "UTF8");
-      try {
-        writer.println("prefixes = " + prefix + '=' + linkRelationsUriPrefix);
-      } finally {
-        writer.close();
-      }
+    try (PrintWriter writer = new PrintWriter(configuration, "UTF8")) {
+      writer.println("prefixes = " + prefix + '=' + linkRelationsUriPrefix);
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }

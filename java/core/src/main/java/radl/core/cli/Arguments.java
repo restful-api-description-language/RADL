@@ -86,14 +86,8 @@ public class Arguments implements Iterator<String> {
    */
   public Properties properties() {
     Properties result = new Properties();
-    InputStream stream;
-    try {
-      stream = new FileInputStream(file());
-      try {
-        result.load(stream);
-      } finally {
-        stream.close();
-      }
+    try (InputStream stream = new FileInputStream(file())) {
+      result.load(stream);
     } catch (IOException e) {
       throw new RuntimeException("Error loading properties", e);
     }

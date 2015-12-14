@@ -3,6 +3,14 @@
  */
 package radl.core.validation;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,14 +33,6 @@ import radl.core.cli.Arguments;
 import radl.core.validation.Issue.Level;
 import radl.test.RandomData;
 import radl.test.TestUtil;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 
 public class RadlValidatorTest {
@@ -70,11 +70,8 @@ public class RadlValidatorTest {
 
   private String randomFileName(char prefix) throws IOException {
     File result = new File(dir, prefix + RANDOM.string() + ".radl");
-    PrintWriter writer = new PrintWriter(result, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(result, "UTF8")) {
       writer.println();
-    } finally {
-      writer.close();
     }
     return result.getAbsolutePath();
   }
@@ -98,15 +95,12 @@ public class RadlValidatorTest {
     int column2 = RANDOM.integer();
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     String encoding = "UTF8";
-    PrintStream out = new PrintStream(stream, true, encoding);
-    try {
+    try (PrintStream out = new PrintStream(stream, true, encoding)) {
       List<Issue> issuesByFile = Arrays.asList(new Issue(Validator.class, Level.WARNING, line1, column1, warning),
           new Issue(Validator.class, Level.INFO, line2, column2, info));
       Map<String, Collection<Issue>> issues = new HashMap<String, Collection<Issue>>();
       issues.put(fileName, issuesByFile);
       radlValidator.reportIssues(issues, new PrintStreamIssueReporter(out));
-    } finally {
-      out.close();
     }
 
     assertEquals("Printed issues", String.format("File: %s; %s [%d,%d]: %s%nFile: %s; %s [%d,%d]: %s%n",

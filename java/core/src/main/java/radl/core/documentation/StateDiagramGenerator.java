@@ -35,13 +35,8 @@ public class StateDiagramGenerator {
     diagram.setTitle(service);
     Properties properties = new Properties();
     if (configuration != null && configuration.exists()) {
-      try {
-        InputStream stream = new FileInputStream(configuration);
-        try {
-          properties.load(stream);
-        } finally {
-          stream.close();
-        }
+      try (InputStream stream = new FileInputStream(configuration)) {
+        properties.load(stream);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

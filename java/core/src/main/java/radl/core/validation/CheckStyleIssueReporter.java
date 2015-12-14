@@ -67,13 +67,8 @@ public class CheckStyleIssueReporter implements IssueReporter {
     if (outputFile.getParentFile() != null) {
       outputFile.getParentFile().mkdirs();
     }
-    try {
-      PrintWriter writer = new PrintWriter(outputFile, "UTF8");
-      try {
-        writer.print(Xml.toString(output.build()));
-      } finally {
-        writer.close();
-      }
+    try (PrintWriter writer = new PrintWriter(outputFile, "UTF8")) {
+      writer.print(Xml.toString(output.build()));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

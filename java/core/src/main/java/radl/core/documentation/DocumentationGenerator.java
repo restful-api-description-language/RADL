@@ -139,16 +139,11 @@ public final class DocumentationGenerator implements Application {
   }
 
   private void generateClientDocumentation(Document radl, File destination, String cssFile) {
-    try {
-      InputStream stylesheet = getClass().getResourceAsStream(CLIENT_DOCUMENTATION_STYLESHEET);
+    try (InputStream stylesheet = getClass().getResourceAsStream(CLIENT_DOCUMENTATION_STYLESHEET)) {
       if (stylesheet == null) {
         throw new IllegalStateException("Missing stylesheet: " + CLIENT_DOCUMENTATION_STYLESHEET);
       }
-      try {
-        generateClientDocumentation(radl, stylesheet, cssFile, destination);
-      } finally {
-        stylesheet.close();
-      }
+      generateClientDocumentation(radl, stylesheet, cssFile, destination);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -175,11 +170,8 @@ public final class DocumentationGenerator implements Application {
     Transformer transformer = newTransformerFactory().newTransformer(new StreamSource(stylesheet));
     transformer.setParameter("dir", destination);
     transformer.setParameter("css-file", cssFile);
-    OutputStream output = new FileOutputStream(destination);
-    try {
+    try (OutputStream output = new FileOutputStream(destination)) {
       transformer.transform(new DOMSource(radl), new StreamResult(output));
-    } finally {
-      output.close();
     }
   }
 

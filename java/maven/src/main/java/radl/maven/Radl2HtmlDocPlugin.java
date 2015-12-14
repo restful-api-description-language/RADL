@@ -18,6 +18,7 @@ import radl.core.cli.Arguments;
 import radl.core.documentation.DocumentationGenerator;
 import radl.maven.util.RadlFileUtil;
 
+
 /**
  * Maven plugin for generating HTML documentation from the RADL file.
  */
@@ -51,6 +52,7 @@ public class Radl2HtmlDocPlugin extends AbstractMojo implements MavenConfig {
   @Parameter(property = DOCS_DIR, defaultValue = DOCS_DIR_DEFAULT)
   private File docsDir;
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     File radlFile = RadlFileUtil.findRadlFile(radlDirName, serviceName);
     DocumentationGenerator documentationGenerator = new DocumentationGenerator();
@@ -63,4 +65,5 @@ public class Radl2HtmlDocPlugin extends AbstractMojo implements MavenConfig {
         }));
     getLog().info(String.format(MSG, docsDir));
   }
+
 }

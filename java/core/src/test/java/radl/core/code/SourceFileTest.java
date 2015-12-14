@@ -62,11 +62,8 @@ public class SourceFileTest {
     expected.add(text);
     File file = new File(new File(path), RANDOM.string());
     try {
-      PrintWriter writer = new PrintWriter(file, "UTF8");
-      try {
+      try (PrintWriter writer = new PrintWriter(file, "UTF8")) {
         writer.println(text);
-      } finally {
-        writer.close();
       }
       SourceFile sourceFile = new SourceFile(file.getPath());
 
@@ -101,11 +98,8 @@ public class SourceFileTest {
     File file = new File(path);
     file.getParentFile().mkdirs();
     try {
-      PrintWriter writer = new PrintWriter(file, "UTF8");
-      try {
+      try (PrintWriter writer = new PrintWriter(file, "UTF8")) {
         writer.println(String.format("<%s/>", root));
-      } finally {
-        writer.close();
       }
       SourceFile sourceFile = new SourceFile(file.getPath());
 

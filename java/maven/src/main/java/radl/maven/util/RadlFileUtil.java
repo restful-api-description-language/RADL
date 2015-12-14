@@ -9,10 +9,12 @@ import java.io.FilenameFilter;
 
 import org.apache.maven.plugin.MojoFailureException;
 
+
 /**
  * An utility to process RADL files.
  */
 public final class RadlFileUtil {
+
   private static final String RADL_EXT = ".radl";
 
   private RadlFileUtil() {
@@ -25,9 +27,10 @@ public final class RadlFileUtil {
     }
     File radlFile = new File(dir, suggestedName + RADL_EXT);
     if (!radlFile.exists()) {
-      //iterate to find a first .radl file
+      // Iterate to find a first .radl file
       File[] files = dir.listFiles(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
+        @Override
+        public boolean accept(File ignored, String name) {
           return name.endsWith(RADL_EXT);
         }
       });
@@ -40,4 +43,5 @@ public final class RadlFileUtil {
     }
     return radlFile;
   }
+
 }

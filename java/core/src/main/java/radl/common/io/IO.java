@@ -50,18 +50,13 @@ public final class IO {
   }
 
   public static Iterable<String> linesOf(InputStream stream) {
-    Collection<String> result = new ArrayList<String>();
-    try {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF8"));
-      try {
-        String line = reader.readLine();
-        while (line != null) {
-          result.add(line);
-          line = reader.readLine();
-        }
-      } finally {
-        reader.close();
-    }
+    Collection<String> result = new ArrayList<>();
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF8"))) {
+      String line = reader.readLine();
+      while (line != null) {
+        result.add(line);
+        line = reader.readLine();
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

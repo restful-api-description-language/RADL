@@ -3,6 +3,9 @@
  */
 package radl.core.documentation;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -20,9 +23,6 @@ import radl.core.cli.Application;
 import radl.core.cli.Arguments;
 import radl.test.RandomData;
 import radl.test.TestUtil;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 
 public class DocumentationGeneratorTest {
@@ -98,17 +98,13 @@ public class DocumentationGeneratorTest {
   private String createRadl(URL cssFile) throws FileNotFoundException {
     String result = RANDOM.string(8);
     File radl = new File(dir, result + ".radl");
-    try {
-      PrintWriter writer = new PrintWriter(radl, "UTF8");
-      try {
-        writer.println(String.format("<service xmlns='%s' name='%s'><states/></service>", Radl.NAMESPACE_URI, result));
-      } finally {
-        writer.close();
-      }
+    try (PrintWriter writer = new PrintWriter(radl, "UTF8")) {
+      writer.println(String.format("<service xmlns='%s' name='%s'><states/></service>", Radl.NAMESPACE_URI, result));
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
     generateClientDocumentation(cssFile == null ? null : cssFile.toString(), radl.getPath());
     return result;
   }
+
 }

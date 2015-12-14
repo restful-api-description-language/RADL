@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 
 import radl.core.Log;
 
+
 public final class ResourceModelSerializer {
 
   private ResourceModelSerializer() {
@@ -19,12 +20,11 @@ public final class ResourceModelSerializer {
 
   public static void serializeModelToFile(ResourceModel resourceModel, File file) {
     Log.info("Saving resource model to file: " + file);
-    try {
-      if (file != null) {
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-        oos.writeObject(resourceModel);
-        oos.close();
-      }
+    if (file == null) {
+      return;
+    }
+    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+      oos.writeObject(resourceModel);
     } catch (Exception e) {
       throw new RuntimeException("Failed to write resource model to file.", e);
     }
@@ -32,15 +32,11 @@ public final class ResourceModelSerializer {
 
   public static ResourceModel deserializeModelFromFile(File file) {
     Log.info("Loading resource model from file: " + file);
-    try {
-      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-      try {
-        return (ResourceModel)ois.readObject();
-      } finally {
-        ois.close();
-      }
+    try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+      return (ResourceModel)ois.readObject();
     } catch (Exception e) {
       throw new RuntimeException("Failed to load resource model from file", e);
     }
   }
+
 }

@@ -24,25 +24,16 @@ public class ByteArrayInputOutputStreamTest {
   public void readsWhatWasWritten() throws IOException {
     String line1 = RANDOM.string();
     String line2 = RANDOM.string();
-    ByteArrayInputOutputStream stream = new ByteArrayInputOutputStream();
-    try {
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, "UTF8"));
-      try {
+    try (ByteArrayInputOutputStream stream = new ByteArrayInputOutputStream()) {
+      try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, "UTF8"))) {
         writer.println(line1);
         writer.println(line2);
-      } finally {
-        writer.close();
       }
-      BufferedReader reader = new BufferedReader(new InputStreamReader(stream.getInputStream(), "UTF8"));
-      try {
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream.getInputStream(), "UTF8"))) {
         Assert.assertEquals("1st line", line1, reader.readLine());
         Assert.assertEquals("2nd line", line2, reader.readLine());
         Assert.assertNull("Extra line", reader.readLine());
-      } finally {
-        reader.close();
       }
-    } finally {
-      stream.close();
     }
   }
 

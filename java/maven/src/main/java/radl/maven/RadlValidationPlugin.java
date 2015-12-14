@@ -17,6 +17,7 @@ import radl.core.cli.Arguments;
 import radl.core.validation.RadlValidator;
 import radl.maven.util.RadlFileUtil;
 
+
 /**
  * RADL Maven plugin for RADL validation.
  */
@@ -54,6 +55,7 @@ public class RadlValidationPlugin extends AbstractMojo implements MavenConfig {
   @Parameter(property = FAIL_ON_VALIDATION_ERRORS, defaultValue = FAIL_ON_VALIDATION_ERRORS_DEFAULT)
   private boolean failOnValidationErrors;
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     File radlFile = RadlFileUtil.findRadlFile(radlDirName, serviceName);
     RadlValidator radlValidator = new RadlValidator();
@@ -76,4 +78,5 @@ public class RadlValidationPlugin extends AbstractMojo implements MavenConfig {
       getLog().info(VALIDATION_SUCCEED);
     }
   }
+
 }

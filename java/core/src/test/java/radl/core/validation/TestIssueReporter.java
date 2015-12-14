@@ -11,13 +11,8 @@ public class TestIssueReporter implements IssueReporter {
 
   @Override
   public void setReportFileName(String reportFileName) {
-    try {
-      PrintWriter writer = new PrintWriter(FILE_NAME, "UTF-8");
-      try {
-        writer.println(FILE_NAME);
-      } finally {
-        writer.close();
-      }
+    try (PrintWriter writer = new PrintWriter(FILE_NAME, "UTF-8")) {
+      writer.println(FILE_NAME);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

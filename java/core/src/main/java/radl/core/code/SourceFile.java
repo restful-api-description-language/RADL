@@ -44,13 +44,8 @@ public class SourceFile {
   public Code code() {
     if (code == null) {
       code = newCode();
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF8"));
-        try {
-          addText(reader);
-        } finally {
-          reader.close();
-        }
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF8"))) {
+        addText(reader);
       } catch (IOException e) { // NOPMD EmptyCatchBlock
         // Ignore
       }

@@ -85,13 +85,8 @@ public class RealSourceFiles implements Reality<String, SourceFile> {
   @Override
   public void add(String path, SourceFile sourceFile) {
     File file = getUpdatableFile(path);
-    try {
-      PrintWriter writer = new PrintWriter(file, "UTF8");
-      try {
-        writer.print(sourceFile.code().text());
-      } finally {
-        writer.close();
-      }
+    try (PrintWriter writer = new PrintWriter(file, "UTF8")) {
+      writer.print(sourceFile.code().text());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

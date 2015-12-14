@@ -49,11 +49,8 @@ public class FromJavaRadlExtractorTest {
     Properties properties = randomProperties();
     File radlFile = TestUtil.randomFile(FromJavaRadlExtractorTest.class, ".radl");
     File configurationFile = TestUtil.randomFile(FromJavaRadlExtractorTest.class, ".properties");
-    PrintWriter writer = new PrintWriter(configurationFile, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(configurationFile, "UTF8")) {
       properties.store(writer, "");
-    } finally {
-      writer.close();
     }
 
     radlExtractor.run(new Arguments(new String[] { "", dir.getPath(), radlFile.getAbsolutePath(),
@@ -76,20 +73,14 @@ public class FromJavaRadlExtractorTest {
     Properties properties = randomProperties();
     File radlFile = TestUtil.randomFile(FromJavaRadlExtractorTest.class, ".radl");
     File configurationFile = TestUtil.randomFile(FromJavaRadlExtractorTest.class, ".properties");
-    PrintWriter writer = new PrintWriter(configurationFile, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(configurationFile, "UTF8")) {
       properties.store(writer, "");
-    } finally {
-      writer.close();
     }
     File argumentsFile = TestUtil.randomFile(FromJavaRadlExtractorTest.class, ".arguments");
-    writer = new PrintWriter(argumentsFile, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(argumentsFile, "UTF8")) {
       writer.println("base.dir = " + encodePathForPropertiesFile(dir));
       writer.println("radl.file = " + encodePathForPropertiesFile(radlFile));
       writer.println("configuration.file = " + encodePathForPropertiesFile(configurationFile));
-    } finally {
-      writer.close();
     }
 
     try {
@@ -110,11 +101,8 @@ public class FromJavaRadlExtractorTest {
     String oldServiceName = aName();
     String newServiceName = aName();
     File radlFile = TestUtil.randomFile(FromJavaRadlExtractorTest.class, ".radl");
-    PrintWriter writer = new PrintWriter(radlFile, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(radlFile, "UTF8")) {
       writer.println(Xml.toString(simpleRadlDocument(oldServiceName)));
-    } finally {
-      writer.close();
     }
     when(merger.toRadl(resourceModel)).thenReturn(simpleRadlDocument(newServiceName));
 

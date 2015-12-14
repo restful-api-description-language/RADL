@@ -49,11 +49,8 @@ public class JavaTest {
     if (!dir.mkdirs()) {
       throw new IllegalStateException("Couldn't create directory: " + dir.getPath());
     }
-    PrintWriter writer = new PrintWriter(new File(dir, "tools.jar"), "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(new File(dir, "tools.jar"), "UTF8")) {
       writer.println();
-    } finally {
-      writer.close();
     }
     return result.getAbsolutePath();
   }
@@ -68,5 +65,5 @@ public class JavaTest {
   private void assertJavaString(String input, String expected) {
     assertEquals("toString(" + input + ")", expected, Java.toString(input));
   }
-  
+
 }

@@ -22,7 +22,7 @@ public class CodeBaseGeneratorImpl implements CodeBaseGenerator {
     this.fileHeader = fileHeader;
     this.generators = generators;
   }
-  
+
   @Override
   public void generate(List<Module> source, List<Module> destination) {
     Map<String, Object> context = newContext();
@@ -39,6 +39,12 @@ public class CodeBaseGeneratorImpl implements CodeBaseGenerator {
     return result;
   }
 
+  /**
+   * Determine what module should contain generated code.
+   * @param modules The available output modules
+   * @param generator The generator
+   * @return The module to store the generated code into
+   */
   protected Module moduleFor(List<Module> modules, CodeGenerator generator) {
     return modules.get(0);
   }

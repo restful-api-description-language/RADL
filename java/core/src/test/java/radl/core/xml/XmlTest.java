@@ -179,45 +179,33 @@ public class XmlTest {
     String xml = "<bear xmlns=\"http://ape.com\">\n  <cheetah/>\n  "
         + "<elephant xmlns=\"http://dingo.com\" xmlns:ns3=\"http://hyena.com\" ns3:fox=\"giraffe\" "
         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"iguana\"/>\n</bear>\n";
-    ByteArrayInputOutputStream stream = new ByteArrayInputOutputStream();
-    try {
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, "UTF8"));
-      try {
+    try (ByteArrayInputOutputStream stream = new ByteArrayInputOutputStream()) {
+      try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, "UTF8"))) {
         writer.print(xml);
         writer.flush();
 
         Document document = Xml.parse(stream.getInputStream());
 
         assertEquals("toString()", Xml.XML_PROLOG + xml, Xml.toString(document));
-      } finally {
-        writer.close();
       }
-    } finally {
-      stream.close();
     }
   }
 
   @Test
   public void parsingAndSerializationProperlyHandleTheXmlNamespace() throws IOException {
     String xml = "<elephant xml:lang=\"en\">fox</elephant>\n";
-    InputStream stream = new StringStream(xml);
-    try {
+    try (InputStream stream = new StringStream(xml)) {
       Document document = Xml.parse(stream);
       assertEquals("XML", xml, Xml.toString(document.getDocumentElement()));
-    } finally {
-      stream.close();
     }
   }
 
   @Test
   public void serializationMaintainsNamespacePrefix() throws IOException {
     String xml = "<zoo:giraffe xmlns:zoo=\"http://zoo.fakedomain.com\">\n  <zoo:hyena/>\n</zoo:giraffe>\n";
-    InputStream stream = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-    try {
+    try (InputStream stream = new ByteArrayInputStream(xml.getBytes("UTF-8"))) {
       Document document = Xml.parse(stream);
       assertEquals("XML", xml, Xml.toString(document.getDocumentElement()));
-    } finally {
-      stream.close();
     }
   }
 

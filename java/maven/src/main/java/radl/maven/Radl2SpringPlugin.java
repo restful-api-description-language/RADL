@@ -17,6 +17,7 @@ import radl.core.cli.Arguments;
 import radl.java.generation.spring.RadlToSpringServer;
 import radl.maven.util.RadlFileUtil;
 
+
 /**
  * Maven plugin for generating Spring server code from the RADL file.
  */
@@ -70,6 +71,7 @@ public class Radl2SpringPlugin extends AbstractMojo implements MavenConfig {
   @Parameter(property = SCM, defaultValue = SCM_DEFAULT)
   private String scm;
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     File radlFile = RadlFileUtil.findRadlFile(radlDirName, serviceName);
     RadlToSpringServer springCodeGenerator = new RadlToSpringServer();
@@ -83,4 +85,5 @@ public class Radl2SpringPlugin extends AbstractMojo implements MavenConfig {
             scm }));
     getLog().info(String.format(MSG, baseDir, relativeGeneratedManualSourceDir, baseDir, relativeGeneratedSourceDir));
   }
+
 }

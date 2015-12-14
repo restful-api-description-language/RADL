@@ -140,13 +140,8 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
 
   private RunOptions getOptionsByFile(String optionsFile) {
     Properties properties = new Properties();
-    try {
-      InputStream optionsStream = new FileInputStream(new File(optionsFile));
-      try {
-        properties.load(optionsStream);
-      } finally {
-        optionsStream.close();
-      }
+    try (InputStream optionsStream = new FileInputStream(new File(optionsFile))) {
+      properties.load(optionsStream);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -220,13 +215,8 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
 
   private Properties loadConfigurationFrom(File configurationFile) {
     Properties result = new Properties();
-    try {
-      InputStream stream = new FileInputStream(configurationFile);
-      try {
-        result.load(stream);
-      } finally {
-        stream.close();
-      }
+    try (InputStream stream = new FileInputStream(configurationFile)) {
+      result.load(stream);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -237,11 +227,8 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     String xml = merge(radlFile, radl);
     try {
       scm.prepareForUpdate(radlFile);
-      PrintWriter writer = new PrintWriter(radlFile, "UTF8");
-      try {
+      try (PrintWriter writer = new PrintWriter(radlFile, "UTF8")) {
         writer.print(xml);
-      } finally {
-        writer.close();
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -300,14 +287,11 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     }
     try {
       try {
-        PrintWriter writer = new PrintWriter(compilerOptions, "UTF8");
-        try {
+        try (PrintWriter writer = new PrintWriter(compilerOptions, "UTF8")) {
           writer.println(processorOptions);
           writeOptions(extractOptions, writer);
           writeSources(javaFiles, writer);
           writeClasses(javaFiles, writer);
-        } finally {
-          writer.close();
         }
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -450,25 +434,17 @@ public class FromJavaRadlExtractor implements RadlExtractor, Application {
     if (!name.endsWith(".jar")) {
       return false;
     }
-    try {
-      ZipFile jar = new ZipFile(new File(dir, name));
-      try {
-        ZipEntry manifest = jar.getEntry("META-INF/MANIFEST.MF");
-        if (manifest == null) {
-          return false;
+    try (ZipFile jar = new ZipFile(new File(dir, name))) {
+      ZipEntry manifest = jar.getEntry("META-INF/MANIFEST.MF");
+      if (manifest == null) {
+        return false;
+      }
+      Properties properties = new Properties();
+      try (InputStream stream = jar.getInputStream(manifest)) {
+        properties.load(stream);
+        if (bundleName.equals(properties.getProperty("Bundle-SymbolicName"))) {
+          return true;
         }
-        Properties properties = new Properties();
-        InputStream stream = jar.getInputStream(manifest);
-        try {
-          properties.load(stream);
-          if (bundleName.equals(properties.getProperty("Bundle-SymbolicName"))) {
-            return true;
-          }
-        } finally {
-          stream.close();
-        }
-      } finally {
-        jar.close();
       }
     } catch (IOException e) {
       throw new RuntimeException(e);

@@ -91,6 +91,7 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
 
 
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     FromJavaRadlExtractor radlFromJavaExtractor = new FromJavaRadlExtractor();
     File tempArgumentsFile = null;
@@ -118,11 +119,8 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
 
   private File writePropertiesToFile(Properties properties) throws IOException {
     File tempArgumentsFile = createNewArgumentFile();
-    PrintWriter writer = new PrintWriter(tempArgumentsFile, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(tempArgumentsFile, "UTF8")) {
       properties.store(writer, "");
-    } finally {
-      writer.close();
     }
     getLog().info("RADL generation argument file: " + tempArgumentsFile);
     return tempArgumentsFile;
@@ -149,9 +147,9 @@ public class RadlFromCodePlugin extends AbstractMojo implements MavenConfig {
     Properties properties = new Properties();
     // load from origin
     if (argumentFile != null && argumentFile.exists()) {
-      FileInputStream source = new FileInputStream(argumentFile);
-      properties.load(source);
-      source.close();
+      try (FileInputStream source = new FileInputStream(argumentFile)) {
+        properties.load(source);
+      }
     }
     return properties;
   }

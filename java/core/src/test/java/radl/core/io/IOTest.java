@@ -58,17 +58,11 @@ public class IOTest {
   public void copiesStreams() throws IOException {
     final String content = RANDOM.string();
     String charSet = "UTF8";
-    ByteArrayOutputStream destination = new ByteArrayOutputStream();
-    try {
-      InputStream source = new ByteArrayInputStream(content.getBytes(charSet));
-      try {
+    try (ByteArrayOutputStream destination = new ByteArrayOutputStream()) {
+      try (InputStream source = new ByteArrayInputStream(content.getBytes(charSet))) {
         IO.copy(source, destination);
         assertEquals("Content", content, new String(destination.toByteArray(), charSet));
-      } finally {
-        source.close();
       }
-    } finally {
-      destination.close();
     }
   }
 
@@ -90,20 +84,14 @@ public class IOTest {
     String line1 = RANDOM.string();
     String line2 = RANDOM.string();
     File file = new File(dir, RANDOM.string(8));
-    PrintWriter writer = new PrintWriter(file, "UTF8");
-    try {
+    try (PrintWriter writer = new PrintWriter(file, "UTF8")) {
       writer.println(line1);
       writer.println(line2);
-    } finally {
-      writer.close();
     }
 
-    InputStream stream = new FileInputStream(file);
-    try {
+    try (InputStream stream = new FileInputStream(file)) {
       Iterable<String> lines = IO.linesOf(stream);
       assertEquals("Lines", Arrays.asList(line1, line2), lines);
-    } finally {
-      stream.close();
     }
   }
 
