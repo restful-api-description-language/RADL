@@ -701,17 +701,17 @@ public class ResourceModelImpl implements ResourceModel, Serializable {
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private <T> void replaceKey(Map<String, T> map, String newKey, Collection<String> oldKeys) {
-    Map<String, T> values = new HashMap<>();
+  private <T> void replaceKey(Map<String, Collection<T>> map, String newKey, Collection<String> oldKeys) {
+    Map<String, Collection<T>> values = new HashMap<>();
     for (String oldKey : oldKeys) {
-      T value = map.remove(oldKey);
+      Collection<T> value = map.remove(oldKey);
       if (value == null) {
         continue;
       }
-      T previous = values.put(newKey, value);
+      Collection<T> previous = values.put(newKey, value);
       if (previous != null && !value.equals(previous)) {
         if (previous instanceof Collection && value instanceof Collection) {
-          ((Collection)value).addAll((Collection)previous);
+          ((Collection)value).addAll(previous);
         } else {
           // This is not supposed to happen, but it does on one project... TBC
           map.put(oldKey, value);

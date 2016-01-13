@@ -6,6 +6,7 @@ package radl.core.code;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import radl.core.code.radl.RadlCode;
@@ -44,8 +45,10 @@ public class SourceFile {
   public Code code() {
     if (code == null) {
       code = newCode();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF8"))) {
-        addText(reader);
+      try (InputStream stream = new FileInputStream(path)) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF8"))) {
+          addText(reader);
+        }
       } catch (IOException e) { // NOPMD EmptyCatchBlock
         // Ignore
       }

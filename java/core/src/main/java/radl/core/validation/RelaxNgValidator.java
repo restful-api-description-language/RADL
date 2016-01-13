@@ -3,6 +3,7 @@
  */
 package radl.core.validation;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Collection;
@@ -20,9 +21,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import radl.core.validation.Issue.Level;
-
 import com.thaiopensource.relaxng.jaxp.CompactSyntaxSchemaFactory;
+
+import radl.core.validation.Issue.Level;
 
 
 /**
@@ -62,9 +63,11 @@ public class RelaxNgValidator implements Validator {
 
   private javax.xml.validation.Validator newValidator() {
     try {
-      Schema schema = newRelaxNgSchema(new InputSource(getSchema(RADL_SCHEMA)));
-      return schema.newValidator();
-    } catch (SAXException e) {
+      try (InputStream schemaStream = getSchema(RADL_SCHEMA)) {
+        Schema schema = newRelaxNgSchema(new InputSource(schemaStream));
+        return schema.newValidator();
+      }
+    } catch (SAXException | IOException e) {
       throw new RuntimeException(e);
     }
   }

@@ -22,6 +22,7 @@ class FortifyInitPlugin implements Plugin<Gradle> {
         project.apply plugin: 'java'
         project.apply plugin: com.emc.gradle.fortify.FortifyPlugin
         
+        project.convention.plugins.fortity.filter = project.file('fortify.filter')
         project.subprojects.each { 
           it.convention.plugins.fortify.scan = it.path.startsWith(':java:')
         }

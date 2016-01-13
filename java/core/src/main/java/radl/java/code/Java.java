@@ -48,7 +48,7 @@ public final class Java {
 
   private static JavaCompiler lookForCompiler() {
     JavaCompiler result;
-    String saveJavaHome = System.getProperty(JAVA_HOME);
+    String saveJavaHome = System.getProperty(JAVA_HOME, "");
     try {
       ensureCorrectJavaHome();
       result = ToolProvider.getSystemJavaCompiler();
@@ -83,7 +83,7 @@ public final class Java {
 
   private static Iterable<String> getCandidateDirs() {
     Collection<String> result = new ArrayList<>();
-    String dir = System.getProperty(JAVA_HOME);
+    String dir = System.getProperty(JAVA_HOME, "");
     result.add(dir);
     if (dir.endsWith("jre")) {
       result.add(dir.substring(0, dir.length() - 3));

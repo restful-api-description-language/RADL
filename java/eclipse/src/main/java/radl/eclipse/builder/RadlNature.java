@@ -28,7 +28,7 @@ public class RadlNature implements IProjectNature {
     ICommand[] commands = desc.getBuildSpec();
     boolean found = false;
     for (ICommand command : commands) {
-      if (command.getBuilderName().equals(RadlBuilder.BUILDER_ID)) {
+      if (RadlBuilder.BUILDER_ID.equals(command.getBuilderName())) {
         found = true;
         break;
       }
@@ -59,7 +59,7 @@ public class RadlNature implements IProjectNature {
     IProjectDescription description = getProject().getDescription();
     ICommand[] commands = description.getBuildSpec();
     for (int i = 0; i < commands.length; ++i) {
-      if (commands[i].getBuilderName().equals(RadlBuilder.BUILDER_ID)) {
+      if (RadlBuilder.BUILDER_ID.equals(commands[i].getBuilderName())) {
         ICommand[] newCommands = new ICommand[commands.length - 1];
         System.arraycopy(commands, 0, newCommands, 0, i);
         System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);

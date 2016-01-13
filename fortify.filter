@@ -1,0 +1,26 @@
+Dead Code
+Denial of Service
+J2EE Bad Practices
+Path Manipulation
+Poor Error Handling
+Poor Style
+Redundant Null Check
+Setting Manipulation
+System Information Leak: Internal
+Unchecked Return Value
+
+
+# Dynamic Code Evaluation: Unsafe Deserialization at core/src/main/java/radl/core/extraction/ResourceModelSerializer.java:36
+2AC4D2D5E4AF5DA2CA9626EE1C28FF87
+
+# Code Correctness: Class Does Not Implement equals at core/src/main/java/radl/core/enforce/Enforcer.java:62
+7386485C6D0221D050F612C680A27C9D
+
+# Command Injection at core/src/main/java/radl/core/scm/OperatingSystemImpl.java:12
+4C1E50C28290C3AC7FABE1EE6B0A2B10
+
+# Missing XML Validation at core/src/main/java/radl/common/xml/Xml.java:204
+EAD4B05E08B003FD6B8AF80F676C7607
+
+# System Information Leak at core/src/main/java/radl/java/code/Java.java:59
+41780D7942540F52B6CA5E1382227BF9

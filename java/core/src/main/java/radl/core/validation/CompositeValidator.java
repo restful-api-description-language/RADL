@@ -25,15 +25,23 @@ public class CompositeValidator implements Validator {
 
   @Override
   public void validate(InputStream contents, Collection<Issue> issues) {
-   ByteArrayInputOutputStream stream = new ByteArrayInputOutputStream();
+   ByteArrayInputOutputStream reusableStream = new ByteArrayInputOutputStream();
     try {
-      IO.copy(contents, stream);
+      IO.copy(contents, reusableStream);
     } catch (IOException e) {
-      issues.add(new Issue(getClass(), Level.ERROR, 0, 0, e.toString()));
+      addExceptionIssue(e, issues);
     }
     for (Validator validator : validators) {
-      validator.validate(stream.getInputStream(), issues);
+      try (InputStream stream = reusableStream.getInputStream()) {
+        validator.validate(stream, issues);
+      } catch (IOException e) {
+        addExceptionIssue(e, issues);
+      }
     }
+  }
+
+  private boolean addExceptionIssue(IOException exception, Collection<Issue> issues) {
+    return issues.add(new Issue(getClass(), Level.ERROR, 0, 0, exception.toString()));
   }
 
   @Override

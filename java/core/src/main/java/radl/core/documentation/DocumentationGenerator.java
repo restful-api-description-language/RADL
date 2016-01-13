@@ -153,12 +153,13 @@ public final class DocumentationGenerator implements Application {
     if (StringUtils.isNotBlank(cssSource)) {
       Log.info("Provided CSS URL is: " + cssSource);
     }
-    try {
-      InputStream inputStream = StringUtils.isEmpty(cssSource) ?
+    try (InputStream input = StringUtils.isEmpty(cssSource) ?
           getClass().getResourceAsStream(CLIENT_DOCUMENTATION_DEFAULT_CSS) :
-          new URL(cssSource).openStream();
+          new URL(cssSource).openStream()) {
       File localCss = new File(docDir, "radl-use.css");
-      IO.copy(inputStream, new FileOutputStream(localCss));
+      try (OutputStream output = new FileOutputStream(localCss)) {
+        IO.copy(input, output);
+      }
       return localCss;
     } catch (Exception e) {
       throw new RuntimeException(e);

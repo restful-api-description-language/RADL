@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -197,7 +198,7 @@ public final class Xml {
   public static DocumentBuilderFactory newSecureDocumentBuilderFactory(boolean validating) {
     try {
       DocumentBuilderFactory result = DocumentBuilderFactory.newInstance();
-      result.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+      result.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       result.setFeature("http://xml.org/sax/features/external-general-entities", false);
       result.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
       result.setNamespaceAware(true);
@@ -516,7 +517,7 @@ public final class Xml {
   public static TransformerFactory newSecureTransformerFactory() {
     try {
       TransformerFactory result = TransformerFactory.newInstance();
-      result.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+      result.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       return result;
     } catch (TransformerConfigurationException e) {
       throw new IllegalStateException(e);
@@ -546,10 +547,40 @@ public final class Xml {
     return result;
   }
 
-
   private static boolean isNamespaceAttribute(Node attribute) {
     String name = attribute.getNodeName();
     return NAMESPACE_ATTRIBUTE_PREFIX.equals(name) || name.startsWith(NAMESPACE_ATTRIBUTE_PREFIX + ':');
+  }
+
+  public static Document parseWithIncludes(File xml) throws XmlException {
+    try {
+      DocumentBuilderFactory factory = newSecureDocumentBuilderFactory(true);
+      factory.setXIncludeAware(true);
+      factory.setFeature(RadlFileAssembler.XINCLUDE_FIXUP_BASE_URI, false);
+      factory.setFeature(RadlFileAssembler.XINCLUDE_FIXUP_LANGUAGE, false);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      builder.setErrorHandler(new DefaultErrorHandler());
+      if (!builder.isXIncludeAware()) {
+        throw new RuntimeException("The document builder does not support XInclude: " + builder);
+      }
+      return builder.parse(xml);
+    } catch (Exception e) {
+      throw new XmlException(e);
+    }
+  }
+
+  public static void identityTransform(Document source, File destination) throws XmlException {
+    try (FileWriter writer = new FileWriter(destination, false)) {
+      Transformer transformer = getTransformer();
+      try {
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.transform(new DOMSource(source), new StreamResult(writer));
+      } finally {
+        transformer.reset();
+      }
+    } catch (Exception e) {
+      throw new XmlException(e);
+    }
   }
 
 
@@ -578,33 +609,6 @@ public final class Xml {
         return false;
       }
       return message.contains("no grammar found") || message.contains("must match DOCTYPE root \"null\"");
-    }
-  }
-
-  public static Document parseWithIncludes(File xml) throws XmlException {
-    try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      factory.setXIncludeAware(true);
-      factory.setFeature(RadlFileAssembler.XINCLUDE_FIXUP_BASE_URI, false);
-      factory.setFeature(RadlFileAssembler.XINCLUDE_FIXUP_LANGUAGE, false);
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      if (!builder.isXIncludeAware()) {
-        throw new RuntimeException("The document builder does not support XInclude: " + builder);
-      }
-      return builder.parse(xml);
-    } catch (Exception e) {
-      throw new XmlException(e);
-    }
-  }
-
-  public static void identityTransform(Document source, File destination) throws XmlException {
-    try (FileWriter writer = new FileWriter(destination, false)) {
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-      transformer.transform(new DOMSource(source), new StreamResult(writer));
-    } catch (Exception e) {
-      throw new XmlException(e);
     }
   }
 
