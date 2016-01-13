@@ -1,17 +1,32 @@
-buildscript {
+/*
+ * Scan the source with Fortify SCA. Only works from within EMC. 
+ * Use this as a Gradle init script, using e.g. './gradlew -I fortify.gradle sca'
+ */
+
+initscript {
   repositories {
-    maven { url mavenRepo }
+    maven { url 'http://maven.xhive.archipel/artifactory/remote-repos' }
   }
   dependencies {
-    classpath "com.emc.gradle:fortify:$gradlePluginsVersion"
+    classpath 'com.emc.gradle:fortify:1.448'
   }
 }
 
-apply plugin: 'java'
-apply from: file('build.gradle')
+apply plugin: FortifyInitPlugin
 
-apply plugin: 'fortify'
+class FortifyInitPlugin implements Plugin<Gradle> {
 
-convention.plugins.fortify.rules = 'conf/fortify'
-convention.plugins.fortify.filter = 'fortify.filter'
-convention.plugins.fortify.maxMemory = '3G'
+  void apply(Gradle gradle) {
+    gradle.allprojects { project -> 
+      if (project.path == ':') { // Root project
+        project.apply plugin: 'java'
+        project.apply plugin: com.emc.gradle.fortify.FortifyPlugin
+        
+        project.subprojects.each { 
+          it.convention.plugins.fortify.scan = it.path.startsWith(':java:')
+        }
+      } 
+    }
+  }
+  
+}

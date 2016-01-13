@@ -4,10 +4,8 @@ task wrapper(type: Wrapper) {
   jarFile = 'wrapper/wrapper.jar'
 }
 
-ext.javaProjects = subprojects.findAll { it.path.startsWith(':java:') }
-javaProjects.each {
+subprojects.findAll { it.path.startsWith(':java:') }.each {
   it.apply from: file('java.gradle')
 }
-
 
 defaultTasks 'check'
