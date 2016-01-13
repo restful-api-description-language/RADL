@@ -1,0 +1,17 @@
+buildscript {
+  repositories {
+    maven { url mavenRepo }
+  }
+  dependencies {
+    classpath "com.emc.gradle:fortify:$gradlePluginsVersion"
+  }
+}
+
+apply plugin: 'java'
+apply from: file('build.gradle')
+
+apply plugin: 'fortify'
+
+convention.plugins.fortify.rules = 'conf/fortify'
+convention.plugins.fortify.filter = 'fortify.filter'
+convention.plugins.fortify.maxMemory = '3G'
