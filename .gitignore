@@ -5,3 +5,15 @@ classes/
 .gradle/
 .classpath
 .project
+
+*.iws
+
+*.iml
+
+.idea/**/*.*
+
+**/target/**/*.*
+
+*.ipr
+
+java/maven/pom.xml

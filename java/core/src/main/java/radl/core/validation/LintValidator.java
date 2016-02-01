@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 
 import radl.core.code.radl.RadlCode;
 import radl.core.validation.Issue.Level;
@@ -128,7 +127,7 @@ public class LintValidator implements Validator {
   }
 
   private void validateLinkRelations() {
-    Set<String> linkRelations = new TreeSet<>();
+    Set<String> linkRelations = new HashSet<>();
     for (String linkRelation : radl.linkRelationNames()) {
       if (linkRelations.contains(linkRelation)) {
         error("Duplicate link-relation: '%s'", linkRelation);
@@ -157,7 +156,7 @@ public class LintValidator implements Validator {
   }
 
   private void validateMediaTypes() {
-    Set<String> mediaTypes = new TreeSet<>();
+    Set<String> mediaTypes = new HashSet<>();
     for (String mediaType : radl.mediaTypeNames()) {
       if (mediaTypes.contains(mediaType)) {
         error("Duplicate media-type: '%s'", mediaType);
@@ -168,7 +167,7 @@ public class LintValidator implements Validator {
   }
 
   private void validateResourceModel() {
-    Set<String> resources = new TreeSet<>();
+    Set<String> resources = new HashSet<>();
     for (String resource : radl.resourceNames()) {
       if (resources.contains(resource)) {
         error("Duplicate resource: '%s'", resource);
@@ -430,7 +429,7 @@ public class LintValidator implements Validator {
     Iterator<String> states = radl.stateNames().iterator();
     if (states.hasNext()) {
       boolean startStateFound = false;
-      Set<String> stateNames = new TreeSet<>();
+      Set<String> stateNames = new HashSet<>();
       while (states.hasNext()) {
         String state = states.next();
         if (stateNames.contains(state)) {

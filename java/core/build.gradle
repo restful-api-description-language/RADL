@@ -38,7 +38,7 @@ dependencies {
 sourceSets {
   main {
     resources {
-      srcDir project.rootProject.file('specification')
+      srcDir '../../specification'
     }
   }
 }
