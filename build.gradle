@@ -1,6 +1,6 @@
 task wrapper(type: Wrapper) {
   description = 'Generates gradlew (for internal use only)'
-  gradleVersion = '2.10'
+  gradleVersion = '2.11'
   jarFile = 'wrapper/wrapper.jar'
 }
 
