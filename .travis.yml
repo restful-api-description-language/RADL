@@ -43,7 +43,8 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: RWpPmmzrJ2Ddx8nwG6k6UZm98o7gMRpGJ2liCFUGy5Uuf8w5AXj6xMLKFdcK3pZFSYBQ1+4DycFPAXmFCfP+nv6dX9PbDkOVB669ecnxStfVse0zXYgjuNEmhAht6wDb/O6jiNUrnyXcmQDExhXC3SigtnWcLUiRbJOYGoc3oSQ=
+    secure: KQctlwYK908PwgFmD0huCtraaN/XyE3Ev7nz2KK6CJ8N4jrBN+m+7U4N+GgMICrgpjPUnjeye5ZRk1YFxKvvsIiAYRPdCfNZ2R5VKV6vLt8+d1VZP6ndxLuzigdwlYiVVlCHig9X7JQwuvYjGyaOUOVKTBjMvPrn+wUUhSyoDK4=
+  skip_cleanup: true
   file_glob: true
   file:
   - java/core/build/libs/*
@@ -62,5 +63,5 @@ addons:
       description: "Build submitted via Travis CI"
     notification_email: rssinnema@yahoo.com
     build_command_prepend: "./gradlew clean"
-    build_command:   "./gradlew assemble"
+    build_command: "./gradlew assemble"
     branch_pattern: coverity_scan
