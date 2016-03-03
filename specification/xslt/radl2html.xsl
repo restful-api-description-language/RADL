@@ -22,6 +22,7 @@
   <xsl:key name="status" match="//radl:status-codes/radl:status" use="@name"/>
 
   <xsl:param name="css-file">radl-default.css</xsl:param>
+  <xsl:param name="hide-location">false</xsl:param>
   <xsl:variable name="start-state-name">Start</xsl:variable>
   <xsl:variable name="general-media-types"
     select="('application/ld+json', 'application/vnd.mason+json', 'application/vnd.siren+json', 'application/hal+json', '*/*')"/>
@@ -109,7 +110,7 @@
   </xsl:template>
 
   <xsl:template name="content">
-    <h1 id="doctitle">
+    <h1 id="doctitle" class="doctitle">
       <xsl:value-of select="/radl:service/@name"/>
     </h1>
     <xsl:apply-templates select="radl:documentation"/>
@@ -337,43 +338,44 @@
 
         <xsl:for-each select="$interface">
           <xsl:variable name="method" select="."/>
-          <dl>
-
-            <dt>
-              <xsl:call-template name="id">
-                <xsl:with-param name="prefix">transition</xsl:with-param>
-                <xsl:with-param name="scope" select="$from-state"/>
-                <xsl:with-param name="name" select="concat($transition-name, '-', $method/@name)"/>
-              </xsl:call-template>
-              <xsl:text>HTTP Method: </xsl:text>
-              <span>
-                <xsl:attribute name="class">
-                  <xsl:text>http </xsl:text>
-                  <xsl:value-of select="$method/@name"/>
-                </xsl:attribute>
+          <p>
+            <xsl:call-template name="id">
+              <xsl:with-param name="prefix">transition</xsl:with-param>
+              <xsl:with-param name="scope" select="$from-state"/>
+              <xsl:with-param name="name" select="concat($transition-name, '-', $method/@name)"/>
+            </xsl:call-template>
+            <xsl:text>By performing HTTP method </xsl:text>
+            <span>
+              <xsl:attribute name="class">
+                <xsl:text>http </xsl:text>
                 <xsl:value-of select="$method/@name"/>
-              </span>
-            </dt>
-            <xsl:if test="radl:documentation">
-              <dd>
-                <xsl:apply-templates select="radl:documentation"/>
-              </dd>
-            </xsl:if>
+              </xsl:attribute>
+              <xsl:value-of select="$method/@name"/>
+            </span>
+            <xsl:choose>
+              <xsl:when test="$link-relation">
+                <xsl:text> on link relation </xsl:text>
+                <code>
+                  <xsl:call-template name="a-href">
+                    <xsl:with-param name="prefix">linkrel</xsl:with-param>
+                    <xsl:with-param name="name" select="$link-relation"/>
+                  </xsl:call-template>
+                </code>
+                <xsl:text> of state </xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text> on state </xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
+            <xsl:call-template name="a-href">
+                    <xsl:with-param name="prefix">state</xsl:with-param>
+                    <xsl:with-param name="name" select="$from-state"/>
+            </xsl:call-template>
+            <xsl:text>.</xsl:text>
+          </p>
+          <dl>
             <dt>
-              <xsl:text>By Link Relation: </xsl:text>
-              <xsl:choose>
-                <xsl:when test="$link-relation">
-                  <code>
-                    <xsl:call-template name="a-href">
-                      <xsl:with-param name="prefix">linkrel</xsl:with-param>
-                      <xsl:with-param name="name" select="$link-relation"/>
-                    </xsl:call-template>
-                  </code>
-                </xsl:when>
-                <xsl:otherwise>[None]</xsl:otherwise>
-              </xsl:choose>
             </dt>
-
             <xsl:apply-templates select="$method/radl:request">
               <xsl:with-param name="property-group" select="$transition/radl:input/@property-group"/>
               <xsl:with-param name="transitions" select="$transition"/>
@@ -526,13 +528,11 @@
               <xsl:text> (</xsl:text>
               <xsl:for-each
                 select="//radl:media-type[@name=$mediatype-name]/radl:representation[@name=$representation-names]/@name">
-                <code>
-                  <xsl:call-template name="a-href">
-                    <xsl:with-param name="prefix">representation</xsl:with-param>
-                    <xsl:with-param name="scope" select="$mediatype-name"/>
-                    <xsl:with-param name="name" select="."/>
-                  </xsl:call-template>
-                </code>
+                <xsl:call-template name="a-href">
+                  <xsl:with-param name="prefix">representation</xsl:with-param>
+                  <xsl:with-param name="scope" select="$mediatype-name"/>
+                  <xsl:with-param name="name" select="."/>
+                </xsl:call-template>
               </xsl:for-each>
               <xsl:text>)</xsl:text>
             </xsl:if>
@@ -551,7 +551,16 @@
           <thead>
             <tr>
               <th>Resource</th>
-              <th>Location</th>
+              <th>
+                <xsl:choose>
+                  <xsl:when test="$hide-location = true()">
+                    <xsl:text>Description</xsl:text>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:text>Location</xsl:text>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </th>
               <th>Methods</th>
             </tr>
           </thead>
@@ -565,9 +574,16 @@
                   </xsl:call-template>
                 </td>
                 <td>
-                  <code>
-                    <xsl:value-of select="radl:location/@uri | radl:location/@uri-template"/>
-                  </code>
+                  <xsl:choose>
+                    <xsl:when test="$hide-location = true()">
+                      <xsl:apply-templates select="radl:documentation"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <code>
+                       <xsl:value-of select="radl:location/@uri | radl:location/@uri-template"/>
+                      </code>
+                    </xsl:otherwise>
+                  </xsl:choose>
                 </td>
                 <td>
                   <xsl:variable name="resource-name" select="@name"/>
@@ -606,14 +622,16 @@
     </h2>
 
     <xsl:apply-templates select="radl:documentation"/>
-    <dl>
-      <dt>
-        <xsl:text>Location: </xsl:text>
-        <code>
-          <xsl:value-of select="radl:location/@uri | radl:location/@uri-template"/>
-        </code>
-      </dt>
-    </dl>
+    <xsl:if test="$hide-location = false()">
+      <dl>
+        <dt>
+          <xsl:text>Location: </xsl:text>
+          <code>
+            <xsl:value-of select="radl:location/@uri | radl:location/@uri-template"/>
+          </code>
+        </dt>
+      </dl>
+    </xsl:if>
     <xsl:apply-templates select="radl:methods"/>
 
   </xsl:template>
@@ -632,6 +650,7 @@
       </xsl:call-template>
 
       <dt>
+        <xsl:text>Method </xsl:text>
         <span>
           <xsl:attribute name="class">
             <xsl:text>http </xsl:text>
@@ -1063,14 +1082,14 @@
 
         <xsl:for-each select="/radl:service/radl:conventions/radl:headers/radl:header">
           <xsl:sort select="@name"/>
-          <h2>
+          <h3>
             <xsl:call-template name="id">
               <xsl:with-param name="prefix">header</xsl:with-param>
               <xsl:with-param name="name" select="@name"/>
             </xsl:call-template>
             <code><xsl:value-of select="@name"/></code>&#160;&#160;<span class="header-suffix"
                 >(<xsl:value-of select="@type"/>)</span>
-          </h2>
+          </h3>
           <xsl:apply-templates/>
         </xsl:for-each>
       </xsl:when>
@@ -1142,11 +1161,10 @@
         <xsl:value-of select="$mediatype-name"/>
       </h2>
 
-      <h3>Representations</h3>
       <table sortable="true">
         <thead>
           <tr>
-            <th>Representation</th>
+            <th>Representations</th>
           </tr>
         </thead>
         <tbody>
@@ -1317,8 +1335,11 @@
                   <p> Specification: <a>
                       <xsl:copy-of select="radl:specification/@href"/>
                       <xsl:value-of select="radl:specification/@href"/>
-                    </a>. <xsl:apply-templates select="radl:documentation"/>
+                    </a>.
                   </p>
+                </xsl:if>
+                <xsl:if test="radl:documentation">
+                  <xsl:apply-templates select="radl:documentation"/>
                 </xsl:if>
               </td>
             </tr>
@@ -1426,7 +1447,25 @@
     <h1 id="property-groups">Property Groups</h1>
     <xsl:choose>
       <xsl:when test="//radl:property-groups">
-
+        <table sortable="true">
+          <thead>
+            <tr>
+              <th>Property Groups</th>
+            </tr>
+          </thead>
+          <tbody>
+            <xsl:for-each select="//radl:property-groups/radl:property-group">
+              <tr>
+                <td>
+                  <xsl:call-template name="a-href">
+                    <xsl:with-param name="prefix">propertygroup</xsl:with-param>
+                    <xsl:with-param name="name" select="@name"/>
+                  </xsl:call-template>
+                </td>
+              </tr>
+            </xsl:for-each>
+          </tbody>
+        </table>
         <xsl:apply-templates select="//radl:property-groups/radl:property-group">
           <xsl:sort select="@name"/>
           <xsl:with-param name="root-property-group">true</xsl:with-param>
@@ -1446,7 +1485,7 @@
         <xsl:for-each
           select="/radl:service/radl:conventions//radl:uri-parameters/radl:uri-parameter[not(@ref)]">
           <xsl:sort select="@name"/>
-          <h2>
+          <h3>
             <xsl:call-template name="id">
               <xsl:with-param name="prefix">uriparameter</xsl:with-param>
               <xsl:with-param name="name" select="@name"/>
@@ -1454,7 +1493,7 @@
             <code>
               <xsl:value-of select="@name"/>
             </code>
-          </h2>
+          </h3>
           <xsl:choose>
             <xsl:when test="@datatype | radl:value-range | radl:default | radl:documentation">
               <table>
@@ -1503,6 +1542,7 @@
               </table>
             </xsl:when>
           </xsl:choose>
+          <br/>
         </xsl:for-each>
       </xsl:when>
       <xsl:otherwise>

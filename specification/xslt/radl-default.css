@@ -1,17 +1,32 @@
+/*
+ * Copyright (c) 2016. EMC Corporation. All Rights Reserved.
+ */
+
 html{
-  font-family:Lucida Sans Unicode;
+  font-family: Optima,Segoe,"Segoe UI",Candara,Calibri,Arial,sans-serif;
+  color:#303030;
 }
 body{
   margin:0;
   padding:0 0 0 18em;
 }
+a:link{
+  color:#0987ED;
+  text-decoration:none;
+}
+a:hover {
+  color: hotpink;
+  text-decoration:underline;
+}
 
 h1,
-h2{
-  color:Navy;
-}
+h2,
 h3{
-  color:#0767B5;
+  color:#013661;
+}
+.doctitle{
+  font-weight:bold;
+  font-size: 300%;
 }
 
 table{
@@ -27,16 +42,17 @@ td{
 }
 th{
   color:White;
-  background-color:#0767B5;
+  background-color:#147ACC;
   text-align:left;
   border-color:LightGrey;
 }
 td{
   border-color:LightGrey;
   vertical-align:middle;
+  font-size:0.9em;
 }
 tr:nth-child(odd){
-  background-color:#eeeeef;
+  background-color:#F2F8FC;
   padding:16px;
 }
 
@@ -44,17 +60,15 @@ dl{
   margin:16px;
 }
 dl dl{
-  background-color:#eeeeef;
+  background-color:#F2F8FC;
   padding:12px;
-}
-
-dt{
-  font-weight:bold;
-  padding-top:9px;
 }
 dd{
   margin:0;
   padding-left:16px;
+}
+dt{
+  font-weight: bold;
 }
 div.nested{
   margin:0;
@@ -75,9 +89,10 @@ li.transition{
   left:0;
   width:14em;
   height:100%;
-  background-color:#eeeeef;
+  background-color:#E6F2FC;
 }
 .toc-left>h2>a{
+  font-family: Optima,Segoe,"Segoe UI",Candara,Calibri,Arial,sans-serif;
   color:#0767B5;
 }
 .toc-left>h2>a:hover{
@@ -85,6 +100,7 @@ li.transition{
   font-style:normal;
 }
 .toc-left>ul>li>h3>a{
+  font-family: Optima,Segoe,"Segoe UI",Candara,Calibri,Arial,sans-serif;
   color:#0767B5;
 }
 .toc-left>ul>li>h3>a:hover{
@@ -101,8 +117,9 @@ li.transition{
   border-radius:2px;
   color:white;
   display:inline-block;
-  font-size:0.7em;
-  padding:7px 0 4px;
+  font-size:0.9em;
+  font-weight: normal;
+  padding:4px 0 2px;
   text-align:center;
   width:50px;
 }
@@ -116,17 +133,18 @@ li.transition{
   background-color:#0f6ab4;
 }
 .PATCH{
-  background-color:#d38042;
+  background-color:#7D2DA6;
 }
 .POST{
   background-color:#10a54a;
 }
 .PUT{
-  background-color:#c5862b;
+  background-color:#ED3A37;
 }
 *:not(pre)>code{
-  background:none repeat scroll 0 0 #f5f5f5;
+  background:none repeat scroll 0 0 #F0F4FC;
   border:1px solid #ccc;
   border-radius:2px;
   padding:1px 3px;
+  font-weight: normal;
 }

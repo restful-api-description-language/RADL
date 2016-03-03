@@ -6,6 +6,8 @@ package radl.maven;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -46,6 +48,12 @@ public class Radl2HtmlDocPlugin extends AbstractMojo implements MavenConfig {
   private URL cssURL;
 
   /**
+   * The css URL to produce the HTML documentation. Defaults to RADL default css.
+   */
+  @Parameter(property = HIDE_LOCATION_NAME, defaultValue = HIDE_LOCATION_DEFAULT)
+  private boolean hideLocation;
+
+  /**
    * The sub-directory of the project build directory into which documentation is generated.
    * Defaults to <pre>target/radl</pre>.
    */
@@ -56,14 +64,21 @@ public class Radl2HtmlDocPlugin extends AbstractMojo implements MavenConfig {
   public void execute() throws MojoExecutionException, MojoFailureException {
     File radlFile = RadlFileUtil.findRadlFile(radlDirName, serviceName);
     DocumentationGenerator documentationGenerator = new DocumentationGenerator();
-    documentationGenerator.run(
-        new Arguments(new String[] {
-            docsDir.getAbsolutePath(),
-            null,
-            cssURL == null ? null : cssURL.toString(),
-            radlFile.getAbsolutePath()
-        }));
+    List<String> args = genArguments(radlFile);
+    documentationGenerator.run(new Arguments(args.toArray(new String[args.size()])));
     getLog().info(String.format(MSG, docsDir));
   }
 
+  private List<String> genArguments(File radlFile) {
+    List<String> args = new ArrayList<>();
+    args.add(docsDir.getAbsolutePath());
+    if (cssURL != null) {
+      args.add(cssURL.toString());
+    }
+    if (hideLocation) {
+      args.add("hide-location");
+    }
+    args.add(radlFile.getAbsolutePath());
+    return args;
+  }
 }

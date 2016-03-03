@@ -42,6 +42,9 @@ public interface MavenConfig {
   String CSS_URL_NAME = "cssURL";
   String CSS_URL_DEFAULT = "";
 
+  String HIDE_LOCATION_NAME = "hideLocation";
+  String HIDE_LOCATION_DEFAULT = "false";
+
   String SCM = "scm";
   String SCM_DEFAULT = "default";
 

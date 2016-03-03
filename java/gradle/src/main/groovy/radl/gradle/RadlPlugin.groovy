@@ -47,9 +47,10 @@ class RadlPlugin implements Plugin<Project> {
       def extractionPropertiesFile = new File(radlFile.parentFile,
           "${radlFile.name.substring(0, radlFile.name.lastIndexOf('.'))}.properties")
       def cssUrl = getCssUrl(project)
+      def hideLocation = hideLocation(project)
 
       addValidateRadlTask        project, radlFile
-      addRadlToDocumentationTask project, cssUrl, radlFile
+      addRadlToDocumentationTask project, cssUrl, hideLocation, radlFile
       addRadlToSpringTask        project, radlFile
       addJavaToRadlTask          project, radlFile, serviceName, extractionPropertiesFile
     }
@@ -64,12 +65,13 @@ class RadlPlugin implements Plugin<Project> {
     project.check.dependsOn 'validateRadl'
   }
 
-  def addRadlToDocumentationTask(project, cssUrl, radlFile) {
+  def addRadlToDocumentationTask(project, cssUrl, hideLocation, radlFile) {
     project.task('generateDocumentationFromRadl', type: JavaExec, dependsOn: 'validateRadl') {
       mustRunAfter 'extractRadlFromCode'
       main = 'radl.core.documentation.DocumentationGenerator'
       args new File(project.rootProject.buildDir, project.radl.docsDir).path
       args cssUrl
+      args hideLocation
       args radlFile.path
       classpath project.configurations.radl
       doFirst {
@@ -170,6 +172,10 @@ class RadlPlugin implements Plugin<Project> {
 
   def getCssUrl(project) {
     project.radl.cssUrl == null ? '' : project.radl.cssUrl
+  }
+
+  def hideLocation(project) {
+    project.radl.hideLocation ? 'hide-location' : null
   }
 
   def getRadlFile(project, serviceName) {
