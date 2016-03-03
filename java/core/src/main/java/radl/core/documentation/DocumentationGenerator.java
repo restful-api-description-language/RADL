@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -95,19 +96,16 @@ public final class DocumentationGenerator implements Application {
     return false;
   }
 
-  private <T> T getNextArgument(Arguments arguments, Class<T> clazz, String... suffix) {
-    String s = null;
-    if (arguments.hasNext()) {
-      s = arguments.next();
-      if (StringUtils.isNotEmpty(s) && !endsWith(s, suffix)) {
-        arguments.prev();
-        s = null;
-      }
-    }
-    if (s == null) {
+  private <T> T getNextArgument(Arguments arguments, Class<T> type, String... suffix) {
+    if (!arguments.hasNext()) {
       return null;
     }
-    return (T) (File.class.isAssignableFrom(clazz) ? new File(s) : s);
+    String result = arguments.next();
+    if (StringUtils.isNotEmpty(result) && !endsWith(result, suffix)) {
+      arguments.prev();
+      return null;
+    }
+    return type.cast(File.class.isAssignableFrom(type) ? new File(result) : result);
   }
 
   private boolean endsWith(String s, String[] suffix) {
